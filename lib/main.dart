@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Resource/ApiRepository.dart';
+import 'package:leap_flutter/Screen/HomeScreen.dart';
+import 'Screen/BusinessCardsScreen.dart';
+import 'Screen/FlyersCardPage.dart';
 import 'Screen/LoginScreen.dart';
 import 'constants.dart';
 
@@ -35,9 +38,10 @@ class MyApp extends StatelessWidget {
             hintStyle: TextStyle(color: bodyTextColor),
           ),
         ),
-       home: LoginScreen(),
-       // home: FlyersCardPage(),
-       //  home: BusinessCardsScreen(),
+    //  home: LoginScreen(),
+        home: HomeScreen(),
+      //  home: FlyersCardPage(),
+       // home: BusinessCardsScreen(),
       ),
     );
   }

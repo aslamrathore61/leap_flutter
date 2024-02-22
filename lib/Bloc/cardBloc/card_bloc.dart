@@ -19,9 +19,10 @@ class CardBloc extends Bloc<CardEvent, CardState> {
     on<GetFlyersCardListEvent>(getFlyersCardTemplate);
     on<GetBusinessCardListEvent>(getBusinessCardTemplate);
     on<SubmitBusinesCardEvent>(setBusinessCardRequest);
+    on<SubmitFlyersCardEvent>(setFlyersCardRequest);
   }
 
-  /***   Flyers Card Template   ***/
+  /***  Get Flyers Card Template   ***/
   FutureOr<void> getFlyersCardTemplate(
       GetFlyersCardListEvent event, Emitter<CardState> emit) async {
     try {
@@ -56,7 +57,7 @@ class CardBloc extends Bloc<CardEvent, CardState> {
   }
 
 
-  /*** Business card submit request response method  ***/
+  /***  Post Business card submit request response method  ***/
   FutureOr<void> setBusinessCardRequest(SubmitBusinesCardEvent event, Emitter<CardState> emit) async {
     print('businesCardRequest ${event.createUpdateCardRequest}');
     emit(SubmissionCardLoadingState());
@@ -67,12 +68,31 @@ class CardBloc extends Bloc<CardEvent, CardState> {
       final statusCode = businessCardSubmitResponse.code;
       print('statusCode $statusCode');
       if (statusCode == 200) {
-        emit(SubmissionBusinessCardReqSuccessState(businessCardSubmitResponse));
+        emit(SubmissionCardReqSuccessState(businessCardSubmitResponse));
       } else {
-        emit(SubmissionBusinessCardReqErrorState(businessCardSubmitResponse.message ?? "Something went wrong, please try again later."));
+        emit(SubmissionCardReqErrorState(businessCardSubmitResponse.message ?? "Something went wrong, please try again later."));
       }
     } catch (error) {
-      emit(SubmissionBusinessCardReqErrorState(error.toString()));
+      emit(SubmissionCardReqErrorState(error.toString()));
     }
   }
+
+
+  /***  Post Flyers card submit request response method  ***/
+  FutureOr<void> setFlyersCardRequest(SubmitFlyersCardEvent event, Emitter<CardState> emit) async {
+    emit(SubmissionCardLoadingState());
+    try {
+      final businessCardSubmitResponse = await _apiRepo.submitFlyersCardDetails(event.createUpdateCardRequest!);
+      final statusCode = businessCardSubmitResponse.code;
+      print('statusCode $statusCode');
+      if (statusCode == 200) {
+        emit(SubmissionCardReqSuccessState(businessCardSubmitResponse));
+      } else {
+        emit(SubmissionCardReqErrorState(businessCardSubmitResponse.message ?? "Something went wrong, please try again later."));
+      }
+    } catch (error) {
+      emit(SubmissionCardReqErrorState(error.toString()));
+    }
+  }
+
 }

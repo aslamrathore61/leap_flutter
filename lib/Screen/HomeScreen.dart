@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_bloc.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_state.dart';
+import 'package:leap_flutter/Component/ShimmerHomeLoading.dart';
 import 'package:leap_flutter/models/ServiceCountResponse.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Utils/MyCustomColors.dart';
@@ -75,11 +76,12 @@ class _HomeScreenState extends State<HomeScreen> {
           child: BlocBuilder<ServiceCountBloc, ServiceCountState>(
             builder: (context, state) {
               if (state is ServiceCountInitial) {
-                return _buildLoading();
+                return ShimmerHomeLoading();
               } else if (state is ServiceCountLoading) {
-                return _buildLoading();
+                return ShimmerHomeLoading();
               } else if (state is ServiceCountFetchingSuccessState) {
-                return _buildCard(context, state.serviceCountResponse);
+             //   return _buildCard(context, state.serviceCountResponse);
+                return ShimmerHomeLoading();
               } else if (state is ServiceCountError) {
                 return Container();
               } else {

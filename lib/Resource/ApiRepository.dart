@@ -45,6 +45,15 @@ class ApiRepository {
     }
   }
 
+  Future<CreateUpdateCardResponse> submitFlyersCardDetails(
+      CreateUpdateCardRequest cardRequest) async {
+    try {
+      return _provider.submitFlyersCardDetails(cardRequest);
+    } catch (error) {
+      throw NetworkError();
+    }
+  }
+
 
   /***   Fetching Flyers Card Template   ***/
   Future<FlyersCardTemplateResponse> fetchingFlyersCardTemplate() async {

@@ -64,13 +64,32 @@ class ApiProvider {
   /*** BusinessCard Submit Vis API  ***/
   Future<CreateUpdateCardResponse> submitBusinessCardDetails(
       CreateUpdateCardRequest cardRequest) async {
+    print('cardRequest ${cardRequest.toJson()}');
     try {
       String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
       _dio.options.headers["Authorization"] = "Bearer ${token}";
-
       String requestBody = json.encode(cardRequest.toJson());
       Response response = await _dio.post('${_baseUrl}createupdatecardrequest', data: requestBody,);
+      return CreateUpdateCardResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      print('Exception occurred: $error stackTrace: $stacktrace');
+      return CreateUpdateCardResponse.withError(
+          'Data not found / connection issue');
+    }
+  }
 
+
+  /*** Flyers Card Submit Vis API  ***/
+  Future<CreateUpdateCardResponse> submitFlyersCardDetails(
+      CreateUpdateCardRequest cardRequest) async {
+    print('flyerCardRequest ${cardRequest.toJson()}');
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer ${token}";
+      String requestBody = json.encode(cardRequest.toJson());
+      Response response = await _dio.post('${_baseUrl}createupdateflyerrequest', data: requestBody,);
+      final flyersCardTemplateResponses = CreateUpdateCardResponse.fromJson(response.data);
+      print('SubmitFlyersResponse ${flyersCardTemplateResponses.code} ${flyersCardTemplateResponses.message}');
       return CreateUpdateCardResponse.fromJson(response.data);
     } catch (error, stacktrace) {
       print('Exception occurred: $error stackTrace: $stacktrace');
@@ -86,7 +105,6 @@ class ApiProvider {
       String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
       _dio.options.headers["Authorization"] = "Bearer ${token}";
       Response response = await _dio.get('${_baseUrl}getflyerstemplatelist',);
-      FlyersCardTemplateResponse flyersCardTemplateResponses = FlyersCardTemplateResponse.fromJson(response.data);
       return FlyersCardTemplateResponse.fromJson(response.data);
     } catch (error, stacktrace) {
       print('Exception occured: $error stackTrace: $stacktrace');

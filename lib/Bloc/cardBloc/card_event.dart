@@ -11,3 +11,8 @@ class SubmitBusinesCardEvent extends CardEvent {
   final CreateUpdateCardRequest? createUpdateCardRequest;
   SubmitBusinesCardEvent({this.createUpdateCardRequest});
 }
+
+class SubmitFlyersCardEvent extends CardEvent {
+  final CreateUpdateCardRequest? createUpdateCardRequest;
+  SubmitFlyersCardEvent({this.createUpdateCardRequest});
+}

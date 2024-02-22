@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import '../Bloc/cardBloc/card_bloc.dart';
 import '../constants.dart';
 import '../Utils/MyCustomColors.dart';
+import '../models/CreateUpdateCardRequestResponse.dart';
 import '../models/FlyersCardTemplateResponse.dart';
 
 class FlyersCardPage extends StatefulWidget {
@@ -29,27 +30,20 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
 
   FocusNode _searchFocusNode = FocusNode();
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _searchFocusNode.removeListener(_onSearchFocusChanged);
-    super.dispose();
-  }
 
-  @override
-  void initState() {
-    cardBloc.add(GetFlyersCardListEvent());
-    _searchFocusNode.addListener(_onSearchFocusChanged);
-    _searchFocusNode.addListener(_onFocusChange);
-    super.initState();
-  }
-
-  String? _cardTemplateSrc;
   String? _userName;
   String? _mobileNumber;
   String? _email;
-  String? _address;
+  String? _description;
   String? _quantity;
+
+  @override
+  void initState() {
+    super.initState();
+    cardBloc.add(GetFlyersCardListEvent());
+    _searchFocusNode.addListener(_onSearchFocusChanged);
+    _searchFocusNode.addListener(_onFocusChange);
+  }
 
   File? _image;
   final picker = ImagePicker();
@@ -69,274 +63,372 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("My Request"),
-        titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
-        backgroundColor: MyCustomColors.primaryColor,
-        iconTheme: IconThemeData(color: Colors.white),
-      ),
-      body: BlocProvider(
-        create: (context) => cardBloc,
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(18.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /***  Card Template   ***/
-                  Text(
-                    "Card Template*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  _CardTemplateSrchField(),
-                  SizedBox(height: 10.0),
-                  if (_isSearchFocused) _buildSearchResultsForListView(),
-                  SizedBox(height: 10.0),
-                  _buildTemplateCardImage(),
-                  SizedBox(height: 10.0),
-                  Text(
-                    "Agent Details",
-                    style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                        color: primaryColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
-                  ),
+        appBar: AppBar(
+          title: Text("Flyers Request"),
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+          backgroundColor: MyCustomColors.primaryColor,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        body: _buildListTrainingRequest());
+  }
 
-                  /***    Display Image View  ***/
-                  SizedBox(height: 10.0),
-                  Container(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          //    onTap: showOptions,
-                          child: Row(
-                            children: [
-                              Text(
-                                "Display Image",
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium!
-                                    .copyWith(
-                                        color: titleColor,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500),
-                              ),
-                              Icon(
-                                Icons.add_a_photo_rounded,
-                                color: Colors.blue,
-                                size: 20,
-                              ),
-                            ],
+//            child: _buildFormWidget(context)),
+  Widget _buildListTrainingRequest() {
+    return Container(
+      margin: EdgeInsets.all(8.0),
+      child: BlocProvider(
+          create: (context) => cardBloc,
+          child: BlocListener<CardBloc, CardState>(
+            listener: (context, state) {
+              if (state is CardTemplateErrorState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.error.toString())));
+              } else if (state is FlyersCardTemplateFetchingSuccessState) {
+                if (!_flyersCardListing.isNotEmpty) {
+                  _flyersCardListing
+                      .addAll(state.flyersCardTemplateResponse.flyers!);
+                  _filteredData
+                      .addAll(state.flyersCardTemplateResponse.flyers! ?? []);
+                }
+              } else if (state is SubmissionCardReqSuccessState) {
+                showSnackBar(context, 'The request for a Flyers card was successfully created.');
+              }
+            },
+            child: _buildFormWidget(context),
+          )),
+    );
+  }
+
+  Widget _buildFormWidget(BuildContext context) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(18.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              /***  Card Template   ***/
+              Text(
+                "Card Template*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              _CardTemplateSrchField(),
+              SizedBox(height: 10.0),
+              if (_isSearchFocused)
+                _buildTemplateListWidget(context, _filteredData),
+              SizedBox(height: 10.0),
+              _buildTemplateCardImage(),
+              SizedBox(height: 10.0),
+              Text(
+                "Agent Details",
+                style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500),
+              ),
+
+              /***    Display Image View  ***/
+              SizedBox(height: 10.0),
+              Container(
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: showOptions,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Display Image",
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                    color: titleColor,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500),
                           ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Center(
-                          child: _image == null
-                              ? Text('No Image selected')
-                              : Image.file(_image!),
-                        ),
-                      ],
+                          Icon(
+                            Icons.add_a_photo_rounded,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 10.0),
+                    SizedBox(height: 20.0),
+                    Center(
+                      child: _image == null
+                          ? Text('No Image selected')
+                          : Image.file(_image!),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.0),
 
-                  /***  Name TextField  ***/
-                  Text(
-                    "Name*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextFormField(
-                    validator: requiredValidator,
-                    onSaved: (value) {
-                      _userName = value!;
-                    },
-                    textInputAction: TextInputAction.next,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: titleColor, fontSize: 14),
-                    cursorColor: primaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Please enter name",
-                      contentPadding: kTextFieldPadding,
-                      border: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                      focusedBorder: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
+              /***  Name TextField  ***/
+              Text(
+                "Name*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                validator: requiredValidator,
+                onSaved: (value) {
+                  _userName = value!;
+                },
+                textInputAction: TextInputAction.next,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: titleColor, fontSize: 14),
+                cursorColor: primaryColor,
+                decoration: InputDecoration(
+                  hintText: "Please enter name",
+                  contentPadding: kTextFieldPadding,
+                  border: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                  focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                ),
+              ),
+              SizedBox(height: 10.0),
 
-                  /***  Mobile Number TextField  ***/
-                  Text(
-                    "Mobile Number*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextFormField(
-                    validator: phoneNumberValidator,
-                    onSaved: (value) {
-                      _mobileNumber = value!;
-                    },
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.number,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: titleColor, fontSize: 14),
-                    cursorColor: primaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Please enter mobile number",
-                      contentPadding: kTextFieldPadding,
-                      border: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                      focusedBorder: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
+              /***  Mobile Number TextField  ***/
+              Text(
+                "Mobile Number*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                validator: phoneNumberValidator,
+                onSaved: (value) {
+                  _mobileNumber = value!;
+                },
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.number,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: titleColor, fontSize: 14),
+                cursorColor: primaryColor,
+                decoration: InputDecoration(
+                  hintText: "Please enter mobile number",
+                  contentPadding: kTextFieldPadding,
+                  border: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                  focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                ),
+              ),
+              SizedBox(height: 10.0),
 
-                  /***  EmailID TextField  ***/
-                  Text(
-                    "Email ID*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextFormField(
-                    validator: emailValidator,
-                    onSaved: (value) {
-                      _email = value!;
-                    },
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.emailAddress,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: titleColor, fontSize: 14),
-                    cursorColor: primaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Please enter email ID",
-                      contentPadding: kTextFieldPadding,
-                      border: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                      focusedBorder: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
+              /***  EmailID TextField  ***/
+              Text(
+                "Email ID*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                validator: emailValidator,
+                onSaved: (value) {
+                  _email = value!;
+                },
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.emailAddress,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: titleColor, fontSize: 14),
+                cursorColor: primaryColor,
+                decoration: InputDecoration(
+                  hintText: "Please enter email ID",
+                  contentPadding: kTextFieldPadding,
+                  border: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                  focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                ),
+              ),
+              SizedBox(height: 10.0),
 
-                  /***  Address TextField  ***/
-                  Text(
-                    "Address*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextFormField(
-                    validator: requiredValidator,
-                    onSaved: (value) {
-                      _address = value!;
-                    },
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.text,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: titleColor, fontSize: 14),
-                    cursorColor: primaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Please enter address",
-                      contentPadding: kTextFieldPadding,
-                      border: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                      focusedBorder: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
+              /***  Address TextField  ***/
+              Text(
+                "Description*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                validator: requiredValidator,
+                onSaved: (value) {
+                  _description = value!;
+                },
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.text,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: titleColor, fontSize: 14),
+                cursorColor: primaryColor,
+                decoration: InputDecoration(
+                  hintText: "Please enter description",
+                  contentPadding: kTextFieldPadding,
+                  border: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                  focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                ),
+              ),
+              SizedBox(height: 10.0),
 
-                  /***  Quantity TextField  ***/
-                  Text(
-                    "Quantity*",
-                    style: TextStyle(
-                      color: Colors.black87,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  TextFormField(
-                    validator: requiredValidator,
-                    onSaved: (value) {
-                      _quantity = value!;
-                    },
-                    textInputAction: TextInputAction.next,
-                    keyboardType: TextInputType.number,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium!
-                        .copyWith(color: titleColor, fontSize: 14),
-                    cursorColor: primaryColor,
-                    decoration: InputDecoration(
-                      hintText: "Please enter address",
-                      contentPadding: kTextFieldPadding,
-                      border: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                      focusedBorder: kDefaultOutlineInputBorder.copyWith(
-                          borderSide: BorderSide(
-                        color: borderColor,
-                      )),
-                    ),
-                  ),
-                  SizedBox(height: 10.0),
-                  ElevatedButton(
+              /***  Quantity TextField  ***/
+              Text(
+                "Quantity*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                validator: requiredValidator,
+                onSaved: (value) {
+                  _quantity = value!;
+                },
+                textInputAction: TextInputAction.next,
+                keyboardType: TextInputType.number,
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyMedium!
+                    .copyWith(color: titleColor, fontSize: 14),
+                cursorColor: primaryColor,
+                decoration: InputDecoration(
+                  hintText: "Please enter address",
+                  contentPadding: kTextFieldPadding,
+                  border: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                  focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                      borderSide: BorderSide(
+                    color: borderColor,
+                  )),
+                ),
+              ),
+              SizedBox(height: 10.0),
+              BlocBuilder<CardBloc, CardState>(
+                builder: (context, state) {
+                  if (state is SubmissionCardReqSuccessState) {
+                    return Container();
+                  }
+                  return ElevatedButton(
                     onPressed: () async {
                       if (_formKey.currentState!.validate()) {
                         _formKey.currentState!.save();
+
+                        // Instantiate the CreateUpdateCardRequest object with the required data
+                        CreateUpdateCardRequest cardRequest =
+                            CreateUpdateCardRequest(
+                                printEmail: _email,
+                                printName: _userName,
+                                printPhoneNumber: _mobileNumber,
+                                printDescription: _description,
+                                flyerUuid: _filteredData[_selectedImageIndex].flyerUuid,
+                                requestQuantity: _quantity);
+                        cardBloc.add(SubmitFlyersCardEvent(
+                            createUpdateCardRequest: cardRequest));
                       }
                     },
                     child: Text("Place Order".toUpperCase()),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  //Image Picker function to get image from gallery
+  Future getImageFromGallery() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  //Image Picker function to get image from camera
+  Future getImageFromCamera() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+
+    setState(() {
+      if (pickedFile != null) {
+        _image = File(pickedFile.path);
+      }
+    });
+  }
+
+  //Show options to get image from camera or gallery
+  Future showOptions() async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text('Photo Gallery'),
+            onPressed: () {
+              // close the options modal
+              Navigator.of(context).pop();
+              // get image from gallery
+              getImageFromGallery();
+            },
+          ),
+          CupertinoActionSheetAction(
+            child: Text('Camera'),
+            onPressed: () {
+              // close the options modal
+              Navigator.of(context).pop();
+              // get image from camera
+              getImageFromCamera();
+            },
+          ),
+        ],
       ),
     );
   }
@@ -388,42 +480,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
     );
   }
 
-  /*** ListView of filter ***/
-  Widget _buildSearchResultsForListView() {
-    print("getcall ${"_buildSearchResultsForListView"}");
-    return BlocProvider(
-      create: (context) => cardBloc,
-      child: BlocConsumer<CardBloc, CardState>(
-        listener: (context, state) {
-          print('listener : ${state}');
-
-          if (state is CardTemplateErrorState) {
-            print('error : ${state.error}');
-            ScaffoldMessenger.of(context)
-                .showSnackBar(SnackBar(content: Text(state.error)));
-          }
-        },
-        builder: (context, state) {
-          print('builder : ${state}');
-
-          if (state is FlyersCardTemplateFetchingSuccessState) {
-            print(
-                'success CardTemplateFetchingSuccess : ${state.flyersCardTemplateResponse.serviceName}');
-            return _buildTemplateListWidget(
-                context, state.flyersCardTemplateResponse.flyers!);
-          } else {
-            return Container();
-          }
-        },
-      ),
-    );
-  }
-
   Widget _buildTemplateListWidget(BuildContext context, List<Flyers> flyers) {
-    if (!_flyersCardListing.isNotEmpty) {
-      _flyersCardListing.addAll(flyers);
-      _filteredData.addAll(flyers ?? []);
-    }
     return ListView.builder(
       shrinkWrap: true,
       itemCount: _filteredData.length,
@@ -431,6 +488,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
         return RowCardTemplateSrc(
             itemName: _filteredData[index].flyerType!,
             onTap: () {
+             _searchController.text = _filteredData[index].flyerType!;
               _selectedCardTye = flyers[index].flyerType!;
               if (_isSearchFocused) {
                 _isSearchFocused = false;

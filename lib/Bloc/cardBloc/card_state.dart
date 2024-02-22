@@ -29,16 +29,17 @@ class BusinessCardTemplateFetchingSuccessState extends CardState {
 /*   Submit  Card Loading State   */
 class SubmissionCardLoadingState extends CardState {}
 
-/*   Submit Business Card Success State   */
-class SubmissionBusinessCardReqSuccessState extends CardState {
-  final CreateUpdateCardResponse createUpdateCardResponse;
-  SubmissionBusinessCardReqSuccessState(this.createUpdateCardResponse);
+/*   Submit  Card Error State   */
+class SubmissionCardReqErrorState extends CardState {
+  final String error;
+  SubmissionCardReqErrorState(this.error);
 }
 
-/*   Submit Business Card Error State   */
-class SubmissionBusinessCardReqErrorState extends CardState {
-  final String error;
-  SubmissionBusinessCardReqErrorState(this.error);
+/*   Submit  Card Success State   */
+class SubmissionCardReqSuccessState extends CardState {
+  final CreateUpdateCardResponse createUpdateCardResponse;
+  SubmissionCardReqSuccessState(this.createUpdateCardResponse);
 }
+
 
 

@@ -3,6 +3,8 @@ class CreateUpdateCardRequest {
   String? printName;
   String? printPhoneNumber;
   String? printAddress;
+  String? printDescription;
+  String? flyerUuid;
   String? requestQuantity;
   String? designImageUuid;
   String? vcardUuid;
@@ -13,6 +15,8 @@ class CreateUpdateCardRequest {
       this.printName,
       this.printPhoneNumber,
       this.printAddress,
+      this.printDescription,
+      this.flyerUuid,
       this.requestQuantity,
       this.designImageUuid,
       this.vcardUuid,
@@ -23,6 +27,8 @@ class CreateUpdateCardRequest {
     printName = json['printName'];
     printPhoneNumber = json['printPhoneNumber'];
     printAddress = json['printAddress'];
+    printDescription = json['printDescription'];
+    flyerUuid = json['flyerUuid'];
     requestQuantity = json['requestQuantity'];
     designImageUuid = json['designImageUuid'];
     vcardUuid = json['vcardUuid'];
@@ -35,6 +41,8 @@ class CreateUpdateCardRequest {
     data['printName'] = this.printName;
     data['printPhoneNumber'] = this.printPhoneNumber;
     data['printAddress'] = this.printAddress;
+    data['printDescription'] = this.printDescription;
+    data['flyerUuid'] = this.flyerUuid;
     data['requestQuantity'] = this.requestQuantity;
     data['designImageUuid'] = this.designImageUuid;
     data['vcardUuid'] = this.vcardUuid;

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:leap_flutter/Bloc/cardBloc/card_bloc.dart';
+import 'package:leap_flutter/constants.dart';
 import '../models/BusinessCardTemplateResponse.dart';
 import '../Utils/MyCustomColors.dart';
 import '../models/CreateUpdateCardRequestResponse.dart';
@@ -14,15 +15,6 @@ class BusinessCardsScreen extends StatefulWidget {
   @override
   State<BusinessCardsScreen> createState() => _BusinessCardsScreenState();
 }
-
-
-// TextEditingController _nameController = TextEditingController();
-// TextEditingController _mobileNumberController = TextEditingController();
-// TextEditingController _emailController = TextEditingController();
-// TextEditingController _addressController = TextEditingController();
-// TextEditingController _quantityController = TextEditingController();
-
-
 
 class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
   final cardBloc = CardBloc();
@@ -56,29 +48,28 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) =>
-          CupertinoActionSheet(
-            actions: [
-              CupertinoActionSheetAction(
-                child: Text('Photo Gallery'),
-                onPressed: () {
-                  // close the options modal
-                  Navigator.of(context).pop();
-                  // get image from gallery
-                  getImageFromGallery();
-                },
-              ),
-              CupertinoActionSheetAction(
-                child: Text('Camera'),
-                onPressed: () {
-                  // close the options modal
-                  Navigator.of(context).pop();
-                  // get image from camera
-                  getImageFromCamera();
-                },
-              ),
-            ],
+      builder: (context) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text('Photo Gallery'),
+            onPressed: () {
+              // close the options modal
+              Navigator.of(context).pop();
+              // get image from gallery
+              getImageFromGallery();
+            },
           ),
+          CupertinoActionSheetAction(
+            child: Text('Camera'),
+            onPressed: () {
+              // close the options modal
+              Navigator.of(context).pop();
+              // get image from camera
+              getImageFromCamera();
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -92,6 +83,8 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
   List<VisitingCards> _filteredData = [];
   List<VisitingCards> _visitingCardListing = [];
 
+  final _formKey = GlobalKey<FormState>();
+
   String? _cardTemplateSrc;
   String? _userName;
   String? _mobileNumber;
@@ -102,24 +95,10 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
   @override
   void initState() {
     super.initState();
-    cardBloc.add(GetBusinessCardListEvent());
+     cardBloc.add(GetBusinessCardListEvent());
     _searchFocusNode.addListener(_onSearchFocusChanged);
     _searchFocusNode.addListener(_onFocusChange);
   }
-
-/*
-  @override
-  void dispose() {
-   // _nameController.dispose();
-   //  _mobileNumberController.dispose();
-   //  _emailController.dispose();
-   //  _addressController.dispose();
-   //  _quantityController.dispose();
-   //  _searchFocusNode.removeListener(_onSearchFocusChanged);
-
-    super.dispose();
-  }
-*/
 
   void _filterList(String keyword) {
     print('keyword $keyword');
@@ -162,316 +141,311 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
         create: (context) => cardBloc,
         child: BlocListener<CardBloc, CardState>(
             listener: (context, state) {
-              print('stateCall $state');
               if (state is CardTemplateErrorState) {
                 ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error.toString())));
               } else if (state is BusinessCardTemplateFetchingSuccessState) {
-                final list = state.businessCardTemplateResponse.serviceName;
                 if (!_visitingCardListing.isNotEmpty) {
                   _visitingCardListing.addAll(state.businessCardTemplateResponse.visitingCards ?? []);
                   _filteredData.addAll(state.businessCardTemplateResponse.visitingCards ?? []);
                 }
-                print('tempList $list');
-                // showToast(state.createUpdateCardResponse!.message.toString());
-                // Navigator.of(context).pop();
-
+              } else if (state is SubmissionCardReqSuccessState) {
+                showSnackBar(context, 'The request for a business card was successfully created.');
               }
-
-
-              },
+            },
             child: _buildFormWidget(context)),
       ),
     );
   }
 
-  Widget _buildLoading() =>
-      Center(
-        child: CircularProgressIndicator(),
-      );
 
   Widget _buildFormWidget(BuildContext context) {
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(18.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Card Template*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Card Template*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            _buildSearchField(),
-           if (_isSearchFocused) _buildTemplateListWidget(context, _filteredData),
-            SizedBox(height: 10.0),
-            _buildImageView(),
-            SizedBox(height: 10.0),
-            Text(
-              "Agent Details",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: MyCustomColors.primaryColor,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+              _buildSearchField(),
+              if (_isSearchFocused)
+                _buildTemplateListWidget(context, _filteredData),
+              SizedBox(height: 10.0),
+              _buildImageView(),
+              SizedBox(height: 10.0),
+              Text(
+                "Agent Details",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  color: MyCustomColors.primaryColor,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-            ),
-            SizedBox(height: 10.0),
-            Container(
-              child: Column(
-                children: [
-                  GestureDetector(
-                    onTap: showOptions,
-                    child: Row(
-                      children: [
-                        Text(
-                          "Display Image",
-                          style: TextStyle(fontFamily: 'Roboto', fontSize: 14),
-                        ),
-                        Icon(
-                          Icons.add_a_photo_rounded,
-                          color: Colors.blue,
-                          size: 20,
-                        ),
-                      ],
+              SizedBox(height: 10.0),
+              Container(
+                child: Column(
+                  children: [
+                    GestureDetector(
+                      onTap: showOptions,
+                      child: Row(
+                        children: [
+                          Text(
+                            "Display Image",
+                            style:
+                                TextStyle(
+                                    fontSize: 14),
+                          ),
+                          Icon(
+                            Icons.add_a_photo_rounded,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
+                        ],
+                      ),
                     ),
+                    SizedBox(height: 20.0),
+                    Center(
+                      child: _image == null
+                          ? Text('No Image selected')
+                          : Image.file(_image!),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.0),
+
+              /***  Name Field ***/
+              Text(
+                "Name*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                onSaved: (value) {
+                  _userName = value!;
+                  },
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Please enter name',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                  SizedBox(height: 20.0),
-                  Center(
-                    child: _image == null
-                        ? Text('No Image selected')
-                        : Image.file(_image!),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black87, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
                   ),
-                ],
-              ),
-            ),
-            SizedBox(height: 10.0),
-
-            /***  Name Field ***/
-            Text(
-              "Name*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextFormField(
-              onSaved: (value) {_userName = value!;},
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: 'Please enter name',
-                hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(8.0),
                 ),
-                contentPadding:
-                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black87, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
+                //    onChanged: _filterList,
+              ),
+              SizedBox(height: 10.0),
+
+              /***  Mobile Number Field ***/
+              Text(
+                "Mobile Number*",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
-          //    onChanged: _filterList,
-            ),
-            SizedBox(height: 10.0),
-
-            /***  Mobile Number Field ***/
-            Text(
-              "Mobile Number*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextFormField(
-              onSaved: (value) {_mobileNumber = value!;},
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: 'Please enter mobile number',
-                hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                contentPadding:
-                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black87, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            //  onChanged: _filterList,
-            ),
-            SizedBox(height: 10.0),
-
-            /***  Email ID Field ***/
-
-            Text(
-              "Email ID*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextFormField(
-              onSaved: (value) {_email = value!;},
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(hintText: 'Please enter email id',
-                hintStyle: TextStyle(color: Colors.grey, fontSize: 14, fontFamily: 'Roboto', fontWeight: FontWeight.w400),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                contentPadding:
-                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black87, width: 1.0), borderRadius: BorderRadius.circular(8.0),),
-              ),
-             // onChanged: _filterList,
-            ),
-            SizedBox(height: 10.0),
-
-            /***  Address Field ***/
-
-            Text(
-              "Address*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextFormField(
-              onSaved: (value) {_address = value!;},
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: 'Please enter address',
-                hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                contentPadding:
-                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black87, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-           //   onChanged: _filterList,
-            ),
-            SizedBox(height: 10.0),
-
-            /***  Quantity Field ***/
-
-            Text(
-              "Quantity*",
-              style: TextStyle(
-                fontFamily: 'Roboto',
-                color: Colors.black87,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            TextFormField(
-              onSaved: (value) {_quantity = value!;},
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: 'Please enter quantity',
-                hintStyle: TextStyle(
-                    color: Colors.grey,
-                    fontSize: 14,
-                    fontFamily: 'Roboto',
-                    fontWeight: FontWeight.w400),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.blue, width: 2.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                contentPadding:
-                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.black87, width: 1.0),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-             // onChanged: _filterList,
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            SizedBox(
-              height: 45,
-              width: double.infinity,
-              child: BlocBuilder<CardBloc, CardState>(
-                builder: (context, state) {
-                  if(state is SubmissionBusinessCardReqSuccessState) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Successfully Created Request'),duration: Duration(seconds:  2),));
-                    return Container();
-                  }
-
-                  return state is SubmissionCardLoadingState
-                  ? const Center(
-                      child: CircularProgressIndicator())
-                  : ElevatedButton(
-                    onPressed: () {
-                      // Instantiate the CreateUpdateCardRequest object with the required data
-                      CreateUpdateCardRequest cardRequest = CreateUpdateCardRequest(
-                        printEmail: _email,
-                        printName: _userName,
-                        printPhoneNumber: _mobileNumber,
-                        printAddress: _address,
-                        requestQuantity:_quantity,
-                        designImageUuid:  _filteredData[_selectedImageIndex].vcardImageInfo![0].imageUuid,
-                        vcardUuid: _filteredData[_selectedImageIndex].vcardUuid,
-                   //     printImageData: "data:image/png;base64,",
-                      );
-                     cardBloc.add(SubmitBusinesCardEvent(createUpdateCardRequest: cardRequest));
-
-                     // {context.read<CardBloc>().add(SubmitBusinesCardEvent(createUpdateCardRequest: cardRequest));}
-
-                    },
-                    style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty.all<Color>(
-                            MyCustomColors.primaryColor),
-                        // Set background color
-                        foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                        // Set text color
-                        textStyle: MaterialStateProperty.all<TextStyle>(
-                            TextStyle(
-                                fontFamily: 'Roboto',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500)),
-                        // Set font family
-                        shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8)))),
-                    child: Text("Place Order"),
-                  );
+              TextFormField(
+                onSaved: (value) {
+                  _mobileNumber = value!;
                 },
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Please enter mobile number',
+                  hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black87, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                //  onChanged: _filterList,
               ),
-            )
-          ],
+              SizedBox(height: 10.0),
+
+              /***  Email ID Field ***/
+
+              Text(
+                "Email ID*",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                onSaved: (value) {
+                  _email = value!;
+                },
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Please enter email id',
+                  hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontFamily: 'Roboto',
+                      fontWeight: FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black87, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                // onChanged: _filterList,
+              ),
+              SizedBox(height: 10.0),
+
+              /***  Address Field ***/
+
+              Text(
+                "Address*",
+                style: TextStyle(
+                  fontFamily: 'Roboto',
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                onSaved: (value) {
+                  _address = value!;
+                },
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Please enter address',
+                  hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black87, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                //   onChanged: _filterList,
+              ),
+              SizedBox(height: 10.0),
+
+              /***  Quantity Field ***/
+
+              Text(
+                "Quantity*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextFormField(
+                onSaved: (value) {
+                  _quantity = value!;
+                },
+                textAlignVertical: TextAlignVertical.center,
+                decoration: InputDecoration(
+                  hintText: 'Please enter quantity',
+                  hintStyle: TextStyle(
+                      color: Colors.grey,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400),
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.blue, width: 2.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black87, width: 1.0),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
+                ),
+                // onChanged: _filterList,
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              SizedBox(
+                height: 45,
+                width: double.infinity,
+                child: BlocBuilder<CardBloc, CardState>(
+                  builder: (context, state) {
+                    if (state is SubmissionCardReqSuccessState) {
+                      //  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Successfully Created Request'),duration: Duration(seconds:  2),));
+                      return Container();
+                    }
+
+                    return state is SubmissionCardLoadingState
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
+                            onPressed: () {
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
+
+                                // Instantiate the CreateUpdateCardRequest object with the required data
+                                CreateUpdateCardRequest cardRequest = CreateUpdateCardRequest(
+                                  printEmail: _email,
+                                  printName: _userName,
+                                  printPhoneNumber: _mobileNumber,
+                                  printAddress: _address,
+                                  requestQuantity: _quantity,
+                                  designImageUuid:
+                                      _filteredData[_selectedImageIndex]
+                                          .vcardImageInfo![0]
+                                          .imageUuid,
+                                  vcardUuid: _filteredData[_selectedImageIndex]
+                                      .vcardUuid,
+                                  //     printImageData: "data:image/png;base64,",
+                                );
+                                cardBloc.add(SubmitBusinesCardEvent(createUpdateCardRequest: cardRequest));
+                              }
+                            },
+                            child: Text("Place Order"),
+                          );
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
@@ -499,31 +473,6 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
     );
   }
 
-/*  Widget _buildSearchResults() {
-    return BlocProvider(
-      create: (_) => cardBloc,
-      child: BlocListener<CardBloc, CardState>(
-        listener: (context, state) {
-          if (state is CardTemplateErrorState) {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error!)));
-          }
-        },
-        child: BlocBuilder<CardBloc, CardState>(
-          builder: (context, state) {
-            print('statename $state');
-            if (state is BusinessCardTemplateFetchingSuccessState) {
-              return _buildTemplateListWidget(context, _filteredData!);
-            } else if (state is CardTemplateErrorState) {
-              return Container();
-            } else {
-              return Container();
-            }
-          },
-        ),
-      ),
-    );
-  }*/
-
   /***  ImageSetNetwork  ***/
   Widget _buildImageView() {
     // we make this condition because of filter time lenght of list get short but index still having old vlaue
@@ -549,11 +498,8 @@ class _BusinessCardsScreenState extends State<BusinessCardsScreen> {
     );
   }
 
-  Widget _buildTemplateListWidget(BuildContext context, List<VisitingCards> _filteredData) {
-   /* if (!_visitingCardListing.isNotEmpty) {
-      _visitingCardListing.addAll(businessCardResponse.visitingCards ?? []);
-      _filteredData.addAll(businessCardResponse.visitingCards ?? []);
-    }*/
+  Widget _buildTemplateListWidget(
+      BuildContext context, List<VisitingCards> _filteredData) {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: _filteredData.length,
@@ -612,4 +558,3 @@ class RowCardTemplateSrc extends StatelessWidget {
     );
   }
 }
-
