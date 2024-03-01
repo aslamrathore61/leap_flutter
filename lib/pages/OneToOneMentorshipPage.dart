@@ -198,6 +198,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
               InkWell(
                 onTap: () {
                   if (mSeletedMentor != null) {
+                    print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
                     _navigatesAndDisplaySelection(context, mSeletedMentor);
                   } else {
                     showSnackBar(context, 'Please select mentor');

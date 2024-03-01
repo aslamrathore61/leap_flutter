@@ -88,28 +88,30 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
         final DateTime dateTime = DateTime(date.year, date.month, date.day);
 
         element.timeSlots?.forEach((element) {
-          final String? timeString = element.time;
-          final List<String>? timeParts = timeString?.split(' ');
-          final List<int> hoursMinutes =
-              timeParts![0].split(':').map((e) => int.parse(e)).toList();
-          int hours = hoursMinutes[0];
-          if (timeParts[1].toUpperCase() == 'PM' && hours != 12) {
-            hours += 12;
-          }
-          final int minutes = hoursMinutes[1];
-          final DateTime time =
-              dateTime.add(Duration(hours: hours, minutes: minutes));
-          final DateTime end = time.add(const Duration(minutes: 35));
+          if(element.time != null) {
+            final String? timeString = element.time;
+            final List<String>? timeParts = timeString?.split(' ');
+            final List<int> hoursMinutes = timeParts![0].split(':').map((e) => int.parse(e)).toList();
+            int hours = hoursMinutes[0];
+            if (timeParts[1].toUpperCase() == 'PM' && hours != 12) {
+              hours += 12;
+            }
+            final int minutes = hoursMinutes[1];
+            final DateTime time =
+            dateTime.add(Duration(hours: hours, minutes: minutes));
+            final DateTime end = time.add(const Duration(minutes: 35));
 
-          meetings.add(Meeting(
-              'Meeting Mode : ${element.mentorshipMode!}',
-              element.locations,
-              element,
-              null,
-              time,
-              end,
-              getRandomColor().withOpacity(0.7),
-              false));
+            meetings.add(Meeting(
+                'Meeting Mode : ${element.mentorshipMode!}',
+                element.locations,
+                element,
+                null,
+                time,
+                end,
+                getRandomColor().withOpacity(0.7),
+                false));
+          }
+
         });
       });
     } else {
