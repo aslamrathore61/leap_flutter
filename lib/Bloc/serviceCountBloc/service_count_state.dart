@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:leap_flutter/models/MyRequestDeleteModel.dart';
+import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/models/ServiceCountResponse.dart';
 
 abstract class ServiceCountState extends Equatable {
@@ -22,4 +24,21 @@ class ServiceCountError extends ServiceCountState {
   final String? message;
 
   const ServiceCountError(this.message);
+}
+
+class ProfileUpdateAndFetchingLoading extends ServiceCountState {}
+
+class ProfileDetailsFetchingSuccessState extends ServiceCountState {
+  final Profile profileDetails;
+  const ProfileDetailsFetchingSuccessState(this.profileDetails);
+}
+
+class ProfileUpdateAndFetchingErrorState extends ServiceCountState {
+  final String? error;
+  const ProfileUpdateAndFetchingErrorState(this.error);
+}
+
+class ProfileUpdateSuccessState extends ServiceCountState {
+  final CommonSimilarResponse commonSimilarResponse;
+  const ProfileUpdateSuccessState(this.commonSimilarResponse);
 }

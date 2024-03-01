@@ -9,6 +9,8 @@ class CreateUpdateCardRequest {
   String? designImageUuid;
   String? vcardUuid;
   String? printImageData;
+  String? flyerRequestUuid;
+  String? vcardRequestUuid;
 
   CreateUpdateCardRequest(
       {this.printEmail,
@@ -20,7 +22,10 @@ class CreateUpdateCardRequest {
       this.requestQuantity,
       this.designImageUuid,
       this.vcardUuid,
-      this.printImageData});
+      this.printImageData,
+      this.flyerRequestUuid,
+      this.vcardRequestUuid
+      });
 
   CreateUpdateCardRequest.fromJson(Map<String, dynamic> json) {
     printEmail = json['printEmail'];
@@ -33,6 +38,8 @@ class CreateUpdateCardRequest {
     designImageUuid = json['designImageUuid'];
     vcardUuid = json['vcardUuid'];
     printImageData = json['printImageData'];
+    flyerRequestUuid = json['flyerRequestUuid'];
+    vcardRequestUuid = json['vcardRequestUuid'];
   }
 
   Map<String, dynamic> toJson() {
@@ -47,30 +54,10 @@ class CreateUpdateCardRequest {
     data['designImageUuid'] = this.designImageUuid;
     data['vcardUuid'] = this.vcardUuid;
     data['printImageData'] = this.printImageData;
+    data['flyerRequestUuid'] = this.flyerRequestUuid;
+    data['vcardRequestUuid'] = this.vcardRequestUuid;
     return data;
   }
 }
 
-class CreateUpdateCardResponse {
-  int? code;
-  String? message;
-  String? error;
 
-  CreateUpdateCardResponse({this.code, this.message});
-
-  CreateUpdateCardResponse.withError(String errorMessage) {
-    error = errorMessage;
-  }
-
-  CreateUpdateCardResponse.fromJson(Map<String, dynamic> json) {
-    code = json['code'];
-    message = json['message'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['code'] = this.code;
-    data['message'] = this.message;
-    return data;
-  }
-}

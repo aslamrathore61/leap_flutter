@@ -1,18 +1,21 @@
 import 'dart:async';
-
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_event.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_state.dart';
-import '../../Resource/ApiRepository.dart';
+import '../../Resource/ApiProvider.dart';
 
 class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
-  final ApiRepository _apiRepository = ApiRepository();
+  final ApiProvider _apiRepository = ApiProvider();
 
   ServiceCountBloc() : super(ServiceCountInitial()) {
     on<GetServiceCountListEvents>(getServiceCountList);
+    on<GetProfileDataEvents>(getProfileDetails);
+    on<UpdateProfileDetailsEvent>(setUpdateProfileDetails);
   }
 
-  Future<FutureOr<void>> getServiceCountList(GetServiceCountListEvents event, Emitter<ServiceCountState> emit) async {
+  Future<FutureOr<void>> getServiceCountList(
+      GetServiceCountListEvents event, Emitter<ServiceCountState> emit) async {
     emit(ServiceCountLoading());
 
     try {
@@ -26,6 +29,48 @@ class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
       }
     } catch (error) {
       emit(ServiceCountError(error.toString()));
+    }
+  }
+
+  FutureOr<void> getProfileDetails(
+      GetProfileDataEvents event, Emitter<ServiceCountState> emit) async {
+    emit(ProfileUpdateAndFetchingLoading());
+    try {
+      final mProfileDetails = await _apiRepository.fetchingMyProfileData();
+
+      if (mProfileDetails.result != null) {
+        //  print('aslamp ${mList.requestList!.length}');
+        emit(ProfileDetailsFetchingSuccessState(mProfileDetails));
+      } else if (mProfileDetails.code == 401) {
+        emit(ProfileUpdateAndFetchingErrorState('SessionOut'));
+      } else {
+        emit(ProfileUpdateAndFetchingErrorState(
+            'Failed to fetch data. Is your device online?'));
+      }
+    } catch (error) {
+      emit(ServiceCountError(error.toString()));
+    }
+  }
+
+  FutureOr<void> setUpdateProfileDetails(
+      UpdateProfileDetailsEvent event, Emitter<ServiceCountState> emit) async {
+    emit(ProfileUpdateAndFetchingLoading());
+
+    try {
+      final profileUpdateResponse =
+          await _apiRepository.updateProfileDetails(event.profileUpdate);
+
+      final statusCode = profileUpdateResponse.code;
+      print('statusCodeaslam $statusCode');
+      if (statusCode == 200) {
+        emit(ProfileUpdateSuccessState(profileUpdateResponse));
+      } else {
+        print('errormessage ${profileUpdateResponse.error}');
+        emit(ProfileUpdateAndFetchingErrorState(profileUpdateResponse.message ??
+            "Something went wrong, please try again later."));
+      }
+    } catch (error) {
+      emit(ProfileUpdateAndFetchingErrorState(error.toString()));
     }
   }
 }

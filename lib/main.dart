@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:leap_flutter/Resource/ApiRepository.dart';
-import 'package:leap_flutter/Screen/HomeScreen.dart';
-import 'Screen/BusinessCardsScreen.dart';
-import 'Screen/FlyersCardPage.dart';
-import 'Screen/LoginScreen.dart';
-import 'constants.dart';
+import 'package:leap_flutter/Resource/ApiProvider.dart';
+import 'package:leap_flutter/pages/CalenderEventPage.dart';
+import 'package:leap_flutter/pages/DashboardBottomNavigation.dart';
+import 'package:leap_flutter/pages/LoginScreen.dart';
+import 'Utils/constants.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,13 +14,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RepositoryProvider(
-      create: (context) => ApiRepository(),
+      create: (context) => ApiProvider(),
       child: MaterialApp(
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ElevatedButton.styleFrom(
-             backgroundColor: primaryColor,
+              backgroundColor: primaryColor,
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 40),
               shape: RoundedRectangleBorder(
@@ -31,17 +30,14 @@ class MyApp extends StatelessWidget {
           ),
           textTheme: const TextTheme(
             bodyMedium: TextStyle(color: bodyTextColor),
-            bodySmall: TextStyle(color: bodyTextColor),
           ),
           inputDecorationTheme: const InputDecorationTheme(
             contentPadding: EdgeInsets.all(defaultPadding),
             hintStyle: TextStyle(color: bodyTextColor),
           ),
         ),
-    //  home: LoginScreen(),
-        home: HomeScreen(),
-      //  home: FlyersCardPage(),
-       // home: BusinessCardsScreen(),
+        home: DashboardBottomNavigation(),
+
       ),
     );
   }

@@ -1,12 +1,11 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Bloc/loginBloc/login_state.dart';
-import '../../Resource/ApiRepository.dart';
+import '../../Resource/ApiProvider.dart';
 import 'login_event.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
-  final ApiRepository _apiRepo = ApiRepository();
+  final ApiProvider _apiRepo = ApiProvider();
 
   LoginBloc() : super(LoginInitial()) {
     on<LoginSubmittedEvent>(loginSubmitted);

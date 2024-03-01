@@ -1,7 +1,7 @@
 class FlyersCardTemplateResponse {
   String? serviceName;
   String? error;
-  List<Flyers>? flyers;
+  List<FlyersTemplate>? flyers;
 
   FlyersCardTemplateResponse({this.serviceName, this.flyers});
 
@@ -12,9 +12,9 @@ class FlyersCardTemplateResponse {
   FlyersCardTemplateResponse.fromJson(Map<String, dynamic> json) {
     serviceName = json['serviceName'];
     if (json['flyers'] != null) {
-      flyers = <Flyers>[];
+      flyers = <FlyersTemplate>[];
       json['flyers'].forEach((v) {
-        flyers!.add(new Flyers.fromJson(v));
+        flyers!.add(new FlyersTemplate.fromJson(v));
       });
     }
   }
@@ -29,19 +29,19 @@ class FlyersCardTemplateResponse {
   }
 }
 
-class Flyers {
+class FlyersTemplate {
   String? flyerUuid;
   String? flyerType;
   String? flyerImageUrl;
   List<int>? flyerRequestQuantity;
 
-  Flyers(
+  FlyersTemplate(
       {this.flyerUuid,
         this.flyerType,
         this.flyerImageUrl,
         this.flyerRequestQuantity});
 
-  Flyers.fromJson(Map<String, dynamic> json) {
+  FlyersTemplate.fromJson(Map<String, dynamic> json) {
     flyerUuid = json['flyerUuid'];
     flyerType = json['flyerType'];
     flyerImageUrl = json['flyerImageUrl'];
