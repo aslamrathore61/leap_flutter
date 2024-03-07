@@ -104,14 +104,13 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                                   .bodyMedium!
                                   .copyWith(color: titleColor, fontSize: 14),
                               cursorColor: primaryColor,
-                              keyboardType: TextInputType.emailAddress,
+                              keyboardType: TextInputType.text,
                               decoration: InputDecoration(
                                 hintText: "Please Enter Password",
                                 suffixIcon: GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _obscureTextPassword =
-                                          !_obscureTextPassword;
+                                      _obscureTextPassword = !_obscureTextPassword;
                                     });
                                   },
                                   child: _obscureTextPassword

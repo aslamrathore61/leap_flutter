@@ -13,3 +13,10 @@ class UpdateProfileDetailsEvent extends ServiceCountEvent {
 
   UpdateProfileDetailsEvent({required this.profileUpdate});
 }
+
+
+class ChangesPasswordEvent extends ServiceCountEvent {
+  final ChangesPassword changesPassword;
+
+  ChangesPasswordEvent({required this.changesPassword});
+}

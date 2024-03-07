@@ -6,12 +6,11 @@ import 'package:leap_flutter/Utils/GlabblePageRoute.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
-
 import '../Bloc/serviceCountBloc/service_count_bloc.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Bloc/serviceCountBloc/service_count_state.dart';
-import '../Component/ShimmerComponent.dart';
 import '../Component/ShimmerProfileView.dart';
+import '../Component/buttons/primary_button.dart';
 import '../Utils/constants.dart';
 import 'MyProfileEditPage.dart';
 
@@ -22,11 +21,16 @@ class MyProfile extends StatefulWidget {
   State<MyProfile> createState() => _MyProfileState();
 }
 
+bool oldObscurePassword = true;
+bool newObscurePassword = true;
+
 class _MyProfileState extends State<MyProfile> {
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
 
-  // GlobalKey is needed to show bottom sheet.
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _oldPasswordController = TextEditingController();
+  TextEditingController _newPasswordController = TextEditingController();
+  TextEditingController _confirmPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -42,10 +46,7 @@ class _MyProfileState extends State<MyProfile> {
           title: Text(
             "My Profile",
             style: TextStyle(
-                fontSize: 18,
-                fontFamily: 'Roboto',
-                fontWeight: FontWeight.w500,
-                color: Colors.white),
+                fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
           ),
         ),
         body: BlocProvider(
@@ -56,7 +57,7 @@ class _MyProfileState extends State<MyProfile> {
               if (state is ProfileUpdateAndFetchingLoading) {
                 return ShimmerProfileView();
               } else if (state is ProfileDetailsFetchingSuccessState) {
-               return buildProfileView(state.profileDetails);
+                return buildProfileView(state.profileDetails);
               } else {
                 return Container(
                   child: Center(child: Text('No Data Found')),
@@ -100,7 +101,16 @@ class _MyProfileState extends State<MyProfile> {
                 profile.result?.tenureWithSM ?? ''),
             buildDivider(),
             buildSectionTitle("Settings"),
-            buildOptionRow("assets/images/password.png", "Change Password"),
+            InkWell(
+                onTap: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return ChangePasswordDialoged();
+                      });
+                },
+                child: buildOptionRow(
+                    "assets/images/password.png", "Change Password")),
             InkWell(
               onTap: () {
                 showModalBottomSheet(
@@ -230,7 +240,6 @@ class _MyProfileState extends State<MyProfile> {
         child: Text(
           title,
           style: TextStyle(
-            fontFamily: 'Roboto',
             fontSize: 16,
             fontWeight: FontWeight.w500,
             color: Colors.black,
@@ -315,7 +324,8 @@ class _MyProfileState extends State<MyProfile> {
       height: 180,
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.only(left: 20,right: 20,top: 10,bottom: 10),
+        padding:
+            const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -413,5 +423,166 @@ class _MyProfileState extends State<MyProfile> {
         ),
       ),
     );
+  }
+
+  Widget ChangePasswordDialoged() {
+    return AlertDialog(
+      title: Text('Change Password'),
+      content: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TextFormField(
+                    obscureText: oldObscurePassword,
+                    validator: passwordValidator,
+                    controller: _oldPasswordController,
+                    decoration: InputDecoration(
+                      labelText: 'Old Password',
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            oldObscurePassword = !oldObscurePassword;
+                            print('oldObscurePassword $oldObscurePassword');
+                          });
+                        },
+                        child: oldObscurePassword
+                            ? Icon(
+                                Icons.visibility_off,
+                                color: bodyTextColor,
+                              )
+                            : Icon(
+                                Icons.visibility,
+                                color: bodyTextColor,
+                              ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    validator: passwordValidator,
+                    controller: _newPasswordController,
+                    onChanged: (value) {
+                      setState(() {
+                        _newPasswordController.text = value;
+                      });
+                    },
+                    obscureText: newObscurePassword,
+                    decoration: InputDecoration(
+                      labelText: 'New Password',
+                      suffixIcon: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            newObscurePassword = !newObscurePassword;
+                            print('newObscurePassword $newObscurePassword');
+                          });
+                        },
+                        child: newObscurePassword
+                            ? Icon(
+                                Icons.visibility_off,
+                                color: bodyTextColor,
+                              )
+                            : Icon(
+                                Icons.visibility,
+                                color: bodyTextColor,
+                              ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 10),
+                  TextFormField(
+                    validator: confirmPasswordValidation,
+                    controller: _confirmPasswordController,
+                    decoration: InputDecoration(labelText: 'Confirm Password'),
+                    onChanged: (value) {
+                      setState(() {
+                        _confirmPasswordController.text = value;
+                      });
+                    },
+                    obscureText: true,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          child: Text('Cancel'),
+        ),
+        BlocProvider(
+          create: (context) => ServiceCountBloc(),
+          child: BlocConsumer<ServiceCountBloc, ServiceCountState>(
+            listener: (context, state) {
+              if (state is ChangesPasswordErrorState) {
+                showToast(
+                    state.error.toString(),
+                    Colors.red,
+                    const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                    ));
+              } else if (state is ChangesPasswordSuccessState) {
+                _oldPasswordController.text = '';
+                _newPasswordController.text = '';
+                _confirmPasswordController.text = '';
+                Navigator.of(context).pop();
+                showToast(
+                    'Password successfully changed',
+                    Colors.green,
+                    const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                    ));
+              }
+            },
+            builder: (context, state) {
+              return state is ChangesPasswordLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PrimaryButton(
+                      text: 'Update Password',
+                      press: () async {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
+                          if (_newPasswordController.text ==
+                              _confirmPasswordController.text) {
+                            Profile? profileDetailsss =
+                                await SharedPrefObj.getProfileSharedPreValue(
+                                    profileDetails);
+                            final changePassword = ChangesPassword(
+                                oldPassword: _oldPasswordController.text,
+                                newPassword: _newPasswordController.text,
+                                emailId: profileDetailsss?.result?.email);
+
+                            BlocProvider.of<ServiceCountBloc>(context).add(
+                                ChangesPasswordEvent(
+                                    changesPassword: changePassword));
+
+                            /* _serviceCountBloc.add(ChangesPasswordEvent(
+                              changesPassword: changePassword));*/
+                          }
+                        }
+                      });
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  String? confirmPasswordValidation(String? value) {
+    print('confirmPassword : $value : newPwd : ${_newPasswordController.text}');
+    if (value != _newPasswordController.text) {
+      return 'Passwords do not match';
+    }
+    return null;
   }
 }

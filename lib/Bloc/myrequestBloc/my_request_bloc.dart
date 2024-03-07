@@ -10,6 +10,7 @@ class MyRequestBloc extends Bloc<MyRequestEvent, MyRequestState> {
   MyRequestBloc() : super(MyRequestInitial()) {
     on<GetMyRequestListEvent>(getMyRequestList);
     on<DeleteMyRequestItemEvent>(deleteMyRequestItem);
+    on<ArchivedMyRequestItemEvent>(archivedMyRequestItem);
   }
 
   FutureOr<void> getMyRequestList(
@@ -42,6 +43,22 @@ class MyRequestBloc extends Bloc<MyRequestEvent, MyRequestState> {
       }
     } catch (error) {
       print('Failed to Delete $error');
+    }
+  }
+
+  Future<FutureOr<void>> archivedMyRequestItem(
+      ArchivedMyRequestItemEvent event, Emitter<MyRequestState> emit) async {
+    try {
+      final deleteCardResponse = await _apiRepo.archivedMyRequestItemDetails(
+          event.myRequestArchivedModel, event.endPoint);
+      final statusCode = deleteCardResponse.code;
+      if (statusCode == 200) {
+        print('Success Archived Items');
+      } else {
+        print('Failed to Archived');
+      }
+    } catch (error) {
+      print('Failed to Archived $error');
     }
   }
 }

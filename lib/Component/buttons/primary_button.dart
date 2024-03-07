@@ -14,7 +14,7 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets verticalPadding = const EdgeInsets.symmetric(vertical: 14);
+    EdgeInsets verticalPadding = const EdgeInsets.symmetric(vertical: 12);
     return SizedBox(
       width: double.infinity,
       child: Platform.isIOS

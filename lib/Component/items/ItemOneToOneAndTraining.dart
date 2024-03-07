@@ -12,6 +12,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
   final String statusName;
   final String timeSlot;
   final String statusColor;
+  final int isArchive;
   final VoidCallback onEditPress;
   final VoidCallback onDeletePress;
 
@@ -25,6 +26,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
     required this.statusName,
     required this.timeSlot,
     required this.statusColor,
+    required this.isArchive,
     required this.onEditPress,
     required this.onDeletePress,
   }) : super(key: key);
@@ -44,23 +46,42 @@ class ItemOneToOneAndTraining extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text.rich(
-              TextSpan(
-                style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                    color: titleColor.withOpacity(0.7),
-                    fontWeight: FontWeight.w500,
-                    fontSize: 14),
-                text: rowOneTitle,
-                children: <TextSpan>[
-                  TextSpan(
-                    text: '$rowOneValue',
-                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: titleColor,
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14),
+            Row(
+              children: [
+                Expanded(
+                  flex: 7,
+                  child: Text.rich(
+                    TextSpan(
+                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          color: titleColor.withOpacity(0.7),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14),
+                      text: rowOneTitle,
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: '$rowOneValue',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                  color: titleColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                if (isArchive == 1)
+                  Expanded(
+                    flex: 1,
+                    child: Icon(
+                      Icons.unarchive_outlined,
+                      color: titleColor.withOpacity(0.6),
+                      size: 20,
+                    ),
+                  )
+              ],
             ),
             SizedBox(
               height: 10,
@@ -165,15 +186,15 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                           onTap: onDeletePress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
+                              color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(2.0),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
-                                Icons.delete_forever,
-                                color: Colors.red.shade900,
+                                Icons.delete_forever_outlined,
+                                color: Colors.red,
                                 size: 20,
                               ),
                             ),
@@ -186,7 +207,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                           onTap: onEditPress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
+                              color: primaryColor.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(2.0),
                             ),
                             child: Padding(
@@ -194,7 +215,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
                                 Icons.edit,
-                                color: titleColor,
+                                color: primaryColor,
                                 size: 20,
                               ),
                             ),

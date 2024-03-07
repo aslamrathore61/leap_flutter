@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/ServiceCountResponse.dart';
+
 class SharedPrefObj {
 
   // clear all saved details

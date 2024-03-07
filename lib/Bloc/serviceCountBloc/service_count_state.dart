@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:leap_flutter/models/MyRequestDeleteModel.dart';
+import 'package:leap_flutter/models/MyRequestDeleteArchivedModel.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/models/ServiceCountResponse.dart';
 
@@ -38,7 +38,20 @@ class ProfileUpdateAndFetchingErrorState extends ServiceCountState {
   const ProfileUpdateAndFetchingErrorState(this.error);
 }
 
+
 class ProfileUpdateSuccessState extends ServiceCountState {
   final CommonSimilarResponse commonSimilarResponse;
   const ProfileUpdateSuccessState(this.commonSimilarResponse);
+}
+
+class ChangesPasswordLoading extends ServiceCountState {}
+
+class ChangesPasswordSuccessState extends ServiceCountState {
+  final CommonSimilarResponse commonSimilarResponse;
+  const ChangesPasswordSuccessState(this.commonSimilarResponse);
+}
+
+class ChangesPasswordErrorState extends ServiceCountState {
+  final String? error;
+  const ChangesPasswordErrorState(this.error);
 }

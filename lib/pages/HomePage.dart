@@ -31,6 +31,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
   Profile? profile;
+  String? toolbarName;
 
   @override
   void initState() {
@@ -44,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         backgroundColor: primaryColor,
         title: Text(
-          "Aslam Rathore, Welcome Aboard!",
+          toolbarName ?? 'Welcome Aboard!',
           style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
         ),
@@ -68,6 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
               } else if (state is ProfileDetailsFetchingSuccessState) {
                 _serviceCountBloc.add(GetServiceCountListEvents());
                 profile = state.profileDetails;
+                setState(() {
+                  toolbarName =
+                      "${capitalizeFirstLetterOfEachWord(profile?.result?.firstName.toString())} ${capitalizeFirstLetterOfEachWord(profile?.result?.lastName.toString())}, Welcome Aboard!";
+                });
               } else if (state is ProfileUpdateAndFetchingErrorState) {
                 if (state.error == 'SessionOut') {
                   showDialog(
@@ -156,6 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ItemHomeServiceCount(
                     title:
                         serviceCountResponse.trainingList![index].trainingName!,
+                    unPaidTitle: " Training",
+                    unPaidMaxLimit: '199',
                     count: serviceCountResponse
                         .trainingList![index].trainingRisedCount
                         .toString(),
@@ -213,6 +220,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: ItemHomeServiceCount(
                     title:
                         serviceCountResponse.requestList![index].requestName!,
+                    unPaidTitle: "Available Limit",
+                    unPaidMaxLimit: serviceCountResponse
+                        .requestList![index].unpaid_max_limit!,
                     count: serviceCountResponse
                         .requestList![index].requestRisedCount
                         .toString(),

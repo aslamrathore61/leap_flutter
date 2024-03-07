@@ -25,6 +25,30 @@ class MyRequestDeleteModel {
   }
 }
 
+class MyRequestArchivedModel {
+  String? trainingBookingUuid;
+  String? mentorSlotUuid;
+  String? flyerRequestUuid;
+  String? vcardRequestUuid;
+
+  MyRequestArchivedModel({this.trainingBookingUuid,this.mentorSlotUuid,this.flyerRequestUuid,this.vcardRequestUuid,});
+
+  MyRequestArchivedModel.fromJson(Map<String, dynamic> json) {
+    trainingBookingUuid = json['trainingBookingUuid'];
+    mentorSlotUuid = json['mentorSlotUuid'];
+    flyerRequestUuid = json['flyerRequestUuid'];
+    vcardRequestUuid = json['vcardRequestUuid'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['trainingBookingUuid'] = this.trainingBookingUuid;
+    data['mentorSlotUuid'] = this.mentorSlotUuid;
+    data['flyerRequestUuid'] = this.flyerRequestUuid;
+    data['vcardRequestUuid'] = this.vcardRequestUuid;
+    return data;
+  }
+}
 
 class CommonSimilarResponse {
   int? code;

@@ -13,7 +13,7 @@ class Profile {
   Profile.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     result =
-    json['result'] != null ? new Result.fromJson(json['result']) : null;
+        json['result'] != null ? new Result.fromJson(json['result']) : null;
   }
 
   // Convert Model to JSON
@@ -45,19 +45,19 @@ class Result {
 
   Result(
       {this.firstName,
-        this.lastName,
-        this.email,
-        this.phoneNumber,
-        this.userType,
-        this.profileImage,
-        this.designation,
-        this.department,
-        this.organization,
-        this.isFranchise,
-        this.currentMentors,
-        this.splitModel,
-        this.tenureWithSM,
-        this.registerDate});
+      this.lastName,
+      this.email,
+      this.phoneNumber,
+      this.userType,
+      this.profileImage,
+      this.designation,
+      this.department,
+      this.organization,
+      this.isFranchise,
+      this.currentMentors,
+      this.splitModel,
+      this.tenureWithSM,
+      this.registerDate});
 
   Result.fromJson(Map<String, dynamic> json) {
     firstName = json['firstName'];
@@ -96,7 +96,6 @@ class Result {
   }
 }
 
-
 /* For Update Profile details  */
 
 class ProfileUpdate {
@@ -107,9 +106,9 @@ class ProfileUpdate {
 
   ProfileUpdate(
       {this.imageData,
-        this.phoneNumber,
-        this.userFirstName,
-        this.userLastName});
+      this.phoneNumber,
+      this.userFirstName,
+      this.userLastName});
 
   ProfileUpdate.fromJson(Map<String, dynamic> json) {
     imageData = json['imageData'];
@@ -124,6 +123,28 @@ class ProfileUpdate {
     data['phoneNumber'] = this.phoneNumber;
     data['userFirstName'] = this.userFirstName;
     data['userLastName'] = this.userLastName;
+    return data;
+  }
+}
+
+class ChangesPassword {
+  String? oldPassword;
+  String? newPassword;
+  String? emailId;
+
+  ChangesPassword({this.newPassword, this.oldPassword, this.emailId});
+
+  ChangesPassword.fromJson(Map<String, dynamic> json) {
+    oldPassword = json['oldPassword'];
+    newPassword = json['newPassword'];
+    emailId = json['emailId'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['oldPassword'] = this.oldPassword;
+    data['newPassword'] = this.newPassword;
+    data['emailId'] = this.emailId;
     return data;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
 
 // clolors that we use in our app
@@ -48,7 +49,7 @@ const kErrorBorderSide = BorderSide(color: Colors.red, width: 1);
 
 // Validator
 final passwordValidator = MultiValidator([
-  RequiredValidator(errorText: 'Password is required'),
+  RequiredValidator(errorText: 'This password field is required'),
   MinLengthValidator(8, errorText: 'Password must be at least 8 digits long'),
   PatternValidator(r'(?=.*?[#?!@$%^&*-/])',
       errorText: 'Passwords must have at least one special character')
@@ -74,6 +75,21 @@ void showSnackBar(BuildContext context, String message) {
   final snackBar = SnackBar(content: Text(message));
   ScaffoldMessenger.of(context).showSnackBar(snackBar);
 }
+
+void showToast(String message, Color color, Icon icon) {
+  Fluttertoast.showToast(
+    msg: message,
+    toastLength: Toast.LENGTH_SHORT,
+    gravity: ToastGravity.BOTTOM,
+    timeInSecForIosWeb: 1,
+    backgroundColor: color,
+    textColor: Colors.white,
+    fontSize: 16.0,
+  );
+}
+
+
+
 
 void showErrorDialog(BuildContext context, String msg) {
   showDialog(
@@ -116,8 +132,11 @@ Color getRandomColor() {
   Random random = Random();
   return Color.fromARGB(
     255,
-    random.nextInt(256), // Generates a random value between 0 and 255 for the red channel
-    random.nextInt(256), // Generates a random value between 0 and 255 for the green channel
-    random.nextInt(256), // Generates a random value between 0 and 255 for the blue channel
+    random.nextInt(256),
+    // Generates a random value between 0 and 255 for the red channel
+    random.nextInt(256),
+    // Generates a random value between 0 and 255 for the green channel
+    random.nextInt(
+        256), // Generates a random value between 0 and 255 for the blue channel
   );
 }

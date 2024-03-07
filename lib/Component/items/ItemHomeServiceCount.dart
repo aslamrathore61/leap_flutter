@@ -5,6 +5,8 @@ import '../../Utils/constants.dart';
 
 class ItemHomeServiceCount extends StatelessWidget {
   final String title;
+  final String unPaidTitle;
+  final String unPaidMaxLimit;
   final String count;
   final String colorCode;
   final Widget icon;
@@ -14,6 +16,8 @@ class ItemHomeServiceCount extends StatelessWidget {
   const ItemHomeServiceCount({
     Key? key,
     required this.title,
+    required this.unPaidTitle,
+    required this.unPaidMaxLimit,
     required this.count,
     required this.colorCode,
     required this.icon,
@@ -82,10 +86,10 @@ class ItemHomeServiceCount extends StatelessWidget {
                                       color: titleColor.withOpacity(0.9),
                                       fontWeight: FontWeight.w500,
                                       fontSize: 15),
-                              text: '85',
+                              text: '$unPaidMaxLimit',
                               children: <TextSpan>[
                                 TextSpan(
-                                  text: ' Available',
+                                  text: ' $unPaidTitle',
                                   style: Theme.of(context)
                                       .textTheme
                                       .bodySmall!

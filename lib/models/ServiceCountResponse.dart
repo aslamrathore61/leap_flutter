@@ -9,7 +9,6 @@ class ServiceCountResponse {
     error = errorMessage;
   }
 
-
   ServiceCountResponse.fromJson(Map<String, dynamic> json) {
     if (json['trainingList'] != null) {
       trainingList = <TrainingList>[];
@@ -69,15 +68,21 @@ class TrainingList {
 class RequestList {
   int? requestUuid;
   String? requestName;
+  String? unpaid_max_limit;
   String? color;
   int? requestRisedCount;
 
   RequestList(
-      {this.requestUuid, this.requestName, this.color, this.requestRisedCount});
+      {this.requestUuid,
+      this.requestName,
+      this.unpaid_max_limit,
+      this.color,
+      this.requestRisedCount});
 
   RequestList.fromJson(Map<String, dynamic> json) {
     requestUuid = json['requestUuid'];
     requestName = json['requestName'];
+    unpaid_max_limit = json['unpaid_max_limit'];
     color = json['color'];
     requestRisedCount = json['requestRisedCount'];
   }
@@ -86,11 +91,18 @@ class RequestList {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['requestUuid'] = this.requestUuid;
     data['requestName'] = this.requestName;
+    data['unpaid_max_limit'] = this.unpaid_max_limit;
     data['color'] = this.color;
     data['requestRisedCount'] = this.requestRisedCount;
     return data;
   }
+}
 
 
+/*  for my Request list filter*/
+class FilterCount {
+  String name;
+  int value;
 
+  FilterCount(this.name, this.value);
 }

@@ -31,7 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
 
-
   #Architecture
   flutter_bloc: ^8.1.4
   dio: ^5.4.0
@@ -41,9 +40,11 @@ dependencies:
   form_field_validator: ^1.1.0
   lottie: ^3.1.0
   syncfusion_flutter_calendar: ^23.2.7
-
+  fluttertoast: ^8.2.4
+  backdrop: ^0.9.1
   # Date Format Change AM PM to 24:00
   intl: ^0.18.0
+  lite_rolling_switch: ^1.0.1
 
   # images
   image_picker: ^1.0.7

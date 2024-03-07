@@ -5,7 +5,7 @@ import 'package:leap_flutter/Resource/ApiProvider.dart';
 import 'package:leap_flutter/models/MentorList.dart';
 import 'package:leap_flutter/models/TrainingProgram.dart';
 import 'package:meta/meta.dart';
-import '../../models/MyRequestDeleteModel.dart';
+import '../../models/MyRequestDeleteArchivedModel.dart';
 import '../../models/OneToOneMentorshipPostGet.dart';
 
 part 'training_event.dart';

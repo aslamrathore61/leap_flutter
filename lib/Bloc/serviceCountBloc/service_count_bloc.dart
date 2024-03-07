@@ -12,6 +12,7 @@ class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
     on<GetServiceCountListEvents>(getServiceCountList);
     on<GetProfileDataEvents>(getProfileDetails);
     on<UpdateProfileDetailsEvent>(setUpdateProfileDetails);
+    on<ChangesPasswordEvent>(setChangesPassword);
   }
 
   Future<FutureOr<void>> getServiceCountList(
@@ -71,6 +72,27 @@ class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
       }
     } catch (error) {
       emit(ProfileUpdateAndFetchingErrorState(error.toString()));
+    }
+  }
+
+  FutureOr<void> setChangesPassword(
+      ChangesPasswordEvent event, Emitter<ServiceCountState> emit) async {
+    emit(ChangesPasswordLoading());
+
+    try {
+      final changesPasswordResponse =
+          await _apiRepository.changesPasswordUpdate(event.changesPassword);
+
+      final statusCode = changesPasswordResponse.code;
+      print('changesPasswordStatusCode $statusCode');
+      if (statusCode == 200) {
+        emit(ChangesPasswordSuccessState(changesPasswordResponse));
+      } else {
+        print('errormessage ${changesPasswordResponse.error}');
+        emit(ChangesPasswordErrorState(changesPasswordResponse.message ?? "Failed to change password."));
+      }
+    } catch (error) {
+      emit(ChangesPasswordErrorState('Failed to change password.'));
     }
   }
 }

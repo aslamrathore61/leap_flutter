@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,6 @@ import '../Component/buttons/primary_button.dart';
 import '../Utils/constants.dart';
 import '../models/Profile.dart';
 
-
 class MyProfileEditPage extends StatefulWidget {
   const MyProfileEditPage({Key? key, this.profileDetails}) : super(key: key);
   final Profile? profileDetails;
@@ -23,8 +21,6 @@ class MyProfileEditPage extends StatefulWidget {
 }
 
 class _MyProfileEditPageState extends State<MyProfileEditPage> {
-
-
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
   final _formKey = GlobalKey<FormState>();
 
@@ -33,15 +29,8 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
   String? _mobileNumber;
   String? _mProfileImagePath;
 
-
-
-
-
   File? _image;
   final picker = ImagePicker();
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -137,25 +126,9 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               width: 2, // Adjust border width as needed
             ),
           ),
-          child: ClipOval(
-            child: Image.network(
-              // profile.result!.profileImage ?? '',
-              widget.profileDetails?.result?.profileImage ?? '',
-              width: 80, // Adjust the width and height as needed
-              height: 80,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) {
-                  return child;
-                }
-                return CircularProgressIndicator(
-                  value: progress.expectedTotalBytes != null
-                      ? progress.cumulativeBytesLoaded /
-                          progress.expectedTotalBytes!
-                      : null,
-                );
-              },
-            ),
+          child: buildCircularImage(
+            imageUrl: widget.profileDetails?.result?.profileImage,
+            fileImage: _image,
           ),
         ),
         Positioned(
@@ -169,6 +142,36 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget buildCircularImage({String? imageUrl, File? fileImage}) {
+    return ClipOval(
+      child: fileImage == null
+          ? Image.network(
+              imageUrl ??
+                  'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) {
+                  return child;
+                }
+                return CircularProgressIndicator(
+                  value: progress.expectedTotalBytes != null
+                      ? progress.cumulativeBytesLoaded /
+                          progress.expectedTotalBytes!
+                      : null,
+                );
+              },
+            )
+          : Image.file(
+              fileImage,
+              width: 80,
+              height: 80,
+              fit: BoxFit.cover,
+            ),
     );
   }
 
@@ -211,7 +214,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                   onSaved: (value) => _mobileNumber = value,
                   initialValue:
                       widget.profileDetails?.result?.phoneNumber ?? '',
-                  keyboardType: TextInputType.text),
+                  keyboardType: TextInputType.number),
               SizedBox(
                 height: 10,
               ),
@@ -348,6 +351,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
           child: TextFormField(
             initialValue: initialValue,
             textInputAction: TextInputAction.next,
+            enabled: false,
             style: TextStyle(
               color: titleColor,
               fontSize: 14,
@@ -363,7 +367,6 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
       ],
     );
   }
-
 
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
@@ -415,6 +418,4 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
       ),
     );
   }
-
-
 }

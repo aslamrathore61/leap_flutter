@@ -2,16 +2,16 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:leap_flutter/models/MentorList.dart';
 import 'package:leap_flutter/models/Profile.dart';
+import 'package:leap_flutter/models/ServiceCountResponse.dart';
 import '../Utils/constants.dart';
 import '../db/SharedPrefObj.dart';
 import '../models/BusinessCardTemplateResponse.dart';
 import '../models/CreateUpdateCardRequestResponse.dart';
 import '../models/FlyersCardTemplateResponse.dart';
 import '../models/LoginResponse.dart';
-import '../models/MyRequestDeleteModel.dart';
+import '../models/MyRequestDeleteArchivedModel.dart';
 import '../models/MyRequestResponse.dart';
 import '../models/OneToOneMentorshipPostGet.dart';
-import '../models/ServiceCountResponse.dart';
 import '../models/TrainingProgram.dart';
 
 class ApiProvider {
@@ -77,7 +77,8 @@ class ApiProvider {
       Response response = await _dio.get(
         '${_baseUrl}getuserservicesrequestcount',
       );
-      return ServiceCountResponse.fromJson(response.data);
+      ServiceCountResponse serviceCountResponse = ServiceCountResponse.fromJson(response.data);
+      return serviceCountResponse;
     } catch (error, stacktrace) {
       return ServiceCountResponse.withError(
           'Data not found / connection issue');
@@ -324,4 +325,45 @@ class ApiProvider {
           'Data not found / connection issue');
     }
   }
+
+
+  /*** Changes Password Vis API  ***/
+
+  Future<CommonSimilarResponse> changesPasswordUpdate(
+      ChangesPassword changesPassword) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer $token";
+      String requestBody = json.encode(changesPassword.toJson());
+      Response response = await _dio.post(
+        '${_baseUrl}changepassword',
+        data: requestBody,
+      );
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError('Data not found / connection issue');
+    }
+  }
+
+  /***  Archived My Request Row API Vis API  ***/
+
+  Future<CommonSimilarResponse> archivedMyRequestItemDetails(
+      MyRequestArchivedModel myRequestArchivedModel, String endPoint) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer $token";
+      String requestBody = json.encode(myRequestArchivedModel.toJson());
+
+      Response response = await _dio.post(
+        '${_baseUrl}${endPoint}',
+        data: requestBody,
+      );
+
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError('connection issue');
+    }
+  }
+
+
 }

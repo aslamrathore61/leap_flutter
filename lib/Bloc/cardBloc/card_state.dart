@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import '../../models/BusinessCardTemplateResponse.dart';
 import '../../models/CreateUpdateCardRequestResponse.dart';
 import '../../models/FlyersCardTemplateResponse.dart';
-import '../../models/MyRequestDeleteModel.dart';
+import '../../models/MyRequestDeleteArchivedModel.dart';
 
 @immutable
 abstract class CardState {}
