@@ -49,3 +49,27 @@ class Result {
     return data;
   }
 }
+
+
+class ResetPasswordReq {
+  String? emailId;
+  String? otp;
+  String? newPassword;
+
+  ResetPasswordReq({this.emailId, this.otp, this.newPassword});
+
+  ResetPasswordReq.fromJson(Map<String, dynamic> json) {
+    emailId = json['emailId'];
+    otp = json['otp'];
+    newPassword = json['newPassword'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['emailId'] = this.emailId;
+    data['otp'] = this.otp;
+    data['newPassword'] = this.newPassword;
+    return data;
+  }
+}
+

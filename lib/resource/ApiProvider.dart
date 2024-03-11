@@ -366,4 +366,68 @@ class ApiProvider {
   }
 
 
+  /***  Reset Password Row API Vis API  ***/
+
+  Future<CommonSimilarResponse> resetPassword(
+      ResetPasswordReq resetPasswordReq, String endPoint) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer $token";
+      String requestBody = json.encode(resetPasswordReq.toJson());
+
+      Response response = await _dio.post(
+        '${_baseUrl}${endPoint}',
+        data: requestBody,
+      );
+
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError('connection issue');
+    }
+  }
+
+
+  /***  otp validate  API Vis API  ***/
+
+  Future<CommonSimilarResponse> otpValidateResponse(
+      ResetPasswordReq resetPasswordReq, String endPoint) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer $token";
+      String requestBody = json.encode(resetPasswordReq.toJson());
+
+      Response response = await _dio.post(
+        '${_baseUrl}${endPoint}',
+        data: requestBody,
+      );
+
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError('connection issue');
+    }
+  }
+
+
+  /***  Choose new pwd submit API Vis API  ***/
+
+  Future<CommonSimilarResponse> choosenewPWDSubmitResponse(
+      ResetPasswordReq resetPasswordReq, String endPoint) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer $token";
+      String requestBody = json.encode(resetPasswordReq.toJson());
+
+      Response response = await _dio.put(
+        '${_baseUrl}${endPoint}',
+        data: requestBody,
+      );
+
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError('connection issue');
+    }
+  }
+
+
+
 }

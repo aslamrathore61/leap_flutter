@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Bloc/loginBloc/login_event.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
+import 'package:leap_flutter/pages/ForgotPasswordPage.dart';
 import '../Bloc/loginBloc/login_bloc.dart';
 import '../Bloc/loginBloc/login_state.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -40,7 +41,7 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                   child: Container(
                     height: 150,
                     width: 150,
-                    child: Image.asset('assets/images/logo.png'),
+                    child: Image.asset('assets/images/leaplogo.png'),
                   ),
                 ),
                 Expanded(
@@ -110,7 +111,8 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                                 suffixIcon: GestureDetector(
                                   onTap: () {
                                     setState(() {
-                                      _obscureTextPassword = !_obscureTextPassword;
+                                      _obscureTextPassword =
+                                          !_obscureTextPassword;
                                     });
                                   },
                                   child: _obscureTextPassword
@@ -145,8 +147,9 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                         children: [
                           TextButton(
                             onPressed: () {
-                              // Forgot password action
-                            },
+                              Navigator.of(context).push(
+                                  GlabblePageRoute(page: ForgotPasswordPage()));
+                              },
                             child: Text(
                               "Forgot Your Password?",
                             ),
@@ -156,7 +159,7 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                       SizedBox(height: 10),
                       BlocConsumer<LoginBloc, LoginState>(
                         listener: (context, state) {
-                          if (state is LoginFetchingErrorState) {
+                          if (state is FetchingErrorState) {
                             showErrorDialog(context, state.error!);
                           } else if (state is LoginFetchingSuccessState &&
                               state.loginResponse != null) {
@@ -187,9 +190,7 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                                       onPressed: () async {
                                         if (_formKey.currentState!.validate()) {
                                           _formKey.currentState!.save();
-                                          context.read<LoginBloc>().add(
-                                              LoginSubmittedEvent(
-                                                  _userEmail!, _userPassword!));
+                                          context.read<LoginBloc>().add(LoginSubmittedEvent(_userEmail!, _userPassword!));
                                         }
                                       },
                                       child: Text("Login".toUpperCase()),
