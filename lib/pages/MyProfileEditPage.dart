@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -263,7 +264,16 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                               profileUpdate.phoneNumber = _mobileNumber;
                               profileUpdate.userFirstName = _firstName;
                               profileUpdate.userLastName = _lastName;
-                              profileUpdate.imageData = _mProfileImagePath;
+
+                              if (_image != null) {
+                                List<int> imageBytes =
+                                    _image!.readAsBytesSync();
+                                String base64Image = base64Encode(imageBytes);
+                                _mProfileImagePath =
+                                    'data:image/png;base64,$base64Image';
+                                profileUpdate.imageData = _mProfileImagePath;
+                              }
+
                               _serviceCountBloc.add(UpdateProfileDetailsEvent(
                                   profileUpdate: profileUpdate));
                             }
@@ -370,7 +380,8 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
 
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
 
     setState(() {
       if (pickedFile != null) {
@@ -381,7 +392,8 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    final pickedFile =
+        await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
 
     setState(() {
       if (pickedFile != null) {

@@ -7,7 +7,7 @@ class ItemHomeServiceCount extends StatelessWidget {
   final String title;
   final String unPaidTitle;
   final String unPaidMaxLimit;
-  final String count;
+  final int count;
   final String colorCode;
   final Widget icon;
   final VoidCallback onAddPress;

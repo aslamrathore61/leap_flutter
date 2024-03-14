@@ -12,6 +12,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
   final String statusName;
   final String timeSlot;
   final String statusColor;
+  final String viewBorderColor;
   final int isArchive;
   final VoidCallback onEditPress;
   final VoidCallback onDeletePress;
@@ -26,6 +27,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
     required this.statusName,
     required this.timeSlot,
     required this.statusColor,
+    required this.viewBorderColor,
     required this.isArchive,
     required this.onEditPress,
     required this.onDeletePress,
@@ -33,6 +35,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('viewBorderColor $viewBorderColor');
     return Container(
       margin: EdgeInsets.only(left: 10, right: 10),
       decoration: BoxDecoration(
@@ -49,7 +52,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  flex: 7,
+                  flex: 6,
                   child: Text.rich(
                     TextSpan(
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
@@ -186,7 +189,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                           onTap: onDeletePress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.grey.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(2.0),
                             ),
                             child: Padding(
@@ -194,7 +197,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
                                 Icons.delete_forever_outlined,
-                                color: Colors.red,
+                                color: Colors.grey.shade600,
                                 size: 20,
                               ),
                             ),

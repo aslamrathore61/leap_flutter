@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -6,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:leap_flutter/Bloc/cardBloc/card_bloc.dart';
 import 'package:leap_flutter/Utils/constants.dart';
 import 'package:leap_flutter/models/MyRequestResponse.dart';
+import 'package:swipable_stack/swipable_stack.dart';
 import '../Bloc/cardBloc/card_event.dart';
 import '../Bloc/cardBloc/card_state.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -15,7 +17,8 @@ import '../models/Profile.dart';
 import 'SuccessPage.dart';
 
 class BusinessCardsPage extends StatefulWidget {
-  const BusinessCardsPage({Key? key, this.businessCards, this.profileDetails}) : super(key: key);
+  const BusinessCardsPage({Key? key, this.businessCards, this.profileDetails})
+      : super(key: key);
 
   final BusinessCards? businessCards;
   final Profile? profileDetails;
@@ -27,12 +30,19 @@ class BusinessCardsPage extends StatefulWidget {
 class _BusinessCardsPageState extends State<BusinessCardsPage> {
   final cardBloc = CardBloc();
 
+  bool needToUpdateIndext = false;
+
   File? _image;
+  String printImageData = "";
+
+  int itemSelectedCardTempIndext = 0;
+  int updateIndextCardTemplateImage = 0;
+  List<VcardImageInfo>? vcardImageInfo;
   final picker = ImagePicker();
 
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
 
     setState(() {
       if (pickedFile != null) {
@@ -43,7 +53,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
+    final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
 
     setState(() {
       if (pickedFile != null) {
@@ -87,6 +97,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   FocusNode _searchFocusNode = FocusNode();
   bool _isSearchFocused = false;
+  bool _cardTemplateSelected = false;
 
   List<VisitingCards> _filteredData = [];
   List<VisitingCards> _visitingCardListing = [];
@@ -100,12 +111,12 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   String? _address;
   String? _quantity;
 
-  String? _selectedCardImageUuid;
   String? _businessTemplatedUuid;
 
   @override
   void initState() {
     super.initState();
+
     cardBloc.add(GetBusinessCardListEvent());
     _searchFocusNode.addListener(_onSearchFocusChanged);
     _searchFocusNode.addListener(_onFocusChange);
@@ -113,12 +124,16 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
     //set old value for uppdate
     if (widget.businessCards != null) {
       _businessTemplatedUuid = widget.businessCards!.vcardUuid;
-      _selectedCardImageUuid = widget.businessCards!.vcardImageUuid;
+
+      // _selectedCardImageUuid = widget.businessCards!.vcardImageUuid;
       _searchController.text = widget.businessCards!.vcardType!;
     }
   }
 
   void _filterList(String keyword) {
+    setState(() {
+      _cardTemplateSelected = false;
+    });
     keyword = keyword.toLowerCase();
     setState(() {
       _filteredData = _visitingCardListing
@@ -171,6 +186,33 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                   _filteredData.addAll(
                       state.businessCardTemplateResponse.visitingCards ?? []);
                 }
+
+                if (widget.businessCards != null) {
+                  state.businessCardTemplateResponse.visitingCards
+                      ?.forEach((element) {
+                    print(
+                        '11 ${element.vcardUuid} ${widget.businessCards?.vcardUuid}');
+                    if (element.vcardUuid == widget.businessCards?.vcardUuid) {
+                      print(
+                          '22 ${element.vcardUuid} ${widget.businessCards?.vcardUuid}');
+
+                      vcardImageInfo = element.vcardImageInfo;
+                      vcardImageInfo?.asMap().forEach((idx, element) {
+                        if (element.imageUuid ==
+                            widget.businessCards?.vcardImageUuid) {
+                          print(
+                              '22 ${element.imageUuid} ${widget.businessCards?.vcardImageUuid}');
+
+                          itemSelectedCardTempIndext = idx;
+                          setState(() {
+                            _cardTemplateSelected = true;
+                          });
+                          //  print('itemSelectedCardTempIndext $itemSelectedCardTempIndext');
+                        }
+                      });
+                    }
+                  });
+                }
               } else if (state is SubmissionCardReqSuccessState) {
                 Navigator.of(context).pushReplacement(GlabblePageRoute(
                     page: SuccessPage(
@@ -205,7 +247,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
               if (_isSearchFocused)
                 _buildTemplateListWidget(context, _filteredData),
               SizedBox(height: 10.0),
-              _buildTemplateCardImage(),
+              if (_cardTemplateSelected) _buildSwapCardTemplate(),
               SizedBox(height: 10.0),
               Text(
                 "Agent Details",
@@ -236,11 +278,8 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                       ),
                     ),
                     SizedBox(height: 20.0),
-                    Center(
-                      child: _image == null
-                          ? Text('No Image selected')
-                          : Image.file(_image!),
-                    ),
+                    if (widget.businessCards != null)
+                      previewSavedImage() ?? previewLocalAddedImage()
                   ],
                 ),
               ),
@@ -314,15 +353,27 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
 
+                                print(
+                                    'finalimageuui $itemSelectedCardTempIndext ${vcardImageInfo?[itemSelectedCardTempIndext].imageUuid}');
                                 final cardRequest = CreateUpdateCardRequest();
                                 cardRequest.printEmail = _email;
                                 cardRequest.printName = _userName;
                                 cardRequest.printPhoneNumber = _mobileNumber;
                                 cardRequest.printAddress = _address;
                                 cardRequest.requestQuantity = _quantity;
-                                cardRequest.designImageUuid =
-                                    _selectedCardImageUuid;
+                                cardRequest.designImageUuid = vcardImageInfo?[
+                                        updateIndextCardTemplateImage + 1]
+                                    .imageUuid;
                                 cardRequest.vcardUuid = _businessTemplatedUuid;
+
+                                if (_image != null) {
+                                  List<int> imageBytes =
+                                      _image!.readAsBytesSync();
+                                  String base64Image = base64Encode(imageBytes);
+                                  printImageData =
+                                      'data:image/png;base64,$base64Image';
+                                  cardRequest.printImageData = printImageData;
+                                }
 
                                 if (widget.businessCards != null) {
                                   cardRequest.vcardRequestUuid =
@@ -369,7 +420,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   }
 
   /***  ImageSetNetwork  ***/
-  Widget _buildTemplateCardImage() {
+/*  Widget _buildTemplateCardImage() {
     final imageUrl = widget.businessCards != null
         ? widget.businessCards!.vcardImageUrl
         : _selectedImageIndex >= 0 && _filteredData.length > _selectedImageIndex
@@ -394,6 +445,43 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
         },
       ),
     );
+  }*/
+
+  Widget _buildSwapCardTemplate() {
+    return Container(
+      width: double.infinity,
+      height: 220, // Set the desired height here
+      child: Center(
+        child: SwipableStack(
+          allowVerticalSwipe: false,
+          builder: (context, properties) {
+            if (needToUpdateIndext) {
+              itemSelectedCardTempIndext =
+                  properties.index % vcardImageInfo!.length;
+            } else {
+              needToUpdateIndext = true;
+            }
+
+            return Stack(
+              children: vcardImageInfo!.map((url) {
+                return Card(
+                  elevation: 0.4,
+                  child: Image.network(
+                    vcardImageInfo![itemSelectedCardTempIndext].imageUrl!,
+                  ),
+                );
+              }).toList(),
+            );
+          },
+          onSwipeCompleted: (index, direction) {
+            updateIndextCardTemplateImage = index % vcardImageInfo!.length;
+
+            print('indexCheck ${updateIndextCardTemplateImage}');
+            print('desginImageUUId $updateIndextCardTemplateImage');
+          },
+        ),
+      ),
+    );
   }
 
   Widget _buildTemplateListWidget(
@@ -407,15 +495,15 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
             onTap: () {
               _searchController.text = _filteredData[index].vcardType!;
               _businessTemplatedUuid = _filteredData[index].vcardUuid;
-              _selectedCardImageUuid =
-                  _filteredData[index].vcardImageInfo![0].imageUuid;
-
+              // _selectedCardImageUuid = _filteredData[index].vcardImageInfo![0].imageUuid;
+              vcardImageInfo = _filteredData[index].vcardImageInfo;
               if (_isSearchFocused) {
                 _isSearchFocused = false;
                 FocusManager.instance.primaryFocus?.unfocus();
               }
               setState(() {
                 _selectedImageIndex = index;
+                _cardTemplateSelected = true;
               });
             });
       },
@@ -464,6 +552,31 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
         ),
         SizedBox(height: 10.0),
       ],
+    );
+  }
+
+  Widget previewLocalAddedImage() {
+    return Center(
+      child: _image == null ? Text('No Image selected') : Image.file(_image!),
+    );
+  }
+
+  Widget previewSavedImage() {
+    return Center(
+      child: widget.businessCards?.printimage == null
+          ? Text('No Image selected')
+          : Image.network(widget.businessCards?.printimage,
+              loadingBuilder: (context, child, progress) {
+              if (progress == null) {
+                return child;
+              }
+              return CircularProgressIndicator(
+                value: progress.expectedTotalBytes != null
+                    ? progress.cumulativeBytesLoaded /
+                        progress.expectedTotalBytes!
+                    : null,
+              );
+            }),
     );
   }
 }

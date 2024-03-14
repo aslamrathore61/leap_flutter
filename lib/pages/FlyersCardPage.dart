@@ -144,7 +144,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
               ),
 
               /***    Display Image View  ***/
-              SizedBox(height: 10.0),
+            /*  SizedBox(height: 10.0),
               Container(
                 child: Column(
                   children: [
@@ -178,7 +178,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                     ),
                   ],
                 ),
-              ),
+              ),*/
               SizedBox(height: 10.0),
 
               /***  Name TextField  ***/

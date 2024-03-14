@@ -78,6 +78,7 @@ class ApiProvider {
         '${_baseUrl}getuserservicesrequestcount',
       );
       ServiceCountResponse serviceCountResponse = ServiceCountResponse.fromJson(response.data);
+      await SharedPrefObj.setServiceCountSharedPreValue(serviceCount, serviceCountResponse);
       return serviceCountResponse;
     } catch (error, stacktrace) {
       return ServiceCountResponse.withError(
@@ -326,7 +327,6 @@ class ApiProvider {
     }
   }
 
-
   /*** Changes Password Vis API  ***/
 
   Future<CommonSimilarResponse> changesPasswordUpdate(
@@ -341,7 +341,8 @@ class ApiProvider {
       );
       return CommonSimilarResponse.fromJson(response.data);
     } catch (error, stacktrace) {
-      return CommonSimilarResponse.withError('Data not found / connection issue');
+      return CommonSimilarResponse.withError(
+          'Data not found / connection issue');
     }
   }
 
@@ -365,7 +366,6 @@ class ApiProvider {
     }
   }
 
-
   /***  Reset Password Row API Vis API  ***/
 
   Future<CommonSimilarResponse> resetPassword(
@@ -385,7 +385,6 @@ class ApiProvider {
       return CommonSimilarResponse.withError('connection issue');
     }
   }
-
 
   /***  otp validate  API Vis API  ***/
 
@@ -407,7 +406,6 @@ class ApiProvider {
     }
   }
 
-
   /***  Choose new pwd submit API Vis API  ***/
 
   Future<CommonSimilarResponse> choosenewPWDSubmitResponse(
@@ -427,7 +425,4 @@ class ApiProvider {
       return CommonSimilarResponse.withError('connection issue');
     }
   }
-
-
-
 }

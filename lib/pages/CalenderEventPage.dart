@@ -17,66 +17,113 @@ class CalenderEventPage extends StatefulWidget {
 }
 
 class _CalenderEventPageState extends State<CalenderEventPage> {
-
   @override
   Widget build(BuildContext context) {
+    List<DateTime> blackoutDates =
+        _getAllDaysInTwelveMonths(); // Get all days in 12 months
+
+    List<DateTime> eventDates = [];
+
+    if (widget.mentors != null) {
+      widget.mentors?.availability?.forEach((element) {
+        final String? dateString = element.date;
+        final DateTime date = DateTime.parse(dateString!);
+        final DateTime dateTime = DateTime(date.year, date.month, date.day);
+        print('dateTime, $dateTime');
+        eventDates.add(dateTime);
+      });
+    } else {
+      widget.training?.trainingSlots?.forEach((element) {
+        final String? dateString = element.date;
+        final DateTime date = DateTime.parse(dateString!);
+        final DateTime dateTime = DateTime(date.year, date.month, date.day);
+        print('dateTime, $dateTime');
+        eventDates.add(dateTime);
+      });
+    }
+
+    // Remove event dates from blackout dates
+    eventDates.forEach((date) {
+      blackoutDates.remove(date);
+    });
+
     return Scaffold(
-        appBar: AppBar(
-          title: Text("Event Calender"),
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
-          backgroundColor: primaryColor,
-          iconTheme: IconThemeData(color: Colors.white),
-        ),
-        body: Container(
-          child: SfCalendar(
-            view: CalendarView.month,
-            onTap: (CalendarTapDetails details) {
-              if (details.targetElement == CalendarElement.appointment) {
-                final dynamic appointment = details.appointments?.first;
-                Meeting meeting = appointment;
-                Navigator.pop(context, meeting);
-              }
-            },
-            blackoutDates: <DateTime>[
-              DateTime(2024, 02, 22),
-              DateTime(2024, 02, 24),
-            ],
-            blackoutDatesTextStyle: TextStyle(
-                fontWeight: FontWeight.w400,
-                fontSize: 13,
-                color: Colors.red,
-                decoration: TextDecoration.lineThrough),
-            dataSource: MeetingDataSource(_getDataSource()),
-            monthViewSettings: MonthViewSettings(
-                showTrailingAndLeadingDates: true,
-                showAgenda: true,
-                agendaViewHeight: 350,
-                agendaItemHeight: 60,
-                appointmentDisplayCount: 6,
-                navigationDirection: MonthNavigationDirection.horizontal,
-                monthCellStyle: MonthCellStyle(
-                    backgroundColor: Colors.white,
-                    trailingDatesBackgroundColor: Colors.grey.shade100,
-                    leadingDatesBackgroundColor: Colors.grey.shade50,
-                    todayBackgroundColor: Colors.white,
-                    textStyle: TextStyle(
-                      color: titleColor,
-                      fontSize: 12,
-                    ),
-                    todayTextStyle: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                    trailingDatesTextStyle: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      fontSize: 12,
-                    ),
-                    leadingDatesTextStyle: TextStyle(
-                      fontStyle: FontStyle.italic,
-                      fontSize: 12,
-                    ))),
+      appBar: AppBar(
+        title: Text("Event Calendar"),
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
+        backgroundColor: primaryColor,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Container(
+        child: SfCalendar(
+          view: CalendarView.month,
+          onTap: (CalendarTapDetails details) {
+            if (details.targetElement == CalendarElement.appointment) {
+              final dynamic appointment = details.appointments?.first;
+              Meeting meeting = appointment;
+              Navigator.pop(context, meeting);
+            }
+          },
+          blackoutDates: blackoutDates,
+          blackoutDatesTextStyle: TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 12,
+            color: Colors.black
+                .withOpacity(0.6), // Set color to grey with reduced opacity
           ),
-        ));
+
+          /* blackoutDatesTextStyle: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 13,
+              color: Colors.red,
+              decoration: TextDecoration.lineThrough),*/
+          dataSource: MeetingDataSource(_getDataSource()),
+          monthViewSettings: MonthViewSettings(
+              showTrailingAndLeadingDates: true,
+              showAgenda: true,
+              agendaViewHeight: 350,
+              agendaItemHeight: 60,
+              appointmentDisplayCount: 6,
+              navigationDirection: MonthNavigationDirection.horizontal,
+              monthCellStyle: MonthCellStyle(
+                  backgroundColor: Colors.white,
+                  trailingDatesBackgroundColor: Colors.grey.shade100,
+                  leadingDatesBackgroundColor: Colors.grey.shade50,
+                  todayBackgroundColor: Colors.white,
+                  textStyle: TextStyle(
+                    color: titleColor,
+                    fontSize: 12,
+                  ),
+                  trailingDatesTextStyle: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 12,
+                  ),
+                  leadingDatesTextStyle: TextStyle(
+                    fontStyle: FontStyle.italic,
+                    fontSize: 12,
+                  ))),
+          todayTextStyle: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: Colors.white, // Change the text color of today to red
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DateTime> _getAllDaysInTwelveMonths() {
+    List<DateTime> days = [];
+    for (int month = 1; month <= 12; month++) {
+      for (int day = 1; day <= 31; day++) {
+        try {
+          days.add(DateTime(2024, month, day));
+        } catch (e) {
+          // Do nothing if the date is invalid
+        }
+      }
+    }
+    return days;
   }
 
   List<Meeting> _getDataSource() {
@@ -89,17 +136,18 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
         final DateTime dateTime = DateTime(date.year, date.month, date.day);
 
         element.timeSlots?.forEach((element) {
-          if(element.time != null) {
+          if (element.time != null) {
             final String? timeString = element.time;
             final List<String>? timeParts = timeString?.split(' ');
-            final List<int> hoursMinutes = timeParts![0].split(':').map((e) => int.parse(e)).toList();
+            final List<int> hoursMinutes =
+                timeParts![0].split(':').map((e) => int.parse(e)).toList();
             int hours = hoursMinutes[0];
             if (timeParts[1].toUpperCase() == 'PM' && hours != 12) {
               hours += 12;
             }
             final int minutes = hoursMinutes[1];
             final DateTime time =
-            dateTime.add(Duration(hours: hours, minutes: minutes));
+                dateTime.add(Duration(hours: hours, minutes: minutes));
             final DateTime end = time.add(const Duration(minutes: 35));
 
             meetings.add(Meeting(
@@ -112,7 +160,6 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
                 getRandomColor().withOpacity(0.7),
                 false));
           }
-
         });
       });
     } else {
@@ -191,8 +238,15 @@ class MeetingDataSource extends CalendarDataSource {
 }
 
 class Meeting {
-  Meeting(this.eventName, this.location, this.mentorTimeSlots, this.trainingTimeSlots,
-      this.from, this.to, this.background, this.isAllDay);
+  Meeting(
+      this.eventName,
+      this.location,
+      this.mentorTimeSlots,
+      this.trainingTimeSlots,
+      this.from,
+      this.to,
+      this.background,
+      this.isAllDay);
 
   String? eventName;
   String? location;

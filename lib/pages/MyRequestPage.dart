@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Bloc/myrequestBloc/my_request_bloc.dart';
 import 'package:leap_flutter/Bloc/myrequestBloc/my_request_event.dart';
 import 'package:leap_flutter/Component/items/ItemOneToOneAndTraining.dart';
+import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/pages/BusinessCardsScreen.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
@@ -32,7 +33,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
   final MyRequestBloc _myRequestBloc = MyRequestBloc();
 
   bool isArchived = false;
-
+  ServiceCountResponse? serviceCountResponse;
   List<FilterCount> filterCountList = [
     FilterCount('One to One Mentorship', 1),
     FilterCount('Corporate Training', 2),
@@ -43,7 +44,20 @@ class _MyRequestPageState extends State<MyRequestPage> {
   @override
   void initState() {
     super.initState();
+    fetchSharedPrefServiceCountData();
     _myRequestBloc.add(GetMyRequestListEvent());
+  }
+
+  Future<void> fetchSharedPrefServiceCountData() async {
+    try {
+      serviceCountResponse =
+          await SharedPrefObj.getServiceCountSharedPreValue(serviceCount);
+      print(
+          'serviceCountResponse ${serviceCountResponse!.trainingList![0].color}');
+    } catch (e) {
+      // Handle error fetching data from SharedPreferences
+      print('Error fetching data: $e');
+    }
   }
 
 /*  @override
@@ -75,6 +89,9 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final frontLayerHeight = screenHeight * 0.5;
+
     return BackdropScaffold(
       key: _backdropKey,
       appBar: AppBar(
@@ -96,7 +113,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
           )
         ],
       ),
-      headerHeight: 350,
+      headerHeight: frontLayerHeight,
       frontLayer: _myListViewWidgets(),
       backLayer: backLayerContainer(),
     );
@@ -170,7 +187,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     int archivedCount = 0;
     int notArchivedCount = 0;
 
-    oneToOneMentorship?.forEach((element) {
+/*    oneToOneMentorship?.forEach((element) {
       if (element.archivedStatus == 1) {
         archivedCount++;
       } else {
@@ -181,7 +198,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     if ((archivedCount == 0 && isArchived) ||
         (notArchivedCount == 0 && !isArchived)) {
       return Container();
-    }
+    }*/
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -197,15 +214,49 @@ class _MyRequestPageState extends State<MyRequestPage> {
           itemBuilder: (BuildContext context, int index) {
             final OneToOneMentorship item = oneToOneMentorship![index];
 
-            if (item.archivedStatus == 1 && !isArchived) {
+            /* if (item.archivedStatus == 1 && !isArchived) {
               return Container();
             }
-
+`
             if (item.archivedStatus == 0 && isArchived) {
               return Container();
-            }
+            }*/
 
-            return Dismissible(
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: ItemOneToOneAndTraining(
+                key: ValueKey(item),
+                // Assign a key
+                rowOneTitle: 'Meeting Agenda: ',
+                rowOneValue: oneToOneMentorship[index].meetingAgenda ?? '',
+                rowTwoTitle: 'Mentor Name: ',
+                rowTwoValue: oneToOneMentorship[index].mentorName ?? '',
+                date: oneToOneMentorship[index].mentorshipDate ?? '',
+                statusName: oneToOneMentorship[index].statusName ?? '',
+                timeSlot: oneToOneMentorship[index].timeSlot ?? '',
+                statusColor: oneToOneMentorship[index].statusColor ?? '',
+                viewBorderColor:
+                    serviceCountResponse?.trainingList![0].color ?? '#fff',
+                isArchive: 0 /*oneToOneMentorship[index].archivedStatus ?? 0*/,
+                onEditPress: () {
+                  Navigator.of(context).push(GlabblePageRoute(
+                      page: OneToOneMentorshipPage(
+                          oneToOneMentorship: oneToOneMentorship[index])));
+                },
+                onDeletePress: () {
+                  MyRequestDeleteModel myRequestDeleteModel =
+                      MyRequestDeleteModel();
+                  myRequestDeleteModel.mentorSlotUuid =
+                      oneToOneMentorship[index].mentorSlotUuid;
+                  _myRequestBloc.add(DeleteMyRequestItemEvent(
+                      cardDelete: myRequestDeleteModel,
+                      endPoint: "deleteuserbookedonetoonementorship"));
+                  setState(() => oneToOneMentorship.removeAt(index));
+                },
+              ),
+            );
+
+            /*  return Dismissible(
               key: ValueKey(item),
               onDismissed: (DismissDirection dir) {
                 dismissibleItem = item.mentorSlotUuid!;
@@ -302,7 +353,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   },
                 ),
               ),
-            );
+            );*/
           },
         ),
       ],
@@ -314,7 +365,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     int archivedCount = 0;
     int notArchivedCount = 0;
 
-    corporateTraining?.forEach((element) {
+/*    corporateTraining?.forEach((element) {
       if (element.archivedStatus == 1) {
         archivedCount++;
       } else {
@@ -325,7 +376,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     if ((archivedCount == 0 && isArchived) ||
         (notArchivedCount == 0 && !isArchived)) {
       return Container();
-    }
+    }*/
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -341,15 +392,49 @@ class _MyRequestPageState extends State<MyRequestPage> {
           itemBuilder: (BuildContext context, int index) {
             final CorporateTraining item = corporateTraining![index];
 
-            if (item.archivedStatus == 1 && !isArchived) {
+            /*  if (item.archivedStatus == 1 && !isArchived) {
               return Container();
             }
 
             if (item.archivedStatus == 0 && isArchived) {
               return Container();
-            }
+            }*/
 
-            return Dismissible(
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: ItemOneToOneAndTraining(
+                key: ValueKey(item),
+                // Assign a key
+                rowOneTitle: 'Training Name: ',
+                rowOneValue: corporateTraining[index].trainingName!,
+                rowTwoTitle: 'Trainer Name: ',
+                rowTwoValue: corporateTraining[index].trainerName!,
+                date: corporateTraining[index].allocatedDate!,
+                statusName: corporateTraining[index].statusName!,
+                timeSlot: corporateTraining[index].timeSlot!,
+                statusColor: corporateTraining[index].statusColor!,
+                viewBorderColor:
+                    serviceCountResponse?.trainingList![1].color ?? '#fff',
+                isArchive: 0 /*corporateTraining[index].archivedStatus ?? 0*/,
+                onEditPress: () {
+                  Navigator.of(context).push(GlabblePageRoute(
+                      page: CorporateTrainingPage(
+                          corporateTraining: corporateTraining[index])));
+                },
+                onDeletePress: () {
+                  MyRequestDeleteModel myRequestDeleteModel =
+                      MyRequestDeleteModel();
+                  myRequestDeleteModel.trainingBookingUuid =
+                      corporateTraining[index].trainingBookingUuid;
+                  _myRequestBloc.add(DeleteMyRequestItemEvent(
+                      cardDelete: myRequestDeleteModel,
+                      endPoint: "deleteuserbookedtraining"));
+                  setState(() => corporateTraining.removeAt(index));
+                },
+              ),
+            );
+
+            /*return Dismissible(
               key: ValueKey(item),
               onDismissed: (DismissDirection dir) {
                 dismissibleItem = item.trainingBookingUuid!;
@@ -446,7 +531,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   },
                 ),
               ),
-            );
+            );*/
           },
         ),
       ],
@@ -457,7 +542,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     int archivedCount = 0;
     int notArchivedCount = 0;
 
-    businessCards?.forEach((element) {
+    /*  businessCards?.forEach((element) {
       if (element.archivedStatus == 1) {
         archivedCount++;
       } else {
@@ -468,7 +553,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
     if ((archivedCount == 0 && isArchived) ||
         (notArchivedCount == 0 && !isArchived)) {
       return Container();
-    }
+    }*/
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -484,15 +570,43 @@ class _MyRequestPageState extends State<MyRequestPage> {
             final BusinessCards item = businessCards![index];
 
             // Check if the item is archived, and if it is, return an empty container to hide it
-            if (item.archivedStatus == 1 && !isArchived) {
+            /* if (item.archivedStatus == 1 && !isArchived) {
               return Container();
             }
 
             if (item.archivedStatus == 0 && isArchived) {
               return Container();
-            }
+            }*/
 
-            return Dismissible(
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: ItemMyRequestBusinessCard(
+                key: ValueKey(businessCards[index]),
+                // Assign a key
+                cardName: businessCards[index].vcardType!,
+                date: businessCards[index].allocatedDate!,
+                statusName: businessCards[index].statusName!,
+                requestQuantity: businessCards[index].requestQuantity!,
+                statusColor: businessCards[index].statusColor!,
+                isArchive: 0 /*businessCards[index].archivedStatus!*/,
+                onEditPress: () {
+                  Navigator.of(context).push(GlabblePageRoute(
+                      page: BusinessCardsPage(
+                          businessCards: businessCards[index])));
+                },
+                onDeletePress: () {
+                  MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
+                  cardDelete.vcardRequestUuid =
+                      businessCards[index].vcardRequestUuid;
+                  _myRequestBloc.add(DeleteMyRequestItemEvent(
+                      cardDelete: cardDelete,
+                      endPoint: "deleteusercardrequest"));
+                  setState(() => businessCards.removeAt(index));
+                },
+              ),
+            );
+
+            /*return Dismissible(
               key: ValueKey(item),
               onDismissed: (DismissDirection dir) {
                 dismissibleItem = item.vcardRequestUuid!;
@@ -584,7 +698,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   },
                 ),
               ),
-            );
+            );*/
           },
         ),
       ],
@@ -595,7 +709,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     int archivedCount = 0;
     int notArchivedCount = 0;
 
-    flyers?.forEach((element) {
+    /*  flyers?.forEach((element) {
       if (element.archivedStatus == 1) {
         archivedCount++;
       } else {
@@ -606,7 +720,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
     if ((archivedCount == 0 && isArchived) ||
         (notArchivedCount == 0 && !isArchived)) {
       return Container();
-    }
+    }*/
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -623,32 +737,50 @@ class _MyRequestPageState extends State<MyRequestPage> {
             final Flyers item = flyers![index];
 
             // Check if the item is archived, and if it is, return an empty container to hide it
-            if (item.archivedStatus == 1 && !isArchived) {
+            /*  if (item.archivedStatus == 1 && !isArchived) {
               return Container();
             }
 
             if (item.archivedStatus == 0 && isArchived) {
               return Container();
-            }
+            }*/
 
-            return Dismissible(
+            return Padding(
+              padding: EdgeInsets.only(bottom: 10.0),
+              child: ItemMyRequestBusinessCard(
+                key: ValueKey(flyers[index]),
+                // Assign a key
+                cardName: flyers[index].flyerType!,
+                date: flyers[index].allocatedDate!,
+                statusName: flyers[index].statusName!,
+                requestQuantity: flyers[index].requestQuantity!,
+                statusColor: flyers[index].statusColor!,
+                isArchive: 0 /*flyers[index].archivedStatus!*/,
+                onEditPress: () {
+                  Navigator.of(context).push(GlabblePageRoute(
+                      page: FlyersCardPage(flyers: flyers[index])));
+                },
+                onDeletePress: () {
+                  MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
+                  cardDelete.flyerRequestUuid = flyers[index].flyerRequestUuid;
+                  _myRequestBloc.add(DeleteMyRequestItemEvent(
+                      cardDelete: cardDelete,
+                      endPoint: "deleteuserflyerrequest"));
+                  setState(() => flyers.removeAt(index));
+                },
+              ),
+            );
+
+            /*return Dismissible(
               key: ValueKey(item),
               onDismissed: (DismissDirection dir) {
                 dismissibleItem = item.flyerRequestUuid!;
                 setState(() => flyers.removeAt(index));
-                ScaffoldMessenger.of(context)
-                    .showSnackBar(SnackBar(
-                      content: Text(dir == DismissDirection.startToEnd
-                          ? '${item.flyerName} Add in archived'
-                          : '${item.flyerName} Remove from archived'),
-                      action: SnackBarAction(
-                        label: 'UNDO',
-                        onPressed: () {
-                          setState(() => flyers.insert(index, item));
-                        },
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(dir == DismissDirection.startToEnd ? '${item.flyerName} Add in archived' : '${item.flyerName} Remove from archived'),
+                      action: SnackBarAction(label: 'UNDO',
+                        onPressed: () {setState(() => flyers.insert(index, item));},
                       ),
-                      duration: const Duration(
-                          seconds: 1), // Set the duration to 5 seconds
+                      duration: const Duration(seconds: 1), // Set the duration to 5 seconds
                     ))
                     .closed
                     .then((reason) {
@@ -722,7 +854,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   },
                 ),
               ),
-            );
+            );*/
           },
         ),
       ],
@@ -747,137 +879,183 @@ class _MyRequestPageState extends State<MyRequestPage> {
   int _selectedIndex = -1; // Initialize the selected state
 
   Widget backLayerContainer() {
-    return Column(
-      children: [
-        SizedBox(
-          height: 30,
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemCount: filterCountList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: 10.0),
-              child: ItemFilterMyRequest(
-                title: filterCountList[index].name,
-                onPress: () {
-                  // Update the selected index when pressed
-                  setState(() {
-                    print('indext check : $index');
-                    _selectedIndex = index;
-                  });
-                },
-                selected: _selectedIndex ==
-                    index, // Check if the current item is selected based on its index
-              ),
-            );
-          },
-        ),
-        Padding(
-          padding: EdgeInsets.only(top: 8.0, right: 10.0, left: 10.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              Expanded(
-                flex: 4,
-                child: Center(
-                  child: Container(
-                    height: 40,
-                    child: LiteRollingSwitch(
-                      width: 140,
-                      //initial value
-                      value: isArchived,
-                      textOn: 'Archived Only',
-                      textOff: 'Hide Archived',
-                      colorOn: Colors.greenAccent.withOpacity(0.8),
-                      colorOff: Colors.redAccent.withOpacity(0.8),
-                      iconOn: Icons.done,
-                      iconOff: Icons.remove_circle_outline,
-                      textSize: 12.0,
-                      onChanged: (bool state) {
-                        //Use it to manage the different states
-                        print('ChangesState: $state');
-                        isArchived = state;
-                      },
-                      onTap: () {},
-                      onDoubleTap: () {},
-                      onSwipe: () {},
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                flex: 3,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      isArchived = !isArchived;
-                      if (isArchived == true) {
-                        isArchived = false;
-                      } else {
-                        isArchived = true;
-                      }
-                      if (_selectedIndex == -1) {
-                        widget.dashboardFilterType = 101;
-                      } else {
-                        widget.dashboardFilterType = _selectedIndex + 1;
-                      }
-                    });
-                    _backdropKey.currentState!.fling();
-                  },
-                  child: Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                        colors: [
-                          primaryColor.withOpacity(0.9),
-                          Colors.white.withOpacity(0.4),
-                          primaryColor.withOpacity(0.9)
-                        ], // Example gradient colors
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Apply',
-                        textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyText1!.copyWith(
-                              color: Colors.white.withOpacity(0.9),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
-                            ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      widget.dashboardFilterType = 101;
-                      _selectedIndex = -1;
-                      isArchived = false;
-                    });
-                    _backdropKey.currentState!.fling();
-                  },
-                  child: Icon(
-                    Icons.lock_reset_outlined,
-                    color: Colors.red.withOpacity(0.7),
-                  ),
-                ),
-              ),
-            ],
+    return Container(
+      height: 300,
+      child: Column(
+        children: [
+          SizedBox(
+            height: 22,
           ),
-        ),
-      ],
+          ListView.builder(
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemCount: filterCountList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 10.0),
+                child: ItemFilterMyRequest(
+                  title: filterCountList[index].name,
+                  onPress: () {
+                    // Update the selected index when pressed
+                    setState(() {
+                      print('indext check : $index');
+                      _selectedIndex = index;
+                    });
+                  },
+                  selected: _selectedIndex ==
+                      index, // Check if the current item is selected based on its index
+                ),
+              );
+            },
+          ),
+          Padding(
+            padding: EdgeInsets.only(top: 5.0, right: 10.0, left: 10.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                /* Expanded(
+                  flex: 4,
+                  child: Center(
+                    child: Container(
+                      height: 40,
+                      child: LiteRollingSwitch(
+                        width: 140,
+                        //initial value
+                        value: isArchived,
+                        textOn: 'Archived Only',
+                        textOff: 'Hide Archived',
+                        colorOn: Colors.greenAccent.withOpacity(0.8),
+                        colorOff: Colors.redAccent.withOpacity(0.8),
+                        iconOn: Icons.done,
+                        iconOff: Icons.remove_circle_outline,
+                        textSize: 12.0,
+                        onChanged: (bool state) {
+                          //Use it to manage the different states
+                          print('ChangesState: $state');
+                          isArchived = state;
+                        },
+                        onTap: () {},
+                        onDoubleTap: () {},
+                        onSwipe: () {},
+                      ),
+                    ),
+                  ),
+                ),*/
+
+                Expanded(
+                  flex: 1,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        isArchived = !isArchived;
+                        if (isArchived == true) {
+                          isArchived = false;
+                        } else {
+                          isArchived = true;
+                        }
+                        if (_selectedIndex == -1) {
+                          widget.dashboardFilterType = 101;
+                        } else {
+                          widget.dashboardFilterType = _selectedIndex + 1;
+                        }
+                      });
+                      _backdropKey.currentState!.fling();
+                    },
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            primaryColor.withOpacity(0.9),
+                            Colors.white.withOpacity(0.4),
+                            primaryColor.withOpacity(0.9)
+                          ], // Example gradient colors
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Apply',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  width: 20,
+                ),
+                Expanded(
+                  flex: 1,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        widget.dashboardFilterType = 101;
+                        _selectedIndex = -1;
+                        isArchived = false;
+                      });
+                      _backdropKey.currentState!.fling();
+                    },
+                    child: Container(
+                      height: 40,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            primaryColor.withOpacity(0.9),
+                            Colors.white.withOpacity(0.4),
+                            primaryColor.withOpacity(0.9)
+                          ], // Example gradient colors
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Reset',
+                          textAlign: TextAlign.center,
+                          style:
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                /* Expanded(
+                  flex: 1,
+                  child: InkWell(
+                    onTap: () {
+                      setState(() {
+                        widget.dashboardFilterType = 101;
+                        _selectedIndex = -1;
+                        isArchived = false;
+                      });
+                      _backdropKey.currentState!.fling();
+                    },
+                    child: Icon(
+                      Icons.lock_reset_outlined,
+                      color: Colors.red.withOpacity(0.7),
+                    ),
+                  ),
+                ),*/
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

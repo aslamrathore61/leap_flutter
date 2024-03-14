@@ -16,6 +16,7 @@ const inputColor = Color(0xFFFBFBFB);
 const String bearerToken = 'bearerToken';
 const String loginStatus = "loginStatus";
 const String profileDetails = "profileDetails";
+const String serviceCount = "serviceCount";
 
 const double defaultPadding = 16;
 const Duration kDefaultDuration = Duration(milliseconds: 250);

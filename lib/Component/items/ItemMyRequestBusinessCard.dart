@@ -157,15 +157,15 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                           onTap: onDeletePress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.red.withOpacity(0.1),
+                              color: Colors.grey.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(2.0),
                             ),
                             child: Padding(
                               padding: const EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
-                                Icons.delete_forever,
-                                color: Colors.red.shade900,
+                                Icons.delete_forever_outlined,
+                                color: Colors.grey.shade600,
                                 size: 20,
                               ),
                             ),

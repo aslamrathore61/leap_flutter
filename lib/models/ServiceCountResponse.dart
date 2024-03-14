@@ -68,7 +68,7 @@ class TrainingList {
 class RequestList {
   int? requestUuid;
   String? requestName;
-  String? unpaid_max_limit;
+  dynamic unpaid_max_limit;
   String? color;
   int? requestRisedCount;
 

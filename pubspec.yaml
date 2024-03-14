@@ -46,6 +46,8 @@ dependencies:
   intl: ^0.18.0
   lite_rolling_switch: ^1.0.1
   flutter_otp_text_field: ^1.1.1
+  swipable_stack: ^2.0.0
+  timer_count_down: ^2.2.2
 
   # images
   image_picker: ^1.0.7

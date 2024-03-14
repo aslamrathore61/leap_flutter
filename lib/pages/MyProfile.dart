@@ -154,7 +154,7 @@ class _MyProfileState extends State<MyProfile> {
                 ),
                 child: ClipOval(
                   child: Image.network(
-                    profile.result!.profileImage ?? '',
+                    profile.result!.profileImage ?? 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg',
                     width: 100, // Adjust the width and height as needed
                     height: 100,
                     fit: BoxFit.cover,

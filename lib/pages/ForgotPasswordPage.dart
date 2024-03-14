@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:leap_flutter/Bloc/loginBloc/login_bloc.dart';
 import 'package:leap_flutter/Bloc/loginBloc/login_event.dart';
 import 'package:leap_flutter/models/LoginResponse.dart';
+import 'package:timer_count_down/timer_count_down.dart';
 
 import '../Bloc/loginBloc/login_state.dart';
 import '../Component/buttons/primary_button.dart';
@@ -28,6 +30,8 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   bool enableOtpPage = false;
   bool enableCreatePWDPage = false;
   bool canPop = true;
+  bool TimerGoingOn = true;
+  bool StartCountDount = false;
 
   final _formKey = GlobalKey<FormState>();
   final _choosePWDformKey = GlobalKey<FormState>();
@@ -151,6 +155,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               height: 15,
             ),
             TextFormField(
+              obscureText: true,
               validator: passwordValidator,
               onSaved: (value) => _userPassword = value!,
               style: Theme.of(context)
@@ -183,7 +188,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             BlocConsumer<LoginBloc, LoginState>(
               listener: (context, state) {
-                if(state is ChooseNewPWDSubmitLoadingState) {
+                if (state is ChooseNewPWDSubmitLoadingState) {
                   Navigator.of(context).pop();
                   showToast(
                       'Password successfully change!',
@@ -192,31 +197,30 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                         Icons.check,
                         color: Colors.white,
                       ));
-                }else if(state is ChooseNewPWDSubmitErrorState) {
-                 showSnackBar(context, 'Something went wrong, please try again.');
+                } else if (state is ChooseNewPWDSubmitErrorState) {
+                  showSnackBar(
+                      context, 'Something went wrong, please try again.');
                 }
-
               },
               builder: (context, state) {
                 return state is ChooseNewPWDSubmitLoadingState
                     ? const Center(child: CircularProgressIndicator())
                     : PrimaryButton(
-                  text: 'Next',
-                  press: () {
-                    if (_choosePWDformKey.currentState!.validate()) {
-                      _choosePWDformKey.currentState!.save();
-                      ResetPasswordReq resetPasswrod = ResetPasswordReq();
-                      resetPasswrod.emailId = _userEmail;
-                      resetPasswrod.newPassword = _userPassword;
-                      context.read<LoginBloc>().add(ChooseNewPWDSubmitEvent(
-                          resetPasswrod, 'resetpassword'));
-                    }
-                  },
-                );
+                        text: 'Next',
+                        press: () {
+                          if (_choosePWDformKey.currentState!.validate()) {
+                            _choosePWDformKey.currentState!.save();
+                            ResetPasswordReq resetPasswrod = ResetPasswordReq();
+                            resetPasswrod.emailId = _userEmail;
+                            resetPasswrod.newPassword = _userPassword;
+                            context.read<LoginBloc>().add(
+                                ChooseNewPWDSubmitEvent(
+                                    resetPasswrod, 'resetpassword'));
+                          }
+                        },
+                      );
               },
             ),
-
-
           ],
         ),
       ),
@@ -282,7 +286,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   text: "Check ",
                   children: <TextSpan>[
                     TextSpan(
-                      text: 'Mohmmed@savemax.com',
+                      text: _userEmail,
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           color: titleColor,
                           fontWeight: FontWeight.w500,
@@ -335,13 +339,20 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               SizedBox(
                 height: 15,
               ),
-
-
-           /*   Text('Resend OTP in 00:53',
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
-                      color: Colors.red,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500)),*/
+              if (StartCountDount)
+                Countdown(
+                  key: UniqueKey(),
+                  // Using UniqueKey here
+                  seconds: 30,
+                  build: (BuildContext context, double time) =>
+                      TimerGoingOn ? timeStatusView(time) : resendOTPView(),
+                  interval: Duration(milliseconds: 1000),
+                  onFinished: () {
+                    setState(() {
+                      TimerGoingOn = !TimerGoingOn;
+                    });
+                  },
+                ),
               SizedBox(
                 height: 15,
               ),
@@ -358,7 +369,58 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     );
   }
 
+  Widget timeStatusView(double? time) {
+    if (time == null) {
+      return resendOTPView();
+    }
+    int remainingSeconds = time.toInt();
+    String minutes = (remainingSeconds ~/ 60).toString().padLeft(2, '0');
+    String seconds = (remainingSeconds % 60).toString().padLeft(2, '0');
 
+    return Text(
+      'Resend OTP in $minutes:$seconds',
+      style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+            color: Colors.red,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+    );
+  }
+
+  Widget resendOTPView() {
+    return BlocProvider(
+      create: (context) => LoginBloc(),
+      child: BlocConsumer<LoginBloc, LoginState>(
+        listener: (context, state) {
+          if (state is ResetPWDSuccessState) {
+            setState(() {
+              TimerGoingOn = true;
+              StartCountDount = true;
+            });
+          }
+        },
+        builder: (context, state) {
+          return InkWell(
+            onTap: () {
+              ResetPasswordReq resetPasswrod = ResetPasswordReq();
+              resetPasswrod.emailId = _userEmail;
+              context
+                  .read<LoginBloc>()
+                  .add(ResetPWDSubmitEvent(resetPasswrod, 'resetpasswordmail'));
+            },
+            child: Text(
+              'Resend OTP',
+              style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                    color: primaryColor,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget FirstEmailPage() {
     return BlocProvider(
@@ -390,7 +452,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               cursorColor: primaryColor,
               keyboardType: TextInputType.emailAddress,
               decoration: InputDecoration(
-                hintText: "Please Enter EmailID",
+                hintText: "Please Enter Email",
                 contentPadding: kTextFieldPadding,
                 border: kDefaultOutlineInputBorder,
                 enabledBorder: kDefaultOutlineInputBorder,
@@ -427,6 +489,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                   enableEmailPage = false;
                   enableOtpPage = true;
                   canPop = true;
+                  StartCountDount = true;
                 });
               } else if (state is FetchingErrorState) {
                 showSnackBar(context, state.error ?? 'Something went wrong');
@@ -464,38 +527,5 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     } else {
       Navigator.of(context).pop();
     }
-  }
-}
-
-class TimerManager {
-  late StreamController<String> _controller;
-  late Timer _timer;
-  late int _secondsRemaining;
-
-  Stream<String> get timerStream => _controller.stream;
-
-  void startTimer(Duration duration) {
-    _secondsRemaining = duration.inSeconds;
-    _controller = StreamController<String>();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-      _secondsRemaining--;
-      if (_secondsRemaining <= 0) {
-        _timer.cancel();
-        _controller.close();
-      } else {
-        _controller.add(_formatTime(_secondsRemaining));
-      }
-    });
-  }
-
-  void cancelTimer() {
-    _timer.cancel();
-    _controller.close();
-  }
-
-  String _formatTime(int seconds) {
-    int minutes = seconds ~/ 60;
-    int remainingSeconds = seconds % 60;
-    return '$minutes:${remainingSeconds.toString().padLeft(2, '0')}';
   }
 }

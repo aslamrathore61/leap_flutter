@@ -159,19 +159,20 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.only(bottom: 10.0),
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
-                    title:
-                        serviceCountResponse.trainingList![index].trainingName!,
+                    title: serviceCountResponse.trainingList?[index].trainingName ?? '',
                     unPaidTitle: " Training",
-                    unPaidMaxLimit: '199',
+                    unPaidMaxLimit: '0',
                     count: serviceCountResponse
-                        .trainingList![index].trainingRisedCount
-                        .toString(),
-                    colorCode: serviceCountResponse.trainingList![index].color!,
+                            .trainingList?[index].trainingRisedCount ?? 0,
+                    colorCode:
+                        serviceCountResponse.trainingList?[index].color ??
+                            '#fff',
                     icon: SvgPicture.asset(
                       'assets/icons/onetoone.svg',
                       colorFilter: ColorFilter.mode(
                         getColorFromHex(
-                            serviceCountResponse.trainingList![index].color!),
+                            serviceCountResponse.trainingList?[index].color ??
+                                '#fff'),
                         BlendMode.srcIn,
                       ),
                       width: 25,
@@ -218,14 +219,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.only(bottom: 10.0),
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
-                    title:
-                        serviceCountResponse.requestList![index].requestName!,
+                    title: serviceCountResponse.requestList![index].requestName!,
                     unPaidTitle: "Available Limit",
-                    unPaidMaxLimit: serviceCountResponse
-                        .requestList![index].unpaid_max_limit!,
-                    count: serviceCountResponse
-                        .requestList![index].requestRisedCount
-                        .toString(),
+                    unPaidMaxLimit: serviceCountResponse.requestList?[index].unpaid_max_limit.toString() ?? '0',
+                    count: serviceCountResponse.requestList![index].requestRisedCount ?? 0,
                     colorCode: serviceCountResponse.requestList![index].color!,
                     icon: SvgPicture.asset(
                       'assets/icons/businesscard.svg',

@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
     return RepositoryProvider(
       create: (context) => ApiProvider(),
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
           elevatedButtonTheme: ElevatedButtonThemeData(
