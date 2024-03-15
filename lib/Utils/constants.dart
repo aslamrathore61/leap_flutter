@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:lottie/lottie.dart';
 
 // clolors that we use in our app
 const titleColor = Color(0xFF010F07);
@@ -61,8 +62,23 @@ final emailValidator = MultiValidator([
   EmailValidator(errorText: 'Enter a valid email address')
 ]);
 
-final requiredValidator =
-    RequiredValidator(errorText: 'This field is required');
+RequiredValidator requiredValidator(String fieldName) {
+  return RequiredValidator(
+    errorText: 'Please Enter $fieldName',
+  );
+}
+
+RequiredValidator? requiredValidatorrr(String fieldName, bool clearError) {
+  if(clearError) {
+    return null;
+  }else {
+    return RequiredValidator(
+      errorText: 'Please Enter $fieldName',
+    );
+  }
+
+}
+
 final matchValidator = MatchValidator(errorText: 'passwords do not match');
 
 final phoneNumberValidator = MinLengthValidator(10,
@@ -88,9 +104,6 @@ void showToast(String message, Color color, Icon icon) {
     fontSize: 16.0,
   );
 }
-
-
-
 
 void showErrorDialog(BuildContext context, String msg) {
   showDialog(
@@ -139,5 +152,21 @@ Color getRandomColor() {
     // Generates a random value between 0 and 255 for the green channel
     random.nextInt(
         256), // Generates a random value between 0 and 255 for the blue channel
+  );
+}
+
+Widget noDataFoundWidget() {
+  return Center(
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset(
+          'assets/lottie/no_data_found.json',
+          width: 260,
+          height: 260,
+          fit: BoxFit.cover,
+        ),
+      ],
+    ),
   );
 }

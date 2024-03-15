@@ -288,7 +288,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
               /***  Name TextField  ***/
               _buildTextFormField(
                 label: "Name*",
-                validator: requiredValidator,
+                validator: requiredValidator('Name'),
                 onSaved: (value) => _userName = value,
                 initialValue: widget.businessCards != null
                     ? widget.businessCards!.printName
@@ -323,7 +323,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
               /***  Address  TextField  ***/
               _buildTextFormField(
                 label: 'Address*',
-                validator: requiredValidator,
+                validator: requiredValidator('Address'),
                 onSaved: (value) => _address = value,
                 initialValue: widget.businessCards != null
                     ? widget.businessCards!.printAddress
@@ -334,7 +334,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
               /***  Quantity TextField  ***/
               _buildTextFormField(
                   label: 'Quantity*',
-                  validator: requiredValidator,
+                  validator: requiredValidator('Quantity'),
                   onSaved: (value) => _quantity = value,
                   initialValue: widget.businessCards != null
                       ? widget.businessCards!.requestQuantity

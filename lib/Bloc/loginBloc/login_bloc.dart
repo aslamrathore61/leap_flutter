@@ -14,7 +14,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     on<ChooseNewPWDSubmitEvent>(SaveNewPasswordSubmit);
   }
 
-  Future<void> loginSubmitted(LoginSubmittedEvent event, Emitter<LoginState> emit) async {
+  Future<void> loginSubmitted(
+      LoginSubmittedEvent event, Emitter<LoginState> emit) async {
     emit(LoginLoadingState());
 
     try {
@@ -36,8 +37,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Future<FutureOr<void>> resetPWDSubmit(ResetPWDSubmitEvent event, Emitter<LoginState> emit) async {
-
+  Future<FutureOr<void>> resetPWDSubmit(
+      ResetPWDSubmitEvent event, Emitter<LoginState> emit) async {
     emit(LoginLoadingState());
 
     try {
@@ -46,7 +47,8 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
       final statusCode = commonSimilarResponse.code;
       if (statusCode == 200) {
-        emit(ResetPWDSuccessState(commonSimilarResponse: commonSimilarResponse));
+        emit(
+            ResetPWDSuccessState(commonSimilarResponse: commonSimilarResponse));
       } else {
         emit(FetchingErrorState(commonSimilarResponse.message));
       }
@@ -55,18 +57,18 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-
-  Future<FutureOr<void>> OTPValidateSubmit(OTPValidateEvent event, Emitter<LoginState> emit) async {
-
+  Future<FutureOr<void>> OTPValidateSubmit(
+      OTPValidateEvent event, Emitter<LoginState> emit) async {
     emit(OTPValidateLoadingState());
 
     try {
-      final commonSimilarResponse =
-      await _apiRepo.otpValidateResponse(event.resetPasswordReq, event.endPoint);
+      final commonSimilarResponse = await _apiRepo.otpValidateResponse(
+          event.resetPasswordReq, event.endPoint);
 
       final statusCode = commonSimilarResponse.code;
       if (statusCode == 200) {
-        emit(OTPValidateSuccessState(commonSimilarResponse: commonSimilarResponse));
+        emit(OTPValidateSuccessState(
+            commonSimilarResponse: commonSimilarResponse));
       } else {
         emit(OTPValidateErrorState(commonSimilarResponse.message));
       }
@@ -75,23 +77,25 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
   }
 
-  Future<FutureOr<void>> SaveNewPasswordSubmit(ChooseNewPWDSubmitEvent event, Emitter<LoginState> emit) async {
-
+  Future<FutureOr<void>> SaveNewPasswordSubmit(
+      ChooseNewPWDSubmitEvent event, Emitter<LoginState> emit) async {
     emit(ChooseNewPWDSubmitLoadingState());
 
     try {
-      final commonSimilarResponse =
-      await _apiRepo.choosenewPWDSubmitResponse(event.resetPasswordReq, event.endPoint);
+      final commonSimilarResponse = await _apiRepo.choosenewPWDSubmitResponse(
+          event.resetPasswordReq, event.endPoint);
 
       final statusCode = commonSimilarResponse.code;
       if (statusCode == 200) {
-        emit(ChooseNewPWDSubmitSuccessState(commonSimilarResponse: commonSimilarResponse));
+        print('statusCodeMsg111 $statusCode ${commonSimilarResponse.message}');
+        emit(ChooseNewPWDSubmitSuccessState(
+            commonSimilarResponse: commonSimilarResponse));
       } else {
+        print('statusCodeMsg2222 $statusCode ${commonSimilarResponse.message}');
         emit(ChooseNewPWDSubmitErrorState(commonSimilarResponse.message));
       }
     } catch (error) {
       emit(ChooseNewPWDSubmitErrorState(error.toString()));
     }
   }
-
 }

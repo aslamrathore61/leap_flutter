@@ -49,15 +49,6 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      SizedBox(height: 10),
-                      Text(
-                        "Please sign in to continue.",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w300,
-                          fontSize: 16,
-                          color: Colors.black45,
-                        ),
-                      ),
                       SizedBox(height: defaultPadding),
                       Form(
                         key: _formKey,
@@ -77,7 +68,7 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                               cursorColor: primaryColor,
                               keyboardType: TextInputType.emailAddress,
                               decoration: InputDecoration(
-                                hintText: "Please Enter EmailID",
+                                hintText: "Please Enter Email ID",
                                 contentPadding: kTextFieldPadding,
                                 border: kDefaultOutlineInputBorder,
                                 enabledBorder: kDefaultOutlineInputBorder,

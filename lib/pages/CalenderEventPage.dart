@@ -81,8 +81,8 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
           monthViewSettings: MonthViewSettings(
               showTrailingAndLeadingDates: true,
               showAgenda: true,
-              agendaViewHeight: 350,
-              agendaItemHeight: 60,
+              agendaViewHeight: 330,
+             agendaItemHeight: 60,
               appointmentDisplayCount: 6,
               navigationDirection: MonthNavigationDirection.horizontal,
               monthCellStyle: MonthCellStyle(
@@ -95,11 +95,9 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
                     fontSize: 12,
                   ),
                   trailingDatesTextStyle: TextStyle(
-                    fontStyle: FontStyle.italic,
                     fontSize: 12,
                   ),
                   leadingDatesTextStyle: TextStyle(
-                    fontStyle: FontStyle.italic,
                     fontSize: 12,
                   ))),
           todayTextStyle: TextStyle(

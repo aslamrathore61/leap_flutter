@@ -328,7 +328,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
     return TextFormField(
       controller: _searchController,
       focusNode: _searchFocusNode,
-      validator: requiredValidator,
+      validator: requiredValidator('Training Program'),
       onChanged: (value) {
         _filterList(value);
       },
@@ -347,7 +347,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
           .copyWith(color: titleColor, fontSize: 14),
       cursorColor: primaryColor,
       decoration: InputDecoration(
-        hintText: "Search training programs",
+        hintText: "Search Training Programs",
         contentPadding: kTextFieldPadding,
         border: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(

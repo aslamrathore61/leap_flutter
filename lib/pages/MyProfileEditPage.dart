@@ -63,23 +63,23 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                           LottieBuilder.asset(
                             'assets/lottie/success_file.json',
                             repeat: false,
-                            height: 80,
-                            width: 150,
                           ),
                           SizedBox(height: 8),
                           Text("Profile Update successful!",
                               style: TextStyle(fontSize: 18)),
+
+                          SizedBox(height: 8),
+
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              Navigator.pop(context, "1");
+                            },
+                            child: Text("OK"),
+                          ),
+
                         ],
                       ),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.pop(context, "1");
-                          },
-                          child: Text("OK"),
-                        ),
-                      ],
                     );
                   });
             }
@@ -191,7 +191,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
             children: [
               buildEditRow(
                   label: 'First Name*',
-                  validator: requiredValidator,
+                  validator: requiredValidator('First Name'),
                   onSaved: (value) => _firstName = value,
                   initialValue: capitalizeFirstLetterOfEachWord(
                       widget.profileDetails?.result?.firstName ?? ''),
@@ -201,7 +201,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               ),
               buildEditRow(
                   label: 'Last Name*',
-                  validator: requiredValidator,
+                  validator: requiredValidator('Last Name'),
                   onSaved: (value) => _lastName = value,
                   initialValue: capitalizeFirstLetterOfEachWord(
                       widget.profileDetails?.result?.lastName ?? ''),
@@ -211,7 +211,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               ),
               buildEditRow(
                   label: 'Mobile Number*',
-                  validator: requiredValidator,
+                  validator: requiredValidator('Mobile Number'),
                   onSaved: (value) => _mobileNumber = value,
                   initialValue:
                       widget.profileDetails?.result?.phoneNumber ?? '',
@@ -303,7 +303,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.black54,
+            color: Colors.black87,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),
@@ -346,7 +346,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.black54,
+            color: Colors.black87,
             fontSize: 14,
             fontWeight: FontWeight.w500,
           ),

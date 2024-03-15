@@ -6,6 +6,7 @@ import 'package:leap_flutter/Utils/GlabblePageRoute.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
+import 'package:leap_flutter/pages/UpdatePasswordPage.dart';
 import '../Bloc/serviceCountBloc/service_count_bloc.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Bloc/serviceCountBloc/service_count_state.dart';
@@ -21,16 +22,12 @@ class MyProfile extends StatefulWidget {
   State<MyProfile> createState() => _MyProfileState();
 }
 
-bool oldObscurePassword = true;
-bool newObscurePassword = true;
 
 class _MyProfileState extends State<MyProfile> {
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
 
-  final _formKey = GlobalKey<FormState>();
-  TextEditingController _oldPasswordController = TextEditingController();
-  TextEditingController _newPasswordController = TextEditingController();
-  TextEditingController _confirmPasswordController = TextEditingController();
+  bool emailShowOverflow = false;
+
 
   @override
   void initState() {
@@ -103,14 +100,16 @@ class _MyProfileState extends State<MyProfile> {
             buildSectionTitle("Settings"),
             InkWell(
                 onTap: () {
-                  showDialog(
+                  Navigator.of(context).push(
+                      GlabblePageRoute(page: UpdatePasswordPage()));
+                  /*showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return ChangePasswordDialoged();
-                      });
+                      });*/
                 },
                 child: buildOptionRow(
-                    "assets/images/password.png", "Change Password")),
+                    "assets/images/password.png", "Update Password")),
             InkWell(
               onTap: () {
                 showModalBottomSheet(
@@ -120,6 +119,8 @@ class _MyProfileState extends State<MyProfile> {
               },
               child: buildOptionRow("assets/images/signout.png", "Logout"),
             ),
+
+            SizedBox(height: 20,)
           ],
         ),
       ),
@@ -188,11 +189,19 @@ class _MyProfileState extends State<MyProfile> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  Text(
-                    '${profile.result!.email}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w300,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        emailShowOverflow = !emailShowOverflow;
+                      });
+                    },
+                    child: Text(
+                      overflow: emailShowOverflow ? TextOverflow.visible : TextOverflow.ellipsis,
+                     '${profile.result!.email}',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w300,
+                      ),
                     ),
                   ),
                 ],
@@ -425,164 +434,6 @@ class _MyProfileState extends State<MyProfile> {
     );
   }
 
-  Widget ChangePasswordDialoged() {
-    return AlertDialog(
-      title: Text('Change Password'),
-      content: StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    obscureText: oldObscurePassword,
-                    validator: passwordValidator,
-                    controller: _oldPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'Old Password',
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            oldObscurePassword = !oldObscurePassword;
-                            print('oldObscurePassword $oldObscurePassword');
-                          });
-                        },
-                        child: oldObscurePassword
-                            ? Icon(
-                                Icons.visibility_off,
-                                color: bodyTextColor,
-                              )
-                            : Icon(
-                                Icons.visibility,
-                                color: bodyTextColor,
-                              ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextFormField(
-                    validator: passwordValidator,
-                    controller: _newPasswordController,
-                    onChanged: (value) {
-                      setState(() {
-                        _newPasswordController.text = value;
-                      });
-                    },
-                    obscureText: newObscurePassword,
-                    decoration: InputDecoration(
-                      labelText: 'New Password',
-                      suffixIcon: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            newObscurePassword = !newObscurePassword;
-                            print('newObscurePassword $newObscurePassword');
-                          });
-                        },
-                        child: newObscurePassword
-                            ? Icon(
-                                Icons.visibility_off,
-                                color: bodyTextColor,
-                              )
-                            : Icon(
-                                Icons.visibility,
-                                color: bodyTextColor,
-                              ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  TextFormField(
-                    validator: confirmPasswordValidation,
-                    controller: _confirmPasswordController,
-                    decoration: InputDecoration(labelText: 'Confirm Password'),
-                    onChanged: (value) {
-                      setState(() {
-                        _confirmPasswordController.text = value;
-                      });
-                    },
-                    obscureText: true,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-      actions: <Widget>[
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-          child: Text('Cancel'),
-        ),
-        BlocProvider(
-          create: (context) => ServiceCountBloc(),
-          child: BlocConsumer<ServiceCountBloc, ServiceCountState>(
-            listener: (context, state) {
-              if (state is ChangesPasswordErrorState) {
-                showToast(
-                    state.error.toString(),
-                    Colors.red,
-                    const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                    ));
-              } else if (state is ChangesPasswordSuccessState) {
-                _oldPasswordController.text = '';
-                _newPasswordController.text = '';
-                _confirmPasswordController.text = '';
-                Navigator.of(context).pop();
-                showToast(
-                    'Password successfully changed',
-                    Colors.green,
-                    const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                    ));
-              }
-            },
-            builder: (context, state) {
-              return state is ChangesPasswordLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : PrimaryButton(
-                      text: 'Update Password',
-                      press: () async {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save();
-                          if (_newPasswordController.text ==
-                              _confirmPasswordController.text) {
-                            Profile? profileDetailsss =
-                                await SharedPrefObj.getProfileSharedPreValue(
-                                    profileDetails);
-                            final changePassword = ChangesPassword(
-                                oldPassword: _oldPasswordController.text,
-                                newPassword: _newPasswordController.text,
-                                emailId: profileDetailsss?.result?.email);
 
-                            BlocProvider.of<ServiceCountBloc>(context).add(
-                                ChangesPasswordEvent(
-                                    changesPassword: changePassword));
 
-                            /* _serviceCountBloc.add(ChangesPasswordEvent(
-                              changesPassword: changePassword));*/
-                          }
-                        }
-                      });
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  String? confirmPasswordValidation(String? value) {
-    print('confirmPassword : $value : newPwd : ${_newPasswordController.text}');
-    if (value != _newPasswordController.text) {
-      return 'Passwords do not match';
-    }
-    return null;
-  }
 }

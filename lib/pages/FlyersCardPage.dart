@@ -184,7 +184,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
               /***  Name TextField  ***/
               _buildTextFormField(
                 label: "Name*",
-                validator: requiredValidator,
+                validator: requiredValidator('Name'),
                 onSaved: (value) => _userName = value,
                 initialValue: widget.flyers != null
                     ? widget.flyers!.printName
@@ -214,7 +214,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
               /***  Description TextField  ***/
               _buildTextFormField(
                 label: 'Desciption*',
-                validator: requiredValidator,
+                validator: requiredValidator("Description"),
                 onSaved: (value) => _description = value,
                 initialValue: widget.flyers != null
                     ? widget.flyers!.printDescription
@@ -225,7 +225,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
               /***  Quantity TextField  ***/
               _buildTextFormField(
                   label: 'Quantity*',
-                  validator: requiredValidator,
+                  validator: requiredValidator('Quantity'),
                   onSaved: (value) => _quantity = value,
                   initialValue: widget.flyers != null
                       ? widget.flyers!.requestQuantity
@@ -328,7 +328,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
     return TextFormField(
       controller: _searchController,
       focusNode: _searchFocusNode,
-      validator: requiredValidator,
+      validator: requiredValidator("Card Template"),
       onChanged: (value) {
         // get data while typing
         // if (value.length >= 3) showResult();

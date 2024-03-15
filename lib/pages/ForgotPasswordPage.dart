@@ -165,7 +165,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
               cursorColor: primaryColor,
               keyboardType: TextInputType.text,
               decoration: InputDecoration(
-                hintText: "Enter retype new password",
+                hintText: "Confirm new password",
 
                 contentPadding: kTextFieldPadding,
                 border: kDefaultOutlineInputBorder,
@@ -188,18 +188,13 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
             ),
             BlocConsumer<LoginBloc, LoginState>(
               listener: (context, state) {
-                if (state is ChooseNewPWDSubmitLoadingState) {
+                if (state is ChooseNewPWDSubmitSuccessState) {
                   Navigator.of(context).pop();
-                  showToast(
-                      'Password successfully change!',
-                      Colors.green,
-                      const Icon(
-                        Icons.check,
-                        color: Colors.white,
-                      ));
+                  showToast('Password successfully change!', Colors.green,
+                      const Icon(Icons.check, color: Colors.white,));
                 } else if (state is ChooseNewPWDSubmitErrorState) {
                   showSnackBar(
-                      context, 'Something went wrong, please try again.');
+                      context, '${state.error}');
                 }
               },
               builder: (context, state) {
@@ -305,7 +300,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
                 onTap: () {
                   handleOnBackPress();
                 },
-                child: Text('Changes email',
+                child: Text('Change email',
                     style: Theme.of(context).textTheme.bodySmall!.copyWith(
                         color: primaryColor.withOpacity(0.9),
                         fontWeight: FontWeight.w500,

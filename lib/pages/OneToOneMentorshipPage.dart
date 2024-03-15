@@ -87,6 +87,8 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     _searchFocusNode.addListener(_onFocusChange);
   }
 
+
+
   void _onFocusChange() {
     if (_searchFocusNode.hasFocus) {
       _filterList(_searchController.text);
@@ -135,11 +137,8 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
               _flyersCardListing.addAll(state.mentorList!.mentors!);
               _filteredData.addAll(state.mentorList!.mentors! ?? []);
             }
-            print('mentList : ${state.mentorList?.toJson()}');
             if (widget.oneToOneMentorship != null) {
               state.mentorList?.mentors?.forEach((element) {
-                print(
-                    'compareed ${element.mentorUuid} == ${widget.oneToOneMentorship?.mentorUuid}');
                 if (element.mentorUuid ==
                     widget.oneToOneMentorship?.mentorUuid) {
                   mSeletedMentor = element;
@@ -171,13 +170,19 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              BorderLabeledInput(
-                controller: _meetingAgendaController,
-                label: 'Meeting Agenda*',
-                icon: null,
-                press: () {},
-                enabled: true,
-                hint: 'Please enter meeting agenda', // Disable user input
+              /***  Meeting Agenda  ***/
+              Text(
+                "Meeting Agenda*",
+                style: TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              _meetingAgendaField(),
+
+              SizedBox(
+                height: 20,
               ),
 
               /***  Mentor Name List  ***/
@@ -193,12 +198,13 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
               if (_isSearchFocused)
                 _buildMentorListWidget(context, _filteredData),
               SizedBox(
-                height: 10,
+                height: 20,
               ),
               InkWell(
                 onTap: () {
+                  print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
                   if (mSeletedMentor != null) {
-                    print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
+                  //  print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
                     _navigatesAndDisplaySelection(context, mSeletedMentor);
                   } else {
                     showSnackBar(context, 'Please select mentor');
@@ -331,7 +337,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                                           isPost: true));
                                 }
                               } else {
-                                showSnackBar(context, 'Please select mentor');
+                                showSnackBar(context, 'Please select meeting date');
                               }
                             }
                           },
@@ -345,12 +351,43 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     );
   }
 
+  /*** meeting agenda ***/
+
+  Widget _meetingAgendaField() {
+    return TextFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      controller: _meetingAgendaController,
+      validator: requiredValidator('Meeting Agenda'),
+      textInputAction: TextInputAction.next,
+
+      style: TextStyle(
+        color: titleColor,
+        fontSize: 14,
+      ),
+      cursorColor: primaryColor,
+      decoration: InputDecoration(
+        hintText: "Please Enter Meeting Agenda",
+        contentPadding: kTextFieldPadding,
+        border: kDefaultOutlineInputBorder.copyWith(
+            borderSide: BorderSide(
+          color: borderColor,
+        )),
+        focusedBorder: kDefaultOutlineInputBorder.copyWith(
+            borderSide: BorderSide(
+          color: borderColor,
+        )), // Width of left icon
+        errorMaxLines: 1, // Limit the error message to a single line
+      ),
+    );
+  }
+
   /***  Search field card template ***/
   Widget _mentorNameSrchField() {
     return TextFormField(
+     autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: _searchController,
       focusNode: _searchFocusNode,
-      validator: requiredValidator,
+      validator: requiredValidator("Mentor Name"),
       onChanged: (value) {
         _filterList(value);
       },
@@ -363,13 +400,13 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
         } else {}
       },
       textInputAction: TextInputAction.search,
-      style: Theme.of(context)
-          .textTheme
-          .bodyMedium!
-          .copyWith(color: titleColor, fontSize: 14),
+      style: TextStyle(
+        color: titleColor,
+        fontSize: 14,
+      ),
       cursorColor: primaryColor,
       decoration: InputDecoration(
-        hintText: "Search Mentor",
+        hintText: "Search Mentor Name",
         contentPadding: kTextFieldPadding,
         border: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
@@ -399,6 +436,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
             itemName: _filteredData[index].mentorName!,
             onTap: () {
               mSeletedMentor = _filteredData[index];
+              print('mentor ${mSeletedMentor?.toJson()}');
               _searchController.text = _filteredData[index].mentorName!;
               _selectedMentorUuid = _filteredData[index].mentorUuid;
               if (_isSearchFocused) {
