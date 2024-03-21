@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:leap_flutter/Resource/ApiProvider.dart';
 import 'package:leap_flutter/pages/DashboardBottomNavigation.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
+import 'Bloc/networkBloc/network_bloc.dart';
+import 'Bloc/networkBloc/network_event.dart';
 import 'Utils/constants.dart';
 import 'db/SharedPrefObj.dart';
 
@@ -46,22 +48,28 @@ class MyApp extends StatelessWidget {
             hintStyle: TextStyle(color: bodyTextColor),
           ),
         ),
-        //  home: LoginScreenPage(),
-        home: FutureBuilder<bool>(
-          future: isLoggedIn(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return CircularProgressIndicator(); // Show a loading indicator while checking the login status
-            } else if (snapshot.hasError) {
-              return Text('Error: ${snapshot.error}');
-            } else {
-              if (snapshot.data == true) {
-                return DashboardBottomNavigation(); // User is logged in, show the dashboard
+        /* home: BlocProvider(
+            create: (context) => NetworkBloc()..add(NetworkObserve()),
+            child: const TestFile()),
+*/
+        home: BlocProvider(
+          create: (context) => NetworkBloc()..add(NetworkObserve()),
+          child: FutureBuilder<bool>(
+            future: isLoggedIn(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return CircularProgressIndicator(); // Show a loading indicator while checking the login status
+              } else if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
               } else {
-                return LoginScreenPage(); // User is not logged in, show the login screen
+                if (snapshot.data == true) {
+                  return DashboardBottomNavigation(); // User is logged in, show the dashboard
+                } else {
+                  return LoginScreenPage(); // User is not logged in, show the login screen
+                }
               }
-            }
-          },
+            },
+          ),
         ),
       ),
     );

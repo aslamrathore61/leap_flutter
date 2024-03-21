@@ -27,6 +27,8 @@ class FlyersCardPage extends StatefulWidget {
 }
 
 class _FlyersCardsPageState extends State<FlyersCardPage> {
+  final _scrollController = ScrollController();
+
   final _formKey = GlobalKey<FormState>();
 
   bool _isSearchFocused = false;
@@ -49,7 +51,8 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
   @override
   void initState() {
     super.initState();
-    _searchController.text = (widget.flyers != null ? widget.flyers!.flyerName : '')!;
+    _searchController.text =
+        (widget.flyers != null ? widget.flyers!.flyerName : '')!;
     if (widget.flyers != null) _flyerTemplatedUuid = widget.flyers!.flyerUuid;
     cardBloc.add(GetFlyersCardListEvent());
     _searchFocusNode.addListener(_onSearchFocusChanged);
@@ -101,8 +104,15 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                   _filteredData
                       .addAll(state.flyersCardTemplateResponse.flyers! ?? []);
                 }
+              } else if (state is SubmissionCardReqErrorState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.error.toString())));
               } else if (state is SubmissionCardReqSuccessState) {
-                Navigator.of(context).pushReplacement(GlabblePageRoute(page: SuccessPage(toolbarTitle: "Flyers Card Confimration", successDescription: "Flyers card request created successfully. Our team will inform you of the next steps.")));
+                Navigator.of(context).pushReplacement(GlabblePageRoute(
+                    page: SuccessPage(
+                        toolbarTitle: "Flyers Card Confimration",
+                        successDescription:
+                            "Flyers card request created successfully. Our team will inform you of the next steps.")));
               }
             },
             child: _buildFormWidget(context),
@@ -112,6 +122,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
 
   Widget _buildFormWidget(BuildContext context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Form(
@@ -144,7 +155,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
               ),
 
               /***    Display Image View  ***/
-            /*  SizedBox(height: 10.0),
+              /*  SizedBox(height: 10.0),
               Container(
                 child: Column(
                   children: [
@@ -257,6 +268,20 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                               cardBloc.add(SubmitFlyersCardEvent(
                                   createUpdateCardRequest: cardRequest,
                                   isPost: widget.flyers == null));
+                            } else {
+                              // Find the first error in the form and scroll to it
+                              final FocusScopeNode currentFocus =
+                                  FocusScope.of(context);
+                              if (!currentFocus.hasPrimaryFocus &&
+                                  currentFocus.focusedChild != null) {
+                                currentFocus.focusedChild!.unfocus();
+                              }
+
+                              _scrollController.animateTo(
+                                0.0,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeOut,
+                              );
                             }
                           },
                           child: Text(widget.flyers != null
@@ -326,6 +351,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
   /***  Search field card template ***/
   Widget _CardTemplateSrchField() {
     return TextFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: _searchController,
       focusNode: _searchFocusNode,
       validator: requiredValidator("Card Template"),
@@ -372,25 +398,32 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
 
   Widget _buildTemplateListWidget(
       BuildContext context, List<FlyersTemplate> flyers) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _filteredData.length,
-      itemBuilder: (context, index) {
-        return RowCardTemplateSrc(
-            itemName: _filteredData[index].flyerType!,
-            onTap: () {
-              _searchController.text = _filteredData[index].flyerType!;
-              _flyerTemplatedUuid = _filteredData[index].flyerUuid;
-              if (_isSearchFocused) {
-                _isSearchFocused = false;
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
-              setState(() {
-                _selectedImageIndex = index;
+    if (_filteredData.isEmpty && _searchController.text.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+        child: Text('No result found'),
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _filteredData.length,
+        itemBuilder: (context, index) {
+          return RowCardTemplateSrc(
+              itemName: _filteredData[index].flyerType!,
+              onTap: () {
+                _searchController.text = _filteredData[index].flyerType!;
+                _flyerTemplatedUuid = _filteredData[index].flyerUuid;
+                if (_isSearchFocused) {
+                  _isSearchFocused = false;
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+                setState(() {
+                  _selectedImageIndex = index;
+                });
               });
-            });
-      },
-    );
+        },
+      );
+    }
   }
 
   /*** Card ImageSet from Network  ***/
@@ -451,6 +484,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
           ),
         ),
         TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: initialValue,
           validator: validator,
           onSaved: onSaved,

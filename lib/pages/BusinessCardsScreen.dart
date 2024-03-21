@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:leap_flutter/Bloc/cardBloc/card_bloc.dart';
 import 'package:leap_flutter/Utils/constants.dart';
 import 'package:leap_flutter/models/MyRequestResponse.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:swipable_stack/swipable_stack.dart';
 import '../Bloc/cardBloc/card_event.dart';
 import '../Bloc/cardBloc/card_state.dart';
@@ -28,6 +30,8 @@ class BusinessCardsPage extends StatefulWidget {
 }
 
 class _BusinessCardsPageState extends State<BusinessCardsPage> {
+  final _scrollController = ScrollController();
+
   final cardBloc = CardBloc();
 
   bool needToUpdateIndext = false;
@@ -42,24 +46,30 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
-    });
+    await picker
+        .pickImage(source: ImageSource.gallery, imageQuality: 25)
+        .then((value) => {
+              if (value != null) {cropImageCall(File(value.path))}
+            });
   }
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
+    await picker
+        .pickImage(source: ImageSource.camera, imageQuality: 25)
+        .then((value) async => {
+              if (value != null) {cropImageCall(File(value.path))}
+            });
+  }
 
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
-    });
+  cropImageCall(File imgFile) async {
+    String? croppedImagePath = await cropImage(imgFile);
+    if (croppedImagePath != null) {
+      imageCache.clear();
+      setState(() {
+        _image = File(croppedImagePath);
+      });
+    }
   }
 
   //Show options to get image from camera or gallery
@@ -70,20 +80,49 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
         actions: [
           CupertinoActionSheetAction(
             child: Text('Photo Gallery'),
-            onPressed: () {
+            onPressed: () async {
               // close the options modal
               Navigator.of(context).pop();
-              // get image from gallery
-              getImageFromGallery();
+
+              final deviceInfo = await DeviceInfoPlugin().androidInfo;
+
+              if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
+                Map<Permission, PermissionStatus> galleryPermission =
+                await [Permission.storage].request();
+                if (galleryPermission[Permission.storage]!.isGranted) {
+                  getImageFromGallery();
+                } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
+                  showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                }
+              }else {
+                Map<Permission, PermissionStatus> galleryPermission =
+                await [Permission.photos].request();
+                if (galleryPermission[Permission.photos]!.isGranted) {
+                  getImageFromGallery();
+                } else if (galleryPermission[Permission.photos]!
+                    .isPermanentlyDenied) {
+                  showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                }
+              }
+
             },
           ),
           CupertinoActionSheetAction(
             child: Text('Camera'),
-            onPressed: () {
+            onPressed: () async {
               // close the options modal
               Navigator.of(context).pop();
-              // get image from camera
-              getImageFromCamera();
+
+              Map<Permission, PermissionStatus> cameraPermission =
+                  await [Permission.camera].request();
+              if (cameraPermission[Permission.camera]!.isGranted) {
+                // get image from camera
+                getImageFromCamera();
+              } else if (cameraPermission[Permission.camera]!
+                  .isPermanentlyDenied) {
+                showPermissionSettingsDialog(context,
+                    'Please enable storage permission in app settings to use this feature.');
+              }
             },
           ),
         ],
@@ -228,6 +267,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   Widget _buildFormWidget(BuildContext context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Form(
@@ -278,8 +318,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                       ),
                     ),
                     SizedBox(height: 20.0),
-                    if (widget.businessCards != null)
-                      previewSavedImage() ?? previewLocalAddedImage()
+                    previewDisplayImage()
                   ],
                 ),
               ),
@@ -383,6 +422,20 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                                 cardBloc.add(SubmitBusinesCardEvent(
                                     createUpdateCardRequest: cardRequest,
                                     isPost: widget.businessCards == null));
+                              } else {
+                                // Find the first error in the form and scroll to it
+                                final FocusScopeNode currentFocus =
+                                    FocusScope.of(context);
+                                if (!currentFocus.hasPrimaryFocus &&
+                                    currentFocus.focusedChild != null) {
+                                  currentFocus.focusedChild!.unfocus();
+                                }
+
+                                _scrollController.animateTo(
+                                  0.0,
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeOut,
+                                );
                               }
                             },
                             child: Text("Place Order"),
@@ -399,8 +452,10 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   /***  Search field card template ***/
   Widget _buildSearchField() {
-    return TextField(
+    return TextFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: _searchController,
+      validator: requiredValidator("Card Template"),
       textAlignVertical: TextAlignVertical.center,
       focusNode: _searchFocusNode,
       decoration: InputDecoration(
@@ -486,28 +541,35 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
   Widget _buildTemplateListWidget(
       BuildContext context, List<VisitingCards> _filteredData) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _filteredData.length,
-      itemBuilder: (context, index) {
-        return RowCardTemplateSrc(
-            itemName: _filteredData[index].vcardType!,
-            onTap: () {
-              _searchController.text = _filteredData[index].vcardType!;
-              _businessTemplatedUuid = _filteredData[index].vcardUuid;
-              // _selectedCardImageUuid = _filteredData[index].vcardImageInfo![0].imageUuid;
-              vcardImageInfo = _filteredData[index].vcardImageInfo;
-              if (_isSearchFocused) {
-                _isSearchFocused = false;
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
-              setState(() {
-                _selectedImageIndex = index;
-                _cardTemplateSelected = true;
+    if (_filteredData.isEmpty && _searchController.text.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+        child: Text('No result found'),
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _filteredData.length,
+        itemBuilder: (context, index) {
+          return RowCardTemplateSrc(
+              itemName: _filteredData[index].vcardType!,
+              onTap: () {
+                _searchController.text = _filteredData[index].vcardType!;
+                _businessTemplatedUuid = _filteredData[index].vcardUuid;
+                // _selectedCardImageUuid = _filteredData[index].vcardImageInfo![0].imageUuid;
+                vcardImageInfo = _filteredData[index].vcardImageInfo;
+                if (_isSearchFocused) {
+                  _isSearchFocused = false;
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+                setState(() {
+                  _selectedImageIndex = index;
+                  _cardTemplateSelected = true;
+                });
               });
-            });
-      },
-    );
+        },
+      );
+    }
   }
 
   Widget _buildTextFormField({
@@ -529,6 +591,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
           ),
         ),
         TextFormField(
+          autovalidateMode: AutovalidateMode.onUserInteraction,
           initialValue: initialValue,
           validator: validator,
           onSaved: onSaved,
@@ -555,29 +618,29 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
     );
   }
 
-  Widget previewLocalAddedImage() {
-    return Center(
-      child: _image == null ? Text('No Image selected') : Image.file(_image!),
-    );
-  }
-
-  Widget previewSavedImage() {
-    return Center(
-      child: widget.businessCards?.printimage == null
-          ? Text('No Image selected')
-          : Image.network(widget.businessCards?.printimage,
-              loadingBuilder: (context, child, progress) {
-              if (progress == null) {
-                return child;
-              }
-              return CircularProgressIndicator(
-                value: progress.expectedTotalBytes != null
-                    ? progress.cumulativeBytesLoaded /
-                        progress.expectedTotalBytes!
-                    : null,
-              );
-            }),
-    );
+  Widget previewDisplayImage() {
+    if (_image != null) {
+      return Center(
+        child: _image == null ? Text('No Image Selected') : Image.file(_image!),
+      );
+    } else {
+      return Center(
+        child: widget.businessCards?.printimage == null
+            ? Text('No Image Selected')
+            : Image.network(widget.businessCards?.printimage,
+                loadingBuilder: (context, child, progress) {
+                if (progress == null) {
+                  return child;
+                }
+                return CircularProgressIndicator(
+                  value: progress.expectedTotalBytes != null
+                      ? progress.cumulativeBytesLoaded /
+                          progress.expectedTotalBytes!
+                      : null,
+                );
+              }),
+      );
+    }
   }
 }
 

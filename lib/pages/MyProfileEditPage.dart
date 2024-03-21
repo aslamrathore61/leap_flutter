@@ -1,10 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../Bloc/serviceCountBloc/service_count_bloc.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
@@ -24,6 +28,7 @@ class MyProfileEditPage extends StatefulWidget {
 class _MyProfileEditPageState extends State<MyProfileEditPage> {
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
   final _formKey = GlobalKey<FormState>();
+  final _scrollController = ScrollController();
 
   String? _firstName;
   String? _lastName;
@@ -41,7 +46,11 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
         iconTheme: IconThemeData(color: Colors.white),
         title: Text(
           "Edit Profile",
-          style: Theme.of(context).textTheme.bodyLarge!.copyWith(
+          style: Theme
+              .of(context)
+              .textTheme
+              .bodyLarge!
+              .copyWith(
               color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16),
         ),
       ),
@@ -62,22 +71,33 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                         children: [
                           LottieBuilder.asset(
                             'assets/lottie/success_file.json',
+                            height: 100,
                             repeat: false,
                           ),
                           SizedBox(height: 8),
-                          Text("Profile Update successful!",
-                              style: TextStyle(fontSize: 18)),
-
+                          Text(
+                            "Profile Update Successful!",
+                            style: TextStyle(
+                              color: Colors.black45,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                           SizedBox(height: 8),
-
                           ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pop();
                               Navigator.pop(context, "1");
                             },
-                            child: Text("OK"),
+                            child: Text(
+                              "OK",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-
                         ],
                       ),
                     );
@@ -85,6 +105,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
             }
           },
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Container(
               color: primaryColor,
               child: Column(
@@ -137,7 +158,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
           right: 0,
           child: IconButton(
             icon: Icon(Icons.camera), // You can use any icon you want
-            onPressed: () {
+            onPressed: () async {
               showOptions();
             },
           ),
@@ -150,29 +171,29 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
     return ClipOval(
       child: fileImage == null
           ? Image.network(
-              imageUrl ??
-                  'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) {
-                  return child;
-                }
-                return CircularProgressIndicator(
-                  value: progress.expectedTotalBytes != null
-                      ? progress.cumulativeBytesLoaded /
-                          progress.expectedTotalBytes!
-                      : null,
-                );
-              },
-            )
+        imageUrl ??
+            'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) {
+            return child;
+          }
+          return CircularProgressIndicator(
+            value: progress.expectedTotalBytes != null
+                ? progress.cumulativeBytesLoaded /
+                progress.expectedTotalBytes!
+                : null,
+          );
+        },
+      )
           : Image.file(
-              fileImage,
-              width: 80,
-              height: 80,
-              fit: BoxFit.cover,
-            ),
+        fileImage,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+      ),
     );
   }
 
@@ -210,11 +231,12 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                 height: 10,
               ),
               buildEditRow(
+                  maxLength: 10,
                   label: 'Mobile Number*',
-                  validator: requiredValidator('Mobile Number'),
+                  validator: minLengthValidator('Mobile Number'),
                   onSaved: (value) => _mobileNumber = value,
                   initialValue:
-                      widget.profileDetails?.result?.phoneNumber ?? '',
+                  widget.profileDetails?.result?.phoneNumber ?? '',
                   keyboardType: TextInputType.number),
               SizedBox(
                 height: 10,
@@ -230,7 +252,7 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               buildFixedRow(
                 label: 'Current Mentors',
                 initialValue:
-                    widget.profileDetails?.result?.currentMentors![0] ?? '',
+                widget.profileDetails?.result?.currentMentors![0] ?? '',
               ),
               buildFixedRow(
                 label: 'Model',
@@ -239,9 +261,9 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               buildFixedRow(
                 label: 'Franchise / Brokerage',
                 initialValue:
-                    widget.profileDetails?.result!.isFranchise ?? false
-                        ? "Franchise"
-                        : "Brokerage",
+                widget.profileDetails?.result!.isFranchise ?? false
+                    ? "Franchise"
+                    : "Brokerage",
               ),
               buildFixedRow(
                 label: 'Tenure with SM',
@@ -255,29 +277,43 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                   return state is ProfileUpdateAndFetchingLoading
                       ? const Center(child: CircularProgressIndicator())
                       : PrimaryButton(
-                          text: 'Submit',
-                          press: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
+                      text: 'Submit',
+                      press: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save();
 
-                              final profileUpdate = ProfileUpdate();
-                              profileUpdate.phoneNumber = _mobileNumber;
-                              profileUpdate.userFirstName = _firstName;
-                              profileUpdate.userLastName = _lastName;
+                          final profileUpdate = ProfileUpdate();
+                          profileUpdate.phoneNumber = _mobileNumber;
+                          profileUpdate.userFirstName = _firstName;
+                          profileUpdate.userLastName = _lastName;
 
-                              if (_image != null) {
-                                List<int> imageBytes =
-                                    _image!.readAsBytesSync();
-                                String base64Image = base64Encode(imageBytes);
-                                _mProfileImagePath =
-                                    'data:image/png;base64,$base64Image';
-                                profileUpdate.imageData = _mProfileImagePath;
-                              }
+                          if (_image != null) {
+                            List<int> imageBytes =
+                            _image!.readAsBytesSync();
+                            String base64Image = base64Encode(imageBytes);
+                            _mProfileImagePath =
+                            'data:image/png;base64,$base64Image';
+                            profileUpdate.imageData = _mProfileImagePath;
+                          }
 
-                              _serviceCountBloc.add(UpdateProfileDetailsEvent(
-                                  profileUpdate: profileUpdate));
-                            }
-                          });
+                          _serviceCountBloc.add(UpdateProfileDetailsEvent(
+                              profileUpdate: profileUpdate));
+                        } else {
+                          // Find the first error in the form and scroll to it
+                          final FocusScopeNode currentFocus =
+                          FocusScope.of(context);
+                          if (!currentFocus.hasPrimaryFocus &&
+                              currentFocus.focusedChild != null) {
+                            currentFocus.focusedChild!.unfocus();
+                          }
+
+                          _scrollController.animateTo(
+                            0.0,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeOut,
+                          );
+                        }
+                      });
                 },
               ),
               SizedBox(
@@ -291,6 +327,54 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
   }
 
   Widget buildEditRow({
+    int? maxLength,
+    required String label,
+    required String? Function(String?)? validator,
+    required void Function(String?)? onSaved,
+    String? initialValue,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.black87,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        TextFormField(
+          maxLength: maxLength ?? 20,
+          initialValue: initialValue,
+          validator: validator,
+          onSaved: onSaved,
+          keyboardType: keyboardType,
+          textInputAction: TextInputAction.next,
+          style: TextStyle(
+            color: titleColor,
+            fontSize: 14,
+          ),
+          cursorColor: primaryColor,
+          decoration: InputDecoration(
+              hintText: "Please Enter $label",
+              contentPadding: kTextFieldPadding,
+              border: kDefaultOutlineInputBorder.copyWith(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: borderColor.withOpacity(0.9)),
+              ),
+              focusedBorder: kDefaultOutlineInputBorder.copyWith(
+                borderSide: BorderSide(color: borderColor),
+              ),
+              counterText: ''),
+        ),
+        SizedBox(height: 10.0),
+      ],
+    );
+  }
+
+  Widget buildNumberInputEditRow({
     required String label,
     required String? Function(String?)? validator,
     required void Function(String?)? onSaved,
@@ -380,54 +464,91 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
 
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 25);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
+    await picker
+        .pickImage(source: ImageSource.gallery, imageQuality: 25)
+        .then((value) =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
     });
   }
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
-    final pickedFile =
-        await picker.pickImage(source: ImageSource.camera, imageQuality: 25);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
+    await picker
+        .pickImage(source: ImageSource.camera, imageQuality: 25)
+        .then((value) async =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
     });
+  }
+
+  cropImageCall(File imgFile) async {
+    String? croppedImagePath = await cropImage(imgFile);
+    if (croppedImagePath != null) {
+      imageCache.clear();
+      setState(() {
+        _image = File(croppedImagePath);
+      });
+    }
   }
 
   //Show options to get image from camera or gallery
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text('Photo Gallery'),
-            onPressed: () {
-              // close the options modal
-              Navigator.of(context).pop();
-              // get image from gallery
-              getImageFromGallery();
-            },
+      builder: (context) =>
+          CupertinoActionSheet(
+            actions: [
+              CupertinoActionSheetAction(
+                child: Text('Photo Gallery'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
+
+                  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+
+                  if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.storage].request();
+                    if (galleryPermission[Permission.storage]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    }
+                  }else {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.photos].request();
+                    if (galleryPermission[Permission.photos]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.photos]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    }
+                  }
+
+
+                },
+              ),
+              CupertinoActionSheetAction(
+                child: Text('Camera'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
+
+                  Map<Permission, PermissionStatus> cameraPermission =
+                  await [Permission.camera].request();
+                  if (cameraPermission[Permission.camera]!.isGranted) {
+                    // get image from camera
+                    getImageFromCamera();
+                  } else if (cameraPermission[Permission.camera]!
+                      .isPermanentlyDenied) {
+                    showPermissionSettingsDialog(context,
+                        'Please enable storage permission in app settings to use this feature.');
+                  }
+                },
+              ),
+            ],
           ),
-          CupertinoActionSheetAction(
-            child: Text('Camera'),
-            onPressed: () {
-              // close the options modal
-              Navigator.of(context).pop();
-              // get image from camera
-              getImageFromCamera();
-            },
-          ),
-        ],
-      ),
     );
   }
 }

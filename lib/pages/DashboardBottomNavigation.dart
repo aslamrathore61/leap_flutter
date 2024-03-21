@@ -3,7 +3,7 @@ import '../Utils/constants.dart';
 import '../db/SharedPrefObj.dart';
 import '../models/ServiceCountResponse.dart';
 import 'HomePage.dart';
-import 'MyProfile.dart';
+import 'MyProfilePage.dart';
 import 'MyRequestPage.dart';
 
 
@@ -25,7 +25,7 @@ class _DashboardBottomNavigationState
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     MyRequestPage(dashboardFilterType: 101),
-    MyProfile()
+    MyProfilePage()
   ];
 
   void _onItemTapped(int index) {

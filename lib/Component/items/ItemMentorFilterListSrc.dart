@@ -15,10 +15,12 @@ class ItemMentorFilterListSrc extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
+        //  borderRadius: BorderRadius.circular(10.0), // Set the radius for rounded corners
+          color: Colors.grey.shade100,
           border: Border(
             bottom: BorderSide(
-              color: Colors.grey,
-              width: 1.0,
+              color: Colors.black87,
+              width: 0.0,
             ),
           ),
         ),

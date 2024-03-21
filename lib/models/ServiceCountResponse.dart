@@ -41,18 +41,23 @@ class TrainingList {
   String? trainingName;
   String? color;
   int? trainingRisedCount;
+  int? remaining_training_count;
 
   TrainingList(
       {this.trainingUuid,
       this.trainingName,
       this.color,
-      this.trainingRisedCount});
+      this.trainingRisedCount,
+      this.remaining_training_count,
+
+      });
 
   TrainingList.fromJson(Map<String, dynamic> json) {
     trainingUuid = json['trainingUuid'];
     trainingName = json['trainingName'];
     color = json['color'];
     trainingRisedCount = json['trainingRisedCount'];
+    remaining_training_count = json['remaining_training_count'];
   }
 
   Map<String, dynamic> toJson() {
@@ -61,6 +66,7 @@ class TrainingList {
     data['trainingName'] = this.trainingName;
     data['color'] = this.color;
     data['trainingRisedCount'] = this.trainingRisedCount;
+    data['remaining_training_count'] = this.remaining_training_count;
     return data;
   }
 }
@@ -68,7 +74,8 @@ class TrainingList {
 class RequestList {
   int? requestUuid;
   String? requestName;
-  dynamic unpaid_max_limit;
+  int? unpaid_max_limit;
+  int? requested_quantity;
   String? color;
   int? requestRisedCount;
 
@@ -76,6 +83,7 @@ class RequestList {
       {this.requestUuid,
       this.requestName,
       this.unpaid_max_limit,
+      this.requested_quantity,
       this.color,
       this.requestRisedCount});
 
@@ -83,6 +91,7 @@ class RequestList {
     requestUuid = json['requestUuid'];
     requestName = json['requestName'];
     unpaid_max_limit = json['unpaid_max_limit'];
+    requested_quantity = json['requested_quantity'];
     color = json['color'];
     requestRisedCount = json['requestRisedCount'];
   }
@@ -92,6 +101,7 @@ class RequestList {
     data['requestUuid'] = this.requestUuid;
     data['requestName'] = this.requestName;
     data['unpaid_max_limit'] = this.unpaid_max_limit;
+    data['requested_quantity'] = this.requested_quantity;
     data['color'] = this.color;
     data['requestRisedCount'] = this.requestRisedCount;
     return data;

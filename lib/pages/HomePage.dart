@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +12,15 @@ import 'package:leap_flutter/models/ServiceCountResponse.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/MyRequestPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
+import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
+import '../Bloc/networkBloc/network_bloc.dart';
+import '../Bloc/networkBloc/network_state.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
+import '../Component/CommonComponent.dart';
 import '../Component/items/ItemHomeServiceCount.dart';
 import '../Utils/constants.dart';
 import '../db/SharedPrefObj.dart';
-import '../models/LoginResponse.dart';
 import 'BusinessCardsScreen.dart';
 import '../Utils/GlabblePageRoute.dart';
 import 'FlyersCardPage.dart';
@@ -39,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,9 +56,32 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
         ),
       ),
-      body: _buildListTrainingRequest(),
+      body: _buildListTrainingRequest() /*Center(
+        child: Provider<NetworkBloc>(
+          create: (context) => NetworkBloc(),
+          child: BlocBuilder<NetworkBloc, NetworkState>(
+            builder: (context, state) {
+              print('checkState ${state}');
+              if (state is NetworkFailure) {
+                return noInternetConnetionView();
+              } else if (state is NetworkSuccess) {
+                return _buildListTrainingRequest();
+              } else {
+                return Column(
+                  children: [
+                    Center(child: const Text('inElseCondition')),
+                  ],
+                );
+              }
+            },
+          ),
+        ),
+
+      ),*/
     );
   }
+
+
 
   Widget _buildListTrainingRequest() {
     return Container(
@@ -159,11 +188,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.only(bottom: 10.0),
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
-                    title: serviceCountResponse.trainingList?[index].trainingName ?? '',
-                    unPaidTitle: " Training",
-                    unPaidMaxLimit: '0',
+                    isTraining: true,
+                    title: serviceCountResponse
+                            .trainingList?[index].trainingName ??
+                        '',
+                    unPaidTitle: " Remaining Training",
+                    unPaidMaxLimit: serviceCountResponse
+                            .trainingList?[index].remaining_training_count ??
+                        0,
+                    completedInLimit: 0,
                     count: serviceCountResponse
-                            .trainingList?[index].trainingRisedCount ?? 0,
+                            .trainingList?[index].trainingRisedCount ??
+                        0,
                     colorCode:
                         serviceCountResponse.trainingList?[index].color ??
                             '#fff',
@@ -219,10 +255,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: EdgeInsets.only(bottom: 10.0),
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
-                    title: serviceCountResponse.requestList![index].requestName!,
-                    unPaidTitle: "Available Limit",
-                    unPaidMaxLimit: serviceCountResponse.requestList?[index].unpaid_max_limit.toString() ?? '0',
-                    count: serviceCountResponse.requestList![index].requestRisedCount ?? 0,
+                    isTraining: false,
+                    title:
+                        serviceCountResponse.requestList![index].requestName!,
+                    unPaidTitle: "Available Free Limit",
+                    unPaidMaxLimit: serviceCountResponse
+                            .requestList?[index].unpaid_max_limit ??
+                        0,
+                    completedInLimit: serviceCountResponse
+                            .requestList?[index].requested_quantity ??
+                        0,
+                    count: serviceCountResponse
+                            .requestList![index].requestRisedCount ??
+                        0,
                     colorCode: serviceCountResponse.requestList![index].color!,
                     icon: SvgPicture.asset(
                       'assets/icons/businesscard.svg',

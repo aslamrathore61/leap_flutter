@@ -26,7 +26,7 @@ class LoginResponse {
 }
 
 class Result {
-  Null? userType;
+  String? userType;
   bool? isActive;
   String? name;
   String? token;

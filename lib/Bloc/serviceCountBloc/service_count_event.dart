@@ -20,3 +20,10 @@ class ChangesPasswordEvent extends ServiceCountEvent {
 
   ChangesPasswordEvent({required this.changesPassword});
 }
+
+
+class InternetLostEvent extends ServiceCountEvent {}
+
+class InternetGainedEvent extends ServiceCountEvent {}
+
+

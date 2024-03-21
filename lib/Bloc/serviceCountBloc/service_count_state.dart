@@ -55,3 +55,7 @@ class ChangesPasswordErrorState extends ServiceCountState {
   final String? error;
   const ChangesPasswordErrorState(this.error);
 }
+
+class InternetLostState extends ServiceCountState {}
+
+class InternetGainedState extends ServiceCountState {}

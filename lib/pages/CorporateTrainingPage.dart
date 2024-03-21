@@ -7,6 +7,7 @@ import 'package:leap_flutter/Component/buttons/primary_button.dart';
 import 'package:leap_flutter/Utils/constants.dart';
 import 'package:leap_flutter/models/OneToOneMentorshipPostGet.dart';
 import 'package:leap_flutter/models/Profile.dart';
+import '../Component/CommonComponent.dart';
 import '../Component/commonRow/BorderLabeledInput.dart';
 import '../Component/items/ItemMentorFilterListSrc.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -28,6 +29,8 @@ class CorporateTrainingPage extends StatefulWidget {
 }
 
 class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
+  final _scrollController = ScrollController();
+
   final TrainingBloc trainingBloc = TrainingBloc();
   final _formKey = GlobalKey<FormState>();
   bool _isSearchFocused = false;
@@ -92,13 +95,16 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
   }
 
   /*** Filter data from main list  ***/
+
   void _filterList(String keyword) {
-    print('searcing : $keyword');
     keyword = keyword.toLowerCase();
     setState(() {
-      _filteredData = _flyersCardListing.where((item) => item.trainerName!.toLowerCase().contains(keyword) || item.trainingName!.toLowerCase().contains(keyword)).toList();
+      _filteredData = _flyersCardListing
+          .where((item) =>
+              item.trainerName!.toLowerCase().contains(keyword) ||
+              item.trainingName!.toLowerCase().contains(keyword))
+          .toList();
     });
-
   }
 
   @override
@@ -127,11 +133,8 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
               _flyersCardListing.addAll(state.trainingProgram!.trainings!);
               _filteredData.addAll(state.trainingProgram!.trainings! ?? []);
             }
-            print('trainingList : ${state.trainingProgram?.toJson()}');
             if (widget.corporateTraining != null) {
               state.trainingProgram?.trainings?.forEach((element) {
-                print(
-                    'compareed ${element.trainingUuid} == ${widget.corporateTraining?.trainingUuid}');
                 if (element.trainingUuid ==
                     widget.corporateTraining?.trainingUuid) {
                   mSeletedTraining = element;
@@ -153,6 +156,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
 
   Widget buildMentorshipListWidget(context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Form(
@@ -161,6 +165,10 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               /***  Mentor Name List  ***/
+
+              SizedBox(
+                height: 10,
+              ),
               Text(
                 "Training Program*",
                 style: TextStyle(
@@ -170,6 +178,9 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                 ),
               ),
               _trainingProgramsSrchField(),
+              SizedBox(
+                height: 10,
+              ),
               if (_isSearchFocused)
                 _buildMentorListWidget(context, _filteredData),
               SizedBox(
@@ -180,7 +191,12 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                   if (mSeletedTraining != null) {
                     _navigatesAndDisplaySelection(context, mSeletedTraining);
                   } else {
-                    showSnackBar(context, 'Please select training program');
+                    if (widget.corporateTraining != null) {
+                      showSnackBar(context,
+                          'There are no further available slots for the ${widget.corporateTraining?.trainerName}');
+                    } else {
+                      showSnackBar(context, 'Please select program name.');
+                    }
                   }
                 },
                 child: BorderLabeledInput(
@@ -198,38 +214,26 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
               SizedBox(
                 height: 10,
               ),
-              BorderLabeledInput(
+              buildFixedRowController(
                 controller: _trainingTimeController,
                 label: 'Training Time*',
-                icon: Icon(
-                  Icons.access_time_outlined,
-                  color: borderColor.withOpacity(0.8),
-                ),
-                press: () {},
-                enabled: false,
-                hint: '00:00 AM - 00:00 AM', // Disable user input
+                hint: '00:00 AM - 00:00 AM',
               ),
               SizedBox(
                 height: 10,
               ),
-              BorderLabeledInput(
+              buildFixedRowController(
                 controller: _trainerNameController,
                 label: 'Trainer Name*',
-                icon: null,
-                press: () {},
-                enabled: false,
-                hint: '', // Disable user input
+                hint: '',
               ),
               SizedBox(
                 height: 10,
               ),
-              BorderLabeledInput(
+              buildFixedRowController(
                 controller: _trainingTypeController,
-                label: 'Training Type*',
-                icon: null,
-                press: () {},
-                enabled: false,
-                hint: '', // Disable user input
+                label: 'Training Type',
+                hint: '',
               ),
               Visibility(
                 visible: isLocationFieldVisible,
@@ -238,13 +242,10 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                     SizedBox(
                       height: 10,
                     ),
-                    BorderLabeledInput(
+                    buildFixedRowController(
                       controller: _locationController,
                       label: 'Location*',
-                      icon: null,
-                      press: () {},
-                      enabled: false,
-                      hint: '', // Disable user input
+                      hint: '',
                     ),
                   ],
                 ),
@@ -256,13 +257,10 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                     SizedBox(
                       height: 10,
                     ),
-                    BorderLabeledInput(
-                      controller: _virtualMeetingLink,
+                    buildFixedRowController(
+                      controller: _locationController,
                       label: 'Virtual Meeting Link*',
-                      icon: null,
-                      press: () {},
-                      enabled: false,
-                      hint: '', // Disable user input
+                      hint: '',
                     ),
                   ],
                 ),
@@ -282,7 +280,8 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
 
                               if (_selecteMeeting != null) {
                                 if (_trainingTimeController.text.isEmpty) {
-                                  showSnackBar(context, 'Please select training slot');
+                                  showSnackBar(
+                                      context, 'Please select training slot');
                                   return;
                                 }
                                 final corporateTrainingPostPut =
@@ -311,6 +310,20 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                                 showSnackBar(
                                     context, 'Please select training program');
                               }
+                            } else {
+                              // Find the first error in the form and scroll to it
+                              final FocusScopeNode currentFocus =
+                                  FocusScope.of(context);
+                              if (!currentFocus.hasPrimaryFocus &&
+                                  currentFocus.focusedChild != null) {
+                                currentFocus.focusedChild!.unfocus();
+                              }
+
+                              _scrollController.animateTo(
+                                0.0,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeOut,
+                              );
                             }
                           },
                         );
@@ -326,6 +339,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
   /***  Search field card template ***/
   Widget _trainingProgramsSrchField() {
     return TextFormField(
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: _searchController,
       focusNode: _searchFocusNode,
       validator: requiredValidator('Training Program'),
@@ -341,10 +355,11 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
         } else {}
       },
       textInputAction: TextInputAction.search,
-      style: Theme.of(context)
-          .textTheme
-          .bodyMedium!
-          .copyWith(color: titleColor, fontSize: 14),
+      style: TextStyle(
+        color: Colors.black87,
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+      ),
       cursorColor: primaryColor,
       decoration: InputDecoration(
         hintText: "Search Training Programs",
@@ -369,30 +384,37 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
   }
 
   Widget _buildMentorListWidget(BuildContext context, List<Trainings> flyers) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _filteredData.length,
-      itemBuilder: (context, index) {
-        return ItemMentorFilterListSrc(
-            itemName: _filteredData[index].trainingName!,
-            onTap: () {
-              mSeletedTraining = _filteredData[index];
-              _searchController.text = _filteredData[index].trainingName!;
-              _selectedMentorUuid = _filteredData[index].trainingUuid;
-              // clear all other filed when choose new training
-              _trainingTimeController.text = '';
-              _trainerNameController.text = '';
-              _trainingTypeController.text = '';
-              _locationController.text = '';
-              _virtualMeetingLink.text = '';
+    if (_filteredData.isEmpty && _searchController.text.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Text('No result found'),
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _filteredData.length,
+        itemBuilder: (context, index) {
+          return ItemMentorFilterListSrc(
+              itemName: _filteredData[index].trainingName!,
+              onTap: () {
+                mSeletedTraining = _filteredData[index];
+                _searchController.text = _filteredData[index].trainingName!;
+                _selectedMentorUuid = _filteredData[index].trainingUuid;
+                // clear all other filed when choose new training
+                _trainingTimeController.text = '';
+                _trainerNameController.text = '';
+                _trainingTypeController.text = '';
+                _locationController.text = '';
+                _virtualMeetingLink.text = '';
 
-              if (_isSearchFocused) {
-                _isSearchFocused = false;
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
-            });
-      },
-    );
+                if (_isSearchFocused) {
+                  _isSearchFocused = false;
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              });
+        },
+      );
+    }
   }
 
   Future<void> _navigatesAndDisplaySelection(

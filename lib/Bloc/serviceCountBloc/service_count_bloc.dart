@@ -13,6 +13,7 @@ class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
     on<GetProfileDataEvents>(getProfileDetails);
     on<UpdateProfileDetailsEvent>(setUpdateProfileDetails);
     on<ChangesPasswordEvent>(setChangesPassword);
+
   }
 
   Future<FutureOr<void>> getServiceCountList(
@@ -95,4 +96,7 @@ class ServiceCountBloc extends Bloc<ServiceCountEvent, ServiceCountState> {
       emit(ChangesPasswordErrorState('Failed to change password.'));
     }
   }
+
+
+
 }

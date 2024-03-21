@@ -1,9 +1,12 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:form_field_validator/form_field_validator.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:lottie/lottie.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 // clolors that we use in our app
 const titleColor = Color(0xFF010F07);
@@ -68,18 +71,14 @@ RequiredValidator requiredValidator(String fieldName) {
   );
 }
 
-RequiredValidator? requiredValidatorrr(String fieldName, bool clearError) {
-  if(clearError) {
-    return null;
-  }else {
-    return RequiredValidator(
-      errorText: 'Please Enter $fieldName',
-    );
-  }
-
-}
-
 final matchValidator = MatchValidator(errorText: 'passwords do not match');
+
+MinLengthValidator minLengthValidator(String fieldName) {
+  return MinLengthValidator(
+    10,
+    errorText: '$fieldName  Must be 10 Digits Long',
+  );
+}
 
 final phoneNumberValidator = MinLengthValidator(10,
     errorText: 'Phone Number must be at least 10 digits long');
@@ -165,6 +164,92 @@ Widget noDataFoundWidget() {
           width: 260,
           height: 260,
           fit: BoxFit.cover,
+        ),
+      ],
+    ),
+  );
+}
+
+Future<String?> cropImage(File imgFile) async {
+  final croppedFile = await ImageCropper().cropImage(
+      sourcePath: imgFile.path,
+      aspectRatioPresets: Platform.isAndroid
+          ? [
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio3x2,
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPreset.ratio16x9
+            ]
+          : [
+              CropAspectRatioPreset.original,
+              CropAspectRatioPreset.square,
+              CropAspectRatioPreset.ratio3x2,
+              CropAspectRatioPreset.ratio4x3,
+              CropAspectRatioPreset.ratio5x3,
+              CropAspectRatioPreset.ratio5x4,
+              CropAspectRatioPreset.ratio7x5,
+              CropAspectRatioPreset.ratio16x9
+            ],
+      uiSettings: [
+        AndroidUiSettings(
+            toolbarTitle: "Image Cropper",
+            toolbarColor: primaryColor,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.original,
+            lockAspectRatio: false),
+        IOSUiSettings(
+          title: "Image Cropper",
+        )
+      ]);
+
+  if (croppedFile != null) {
+    return croppedFile.path;
+  }
+
+  return null;
+}
+
+Future<bool?> showConfirmationDialog(
+    BuildContext context, String title, String content) async {
+  return await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text(title),
+        content: Text(content),
+        actions: <Widget>[
+          TextButton(
+            child: Text("No"),
+            onPressed: () {
+              Navigator.of(context).pop(false); // Return false when canceled
+            },
+          ),
+          TextButton(
+            child: Text("Yes"),
+            onPressed: () {
+              Navigator.of(context).pop(true); // Return true when confirmed
+            },
+          ),
+        ],
+      );
+    },
+  );
+}
+
+void showPermissionSettingsDialog(BuildContext context, String msg) {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: Text('Permission Required'),
+      content: Text('$msg'),
+      actions: [
+        TextButton(
+          onPressed: () async {
+            Navigator.pop(context);
+            await openAppSettings();
+          },
+          child: Text('Open Settings'),
         ),
       ],
     ),

@@ -9,6 +9,7 @@ import 'package:leap_flutter/models/MentorList.dart';
 import 'package:leap_flutter/models/OneToOneMentorshipPostGet.dart';
 import 'package:leap_flutter/models/Profile.dart';
 
+import '../Component/CommonComponent.dart';
 import '../Component/commonRow/BorderLabeledInput.dart';
 import '../Component/items/ItemMentorFilterListSrc.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -30,6 +31,8 @@ class OneToOneMentorshipPage extends StatefulWidget {
 }
 
 class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
+  final _scrollController = ScrollController();
+
   final TrainingBloc trainingBloc = TrainingBloc();
   final _formKey = GlobalKey<FormState>();
   bool _isSearchFocused = false;
@@ -86,8 +89,6 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     _searchFocusNode.addListener(_onSearchFocusChanged);
     _searchFocusNode.addListener(_onFocusChange);
   }
-
-
 
   void _onFocusChange() {
     if (_searchFocusNode.hasFocus) {
@@ -163,6 +164,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
 
   Widget buildMentorshipListWidget(context) {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Form(
@@ -180,7 +182,6 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                 ),
               ),
               _meetingAgendaField(),
-
               SizedBox(
                 height: 20,
               ),
@@ -195,19 +196,25 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                 ),
               ),
               _mentorNameSrchField(),
+              SizedBox(
+                height: 10,
+              ),
               if (_isSearchFocused)
                 _buildMentorListWidget(context, _filteredData),
               SizedBox(
-                height: 20,
+                height: 10,
               ),
               InkWell(
                 onTap: () {
-                  print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
                   if (mSeletedMentor != null) {
-                  //  print('mSelectemtnnte ${mSeletedMentor?.toJson()}');
                     _navigatesAndDisplaySelection(context, mSeletedMentor);
                   } else {
-                    showSnackBar(context, 'Please select mentor');
+                    if (widget.oneToOneMentorship != null) {
+                      showSnackBar(context,
+                          'There are no further available slots for the ${widget.oneToOneMentorship?.mentorName}');
+                    } else {
+                      showSnackBar(context, 'Please select mentor');
+                    }
                   }
                 },
                 child: BorderLabeledInput(
@@ -225,27 +232,18 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
               SizedBox(
                 height: 10,
               ),
-              BorderLabeledInput(
+              buildFixedRowController(
                 controller: _meetingTimeController,
                 label: 'Meeting Time*',
-                icon: Icon(
-                  Icons.access_time_outlined,
-                  color: borderColor.withOpacity(0.8),
-                ),
-                press: () {},
-                enabled: false,
-                hint: '00:00 AM - 00:00 AM', // Disable user input
+                hint: '00:00 AM - 00:00 AM',
               ),
               SizedBox(
                 height: 10,
               ),
-              BorderLabeledInput(
+              buildFixedRowController(
                 controller: _meetingModeController,
                 label: 'Meeting Mode*',
-                icon: null,
-                press: () {},
-                enabled: false,
-                hint: '', // Disable user input
+                hint: '',
               ),
               Visibility(
                 visible: isLocationFieldVisible,
@@ -254,13 +252,10 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                     SizedBox(
                       height: 10,
                     ),
-                    BorderLabeledInput(
+                    buildFixedRowController(
                       controller: _locationController,
                       label: 'Location*',
-                      icon: null,
-                      press: () {},
-                      enabled: false,
-                      hint: '', // Disable user input
+                      hint: '',
                     ),
                   ],
                 ),
@@ -272,13 +267,10 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                     SizedBox(
                       height: 10,
                     ),
-                    BorderLabeledInput(
-                      controller: _virtualMeetingLink,
+                    buildFixedRowController(
+                      controller: _meetingModeController,
                       label: 'Virtual Meeting Link*',
-                      icon: null,
-                      press: () {},
-                      enabled: false,
-                      hint: '', // Disable user input
+                      hint: '',
                     ),
                   ],
                 ),
@@ -337,8 +329,23 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                                           isPost: true));
                                 }
                               } else {
-                                showSnackBar(context, 'Please select meeting date');
+                                showSnackBar(
+                                    context, 'Please select meeting date');
                               }
+                            } else {
+                              // Find the first error in the form and scroll to it
+                              final FocusScopeNode currentFocus =
+                                  FocusScope.of(context);
+                              if (!currentFocus.hasPrimaryFocus &&
+                                  currentFocus.focusedChild != null) {
+                                currentFocus.focusedChild!.unfocus();
+                              }
+
+                              _scrollController.animateTo(
+                                0.0,
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.easeOut,
+                              );
                             }
                           },
                         );
@@ -359,7 +366,6 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
       controller: _meetingAgendaController,
       validator: requiredValidator('Meeting Agenda'),
       textInputAction: TextInputAction.next,
-
       style: TextStyle(
         color: titleColor,
         fontSize: 14,
@@ -375,7 +381,8 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
         focusedBorder: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
           color: borderColor,
-        )), // Width of left icon
+        )),
+        // Width of left icon
         errorMaxLines: 1, // Limit the error message to a single line
       ),
     );
@@ -384,7 +391,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
   /***  Search field card template ***/
   Widget _mentorNameSrchField() {
     return TextFormField(
-     autovalidateMode: AutovalidateMode.onUserInteraction,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
       controller: _searchController,
       focusNode: _searchFocusNode,
       validator: requiredValidator("Mentor Name"),
@@ -428,24 +435,31 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
   }
 
   Widget _buildMentorListWidget(BuildContext context, List<Mentors> flyers) {
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: _filteredData.length,
-      itemBuilder: (context, index) {
-        return ItemMentorFilterListSrc(
-            itemName: _filteredData[index].mentorName!,
-            onTap: () {
-              mSeletedMentor = _filteredData[index];
-              print('mentor ${mSeletedMentor?.toJson()}');
-              _searchController.text = _filteredData[index].mentorName!;
-              _selectedMentorUuid = _filteredData[index].mentorUuid;
-              if (_isSearchFocused) {
-                _isSearchFocused = false;
-                FocusManager.instance.primaryFocus?.unfocus();
-              }
-            });
-      },
-    );
+    if (_filteredData.isEmpty && _searchController.text.isNotEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(left: 8.0),
+        child: Text('No result found'),
+      );
+    } else {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _filteredData.length,
+        itemBuilder: (context, index) {
+          return ItemMentorFilterListSrc(
+              itemName: _filteredData[index].mentorName!,
+              onTap: () {
+                mSeletedMentor = _filteredData[index];
+                print('mentor ${mSeletedMentor?.toJson()}');
+                _searchController.text = _filteredData[index].mentorName!;
+                _selectedMentorUuid = _filteredData[index].mentorUuid;
+                if (_isSearchFocused) {
+                  _isSearchFocused = false;
+                  FocusManager.instance.primaryFocus?.unfocus();
+                }
+              });
+        },
+      );
+    }
   }
 
   Future<void> _navigatesAndDisplaySelection(

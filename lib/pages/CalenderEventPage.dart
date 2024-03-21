@@ -79,27 +79,49 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
               decoration: TextDecoration.lineThrough),*/
           dataSource: MeetingDataSource(_getDataSource()),
           monthViewSettings: MonthViewSettings(
-              showTrailingAndLeadingDates: true,
-              showAgenda: true,
-              agendaViewHeight: 330,
-             agendaItemHeight: 60,
-              appointmentDisplayCount: 6,
-              navigationDirection: MonthNavigationDirection.horizontal,
-              monthCellStyle: MonthCellStyle(
-                  backgroundColor: Colors.white,
-                  trailingDatesBackgroundColor: Colors.grey.shade100,
-                  leadingDatesBackgroundColor: Colors.grey.shade50,
-                  todayBackgroundColor: Colors.white,
-                  textStyle: TextStyle(
-                    color: titleColor,
-                    fontSize: 12,
-                  ),
-                  trailingDatesTextStyle: TextStyle(
-                    fontSize: 12,
-                  ),
-                  leadingDatesTextStyle: TextStyle(
-                    fontSize: 12,
-                  ))),
+            showTrailingAndLeadingDates: true,
+            showAgenda: true,
+            agendaViewHeight: 330,
+            agendaItemHeight: 60,
+            appointmentDisplayCount: 6,
+            navigationDirection: MonthNavigationDirection.horizontal,
+            monthCellStyle: MonthCellStyle(
+                backgroundColor: Colors.white,
+                trailingDatesBackgroundColor: Colors.grey.shade100,
+                leadingDatesBackgroundColor: Colors.grey.shade50,
+                todayBackgroundColor: Colors.white,
+                textStyle: TextStyle(
+                  color: titleColor,
+                  fontSize: 12,
+                ),
+                trailingDatesTextStyle: TextStyle(
+                  fontSize: 12,
+                ),
+                leadingDatesTextStyle: TextStyle(
+                  fontSize: 12,
+                )),
+            agendaStyle: AgendaStyle(
+                backgroundColor: Colors.transparent,
+                appointmentTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic),
+                dayTextStyle: TextStyle(
+                    color: primaryColor,
+                    fontSize: 16,
+                    fontStyle: FontStyle.italic),
+                dateTextStyle: TextStyle(
+                    color: primaryColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    fontStyle: FontStyle.normal),
+
+               /* placeholderTextStyle: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    backgroundColor: Colors.red)*/
+            ),
+          ),
           todayTextStyle: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.bold,

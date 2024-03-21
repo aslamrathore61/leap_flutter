@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import '../../Utils/constants.dart';
 
 class ItemHomeServiceCount extends StatelessWidget {
+  final bool isTraining;
   final String title;
   final String unPaidTitle;
-  final String unPaidMaxLimit;
+  final int unPaidMaxLimit;
+  final int completedInLimit;
   final int count;
   final String colorCode;
   final Widget icon;
@@ -15,9 +17,11 @@ class ItemHomeServiceCount extends StatelessWidget {
 
   const ItemHomeServiceCount({
     Key? key,
+    required this.isTraining,
     required this.title,
     required this.unPaidTitle,
     required this.unPaidMaxLimit,
+    required this.completedInLimit,
     required this.count,
     required this.colorCode,
     required this.icon,
@@ -86,7 +90,7 @@ class ItemHomeServiceCount extends StatelessWidget {
                                       color: titleColor.withOpacity(0.9),
                                       fontWeight: FontWeight.w500,
                                       fontSize: 15),
-                              text: '$unPaidMaxLimit',
+                              text: isTraining ? '$unPaidMaxLimit' :  '$unPaidMaxLimit/${unPaidMaxLimit-completedInLimit}',
                               children: <TextSpan>[
                                 TextSpan(
                                   text: ' $unPaidTitle',
@@ -103,13 +107,15 @@ class ItemHomeServiceCount extends StatelessWidget {
                           ),
                         ],
                       ),
-                      Text(
-                        '$count Completed',
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            color: titleColor.withOpacity(0.6),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 14),
+                    Text(
+                      isTraining ? '$count Training Schedule' : '$count Request Raised',
+                      style: TextStyle(
+                        color: titleColor.withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 14,
                       ),
+
+                ),
                     ],
                   ),
                 ),

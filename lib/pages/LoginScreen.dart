@@ -158,9 +158,8 @@ class _LoginScreenPageState extends State<LoginScreenPage> {
                             SharedPrefObj.setSharedPrefValue(bearerToken,
                                 state.loginResponse!.result!.token!);
                             SharedPrefObj.setSharedPrefValue(loginStatus, "1");
-                            Navigator.of(context).pushReplacement(
-                                GlabblePageRoute(
-                                    page: DashboardBottomNavigation()));
+                            Navigator.of(context).pushReplacement(GlabblePageRoute(page: DashboardBottomNavigation()));
+
                           }
                         },
                         builder: (context, state) {

@@ -57,7 +57,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
               _confirmPasswordController.text = '';
               Navigator.of(context).pop();
               showToast(
-                  'Password successfully changed',
+                  'Password Successfully Changed',
                   Colors.green,
                   const Icon(
                     Icons.check,
@@ -89,7 +89,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                       cursorColor: primaryColor,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        hintText: "Enter old password",
+                        hintText: "Enter Old Password",
                         suffixIcon: GestureDetector(
                           onTap: () {
                             setState(() {
@@ -109,7 +109,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                             borderSide: BorderSide(
                           color: primaryColor,
                         )),
-                     /*   prefixIcon: Icon(
+                        /*   prefixIcon: Icon(
                           Icons.key,
                           color: primaryColor,
                         ),*/
@@ -133,7 +133,7 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                       cursorColor: primaryColor,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        hintText: "Enter new password",
+                        hintText: "Enter New Password",
                         suffixIcon: GestureDetector(
                           onTap: () {
                             setState(() {
@@ -153,19 +153,18 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                             borderSide: BorderSide(
                           color: primaryColor,
                         )),
-                       /* prefixIcon: Icon(
+                        /* prefixIcon: Icon(
                           Icons.key,
                           color: primaryColor,
                         ),*/
                         // Left icon
                         prefixIconConstraints:
-                        BoxConstraints(minWidth: 40), // Width of left icon
+                            BoxConstraints(minWidth: 40), // Width of left icon
                       ),
                     ),
                     SizedBox(
                       height: 20,
                     ),
-
                     TextFormField(
                       obscureText: true,
                       validator: confirmPasswordValidation,
@@ -178,24 +177,22 @@ class _UpdatePasswordPageState extends State<UpdatePasswordPage> {
                       cursorColor: primaryColor,
                       keyboardType: TextInputType.text,
                       decoration: InputDecoration(
-                        hintText: "Enter retype password",
+                        hintText: "Confirm Password",
                         contentPadding: kTextFieldPadding,
                         border: kDefaultOutlineInputBorder,
                         enabledBorder: kDefaultOutlineInputBorder,
                         focusedBorder: kDefaultOutlineInputBorder.copyWith(
                             borderSide: BorderSide(
-                              color: primaryColor,
-                            )),
+                          color: primaryColor,
+                        )),
                         // Left icon
                         prefixIconConstraints:
-                        BoxConstraints(minWidth: 40), // Width of left icon
+                            BoxConstraints(minWidth: 40), // Width of left icon
                       ),
                     ),
-
                     SizedBox(
                       height: 30,
                     ),
-
                     BlocBuilder<ServiceCountBloc, ServiceCountState>(
                       builder: (context, state) {
                         return state is ChangesPasswordLoading

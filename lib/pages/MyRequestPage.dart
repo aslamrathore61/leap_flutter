@@ -9,7 +9,11 @@ import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/pages/BusinessCardsScreen.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
+import 'package:provider/provider.dart';
 import '../Bloc/myrequestBloc/my_request_state.dart';
+import '../Bloc/networkBloc/network_bloc.dart';
+import '../Bloc/networkBloc/network_state.dart';
+import '../Component/CommonComponent.dart';
 import '../Component/items/ItemMyRequestBusinessCard.dart';
 import '../Component/ShimmerComponent.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -23,6 +27,7 @@ class MyRequestPage extends StatefulWidget {
   MyRequestPage({super.key, required this.dashboardFilterType});
 
   int dashboardFilterType;
+  int? _dashboardFilterType = -1;
 
   @override
   State<MyRequestPage> createState() => _MyRequestPageState();
@@ -30,6 +35,8 @@ class MyRequestPage extends StatefulWidget {
 
 class _MyRequestPageState extends State<MyRequestPage> {
   final MyRequestBloc _myRequestBloc = MyRequestBloc();
+
+  int _selectedIndex = -1;
 
   bool isArchived = false;
   ServiceCountResponse? serviceCountResponse;
@@ -41,8 +48,16 @@ class _MyRequestPageState extends State<MyRequestPage> {
   ];
 
   @override
+  void dispose() {
+    // Clean up resources here
+    widget._dashboardFilterType = null; // Dispose of the value
+    super.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
+    widget._dashboardFilterType = widget.dashboardFilterType;
     fetchSharedPrefServiceCountData();
     _myRequestBloc.add(GetMyRequestListEvent());
   }
@@ -68,6 +83,30 @@ class _MyRequestPageState extends State<MyRequestPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
+/*
+    return Provider<NetworkBloc>(
+      create: (context) => NetworkBloc(),
+      child: Scaffold(
+        body: Center(
+          child: BlocBuilder<NetworkBloc, NetworkState>(
+            builder: (context, state) {
+              print('checkState ${state}');
+              if (state is NetworkFailure) {
+                return noInternetConnetionView();
+              } else if (state is NetworkSuccess) {
+                return _myListViewWidgets();
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
+        ),
+      ),
+    );
+
+  }
+*/
+
     return BackdropScaffold(
       key: _backdropKey,
       appBar: AppBar(
@@ -83,7 +122,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 isBackdropOpen = !isBackdropOpen;
               });
             },
-            icon: isBackdropOpen
+            icon: (widget._dashboardFilterType! > 0 &&
+                    widget._dashboardFilterType != 101)
                 ? Icon(Icons.filter_alt_off)
                 : Icon(Icons.filter_alt),
           )
@@ -91,8 +131,24 @@ class _MyRequestPageState extends State<MyRequestPage> {
       ),
       headerHeight: screenHeight * 0.45,
       // 70% of the screen height,
-      frontLayer: _myListViewWidgets(),
       backLayer: backLayerContainer(screenHeight),
+      frontLayer: _myListViewWidgets(),
+
+      /* Provider<NetworkBloc>(
+          create: (context) => NetworkBloc(),
+          child: BlocBuilder<NetworkBloc, NetworkState>(
+            builder: (context, state) {
+              print('checkState ${state}');
+              if (state is NetworkFailure) {
+                return noInternetConnetionView();
+              } else if (state is NetworkSuccess) {
+                return _myListViewWidgets();
+              } else {
+                return const SizedBox.shrink();
+              }
+            },
+          ),
+        )*/
     );
   }
 
@@ -127,7 +183,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   Widget _buildListViewCard(
       BuildContext context, MyRequestResponse myRequestResponse) {
-    bool isFilterTypeMatch(int type) => widget.dashboardFilterType == type;
+    bool isFilterTypeMatch(int type) => widget._dashboardFilterType == type;
     /*|| widget.dashboardFilterType == 101;*/
 
     if ((isFilterTypeMatch(1) &&
@@ -143,7 +199,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
             (myRequestResponse.flyers == null ||
                 myRequestResponse.flyers!.isEmpty))) {
       return Container(
-        height: double.infinity,
+          height: double.infinity,
           width: double.infinity,
           color: Colors.white,
           child: noDataFoundWidget());
@@ -154,23 +210,23 @@ class _MyRequestPageState extends State<MyRequestPage> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           if (isFilterTypeMatch(1) ||
-              widget.dashboardFilterType == 101 &&
+              widget._dashboardFilterType == 101 &&
                   (myRequestResponse.oneToOneMentorship != null &&
                       myRequestResponse.oneToOneMentorship!.isNotEmpty))
             _oneToOneMentorshipListViewBUilder(
                 myRequestResponse.oneToOneMentorship),
           if (isFilterTypeMatch(2) ||
-              widget.dashboardFilterType == 101 &&
+              widget._dashboardFilterType == 101 &&
                   (myRequestResponse.corporateTraining != null &&
                       myRequestResponse.corporateTraining!.isNotEmpty))
             _corporatepListViewBUilder(myRequestResponse.corporateTraining),
           if (isFilterTypeMatch(3) ||
-              widget.dashboardFilterType == 101 &&
+              widget._dashboardFilterType == 101 &&
                   (myRequestResponse.businessCards != null &&
                       myRequestResponse.businessCards!.isNotEmpty))
             _businessCardListViewBUilder(myRequestResponse.businessCards),
           if (isFilterTypeMatch(4) ||
-              widget.dashboardFilterType == 101 &&
+              widget._dashboardFilterType == 101 &&
                   (myRequestResponse.flyers != null &&
                       myRequestResponse.flyers!.isNotEmpty))
             _flyersCardListViewBUilder(myRequestResponse.flyers),
@@ -218,15 +274,24 @@ class _MyRequestPageState extends State<MyRequestPage> {
                       page: OneToOneMentorshipPage(
                           oneToOneMentorship: oneToOneMentorship[index])));
                 },
-                onDeletePress: () {
-                  MyRequestDeleteModel myRequestDeleteModel =
-                      MyRequestDeleteModel();
-                  myRequestDeleteModel.mentorSlotUuid =
-                      oneToOneMentorship[index].mentorSlotUuid;
-                  _myRequestBloc.add(DeleteMyRequestItemEvent(
-                      cardDelete: myRequestDeleteModel,
-                      endPoint: "deleteuserbookedonetoonementorship"));
-                  setState(() => oneToOneMentorship.removeAt(index));
+
+                onDeletePress: () async {
+                  bool? confirm = await showConfirmationDialog(
+                    context,
+                    "Confirm Delete",
+                    "Are you sure you want to delete?",
+                  );
+
+                  if (confirm == true) {
+                    MyRequestDeleteModel myRequestDeleteModel =
+                        MyRequestDeleteModel();
+                    myRequestDeleteModel.mentorSlotUuid =
+                        oneToOneMentorship[index].mentorSlotUuid;
+                    _myRequestBloc.add(DeleteMyRequestItemEvent(
+                        cardDelete: myRequestDeleteModel,
+                        endPoint: "deleteuserbookedonetoonementorship"));
+                    setState(() => oneToOneMentorship.removeAt(index));
+                  }
                 },
               ),
             );
@@ -273,15 +338,24 @@ class _MyRequestPageState extends State<MyRequestPage> {
                       page: CorporateTrainingPage(
                           corporateTraining: corporateTraining[index])));
                 },
-                onDeletePress: () {
-                  MyRequestDeleteModel myRequestDeleteModel =
-                      MyRequestDeleteModel();
-                  myRequestDeleteModel.trainingBookingUuid =
-                      corporateTraining[index].trainingBookingUuid;
-                  _myRequestBloc.add(DeleteMyRequestItemEvent(
-                      cardDelete: myRequestDeleteModel,
-                      endPoint: "deleteuserbookedtraining"));
-                  setState(() => corporateTraining.removeAt(index));
+
+                onDeletePress: () async {
+                  bool? confirm = await showConfirmationDialog(
+                    context,
+                    "Confirm Delete",
+                    "Are you sure you want to delete?",
+                  );
+
+                  if (confirm == true) {
+                    MyRequestDeleteModel myRequestDeleteModel =
+                        MyRequestDeleteModel();
+                    myRequestDeleteModel.trainingBookingUuid =
+                        corporateTraining[index].trainingBookingUuid;
+                    _myRequestBloc.add(DeleteMyRequestItemEvent(
+                        cardDelete: myRequestDeleteModel,
+                        endPoint: "deleteuserbookedtraining"));
+                    setState(() => corporateTraining.removeAt(index));
+                  }
                 },
               ),
             );
@@ -320,14 +394,24 @@ class _MyRequestPageState extends State<MyRequestPage> {
                       page: BusinessCardsPage(
                           businessCards: businessCards[index])));
                 },
-                onDeletePress: () {
-                  MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
-                  cardDelete.vcardRequestUuid =
-                      businessCards[index].vcardRequestUuid;
-                  _myRequestBloc.add(DeleteMyRequestItemEvent(
+
+                onDeletePress: () async {
+                  bool? confirm = await showConfirmationDialog(
+                    context,
+                    "Confirm Delete",
+                    "Are you sure you want to delete?",
+                  );
+
+                  if (confirm == true) {
+                    MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
+                    cardDelete.vcardRequestUuid =
+                        businessCards[index].vcardRequestUuid;
+                    _myRequestBloc.add(DeleteMyRequestItemEvent(
                       cardDelete: cardDelete,
-                      endPoint: "deleteusercardrequest"));
-                  setState(() => businessCards.removeAt(index));
+                      endPoint: "deleteusercardrequest",
+                    ));
+                    setState(() => businessCards.removeAt(index));
+                  }
                 },
               ),
             );
@@ -365,13 +449,23 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   Navigator.of(context).push(GlabblePageRoute(
                       page: FlyersCardPage(flyers: flyers[index])));
                 },
-                onDeletePress: () {
-                  MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
-                  cardDelete.flyerRequestUuid = flyers[index].flyerRequestUuid;
-                  _myRequestBloc.add(DeleteMyRequestItemEvent(
-                      cardDelete: cardDelete,
-                      endPoint: "deleteuserflyerrequest"));
-                  setState(() => flyers.removeAt(index));
+
+                onDeletePress: () async {
+                  bool? confirm = await showConfirmationDialog(
+                    context,
+                    "Confirm Delete",
+                    "Are you sure you want to delete?",
+                  );
+
+                  if (confirm == true) {
+                    MyRequestDeleteModel cardDelete = MyRequestDeleteModel();
+                    cardDelete.flyerRequestUuid =
+                        flyers[index].flyerRequestUuid;
+                    _myRequestBloc.add(DeleteMyRequestItemEvent(
+                        cardDelete: cardDelete,
+                        endPoint: "deleteuserflyerrequest"));
+                    setState(() => flyers.removeAt(index));
+                  }
                 },
               ),
             );
@@ -396,8 +490,6 @@ class _MyRequestPageState extends State<MyRequestPage> {
     );
   }
 
-  int _selectedIndex = -1; // Initialize the selected state
-
   Widget backLayerContainer(double screenHeight) {
     return Container(
       height: screenHeight * 0.35, // 30% of the screen height
@@ -419,7 +511,6 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   onPress: () {
                     // Update the selected index when pressed
                     setState(() {
-                      print('indext check : $index');
                       _selectedIndex = index;
                     });
                   },
@@ -439,16 +530,18 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   child: InkWell(
                     onTap: () {
                       setState(() {
+                        isBackdropOpen = !isBackdropOpen;
                         isArchived = !isArchived;
                         if (isArchived == true) {
                           isArchived = false;
                         } else {
                           isArchived = true;
                         }
+
                         if (_selectedIndex == -1) {
-                          widget.dashboardFilterType = 101;
+                          widget._dashboardFilterType = 101;
                         } else {
-                          widget.dashboardFilterType = _selectedIndex + 1;
+                          widget._dashboardFilterType = _selectedIndex + 1;
                         }
                       });
                       _backdropKey.currentState!.fling();
@@ -490,8 +583,9 @@ class _MyRequestPageState extends State<MyRequestPage> {
                   child: InkWell(
                     onTap: () {
                       setState(() {
-                        widget.dashboardFilterType = 101;
+                        isBackdropOpen = !isBackdropOpen;
                         _selectedIndex = -1;
+                        widget._dashboardFilterType = 101;
                         isArchived = false;
                       });
                       _backdropKey.currentState!.fling();

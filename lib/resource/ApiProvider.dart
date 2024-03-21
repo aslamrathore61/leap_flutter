@@ -119,7 +119,7 @@ class ApiProvider {
         response = await _dio.post('${_baseUrl}createupdatecardrequest',
             data: requestBody);
       } else {
-        response = await _dio.get('${_baseUrl}createupdatecardrequest',
+        response = await _dio.put('${_baseUrl}createupdatecardrequest',
             data: requestBody);
       }
       final respose = CommonSimilarResponse.fromJson(response.data);

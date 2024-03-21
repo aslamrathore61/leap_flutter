@@ -7,27 +7,29 @@ import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
 import 'package:leap_flutter/pages/UpdatePasswordPage.dart';
+import 'package:provider/provider.dart';
+import '../Bloc/networkBloc/network_bloc.dart';
+import '../Bloc/networkBloc/network_state.dart';
 import '../Bloc/serviceCountBloc/service_count_bloc.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Bloc/serviceCountBloc/service_count_state.dart';
+import '../Component/CommonComponent.dart';
 import '../Component/ShimmerProfileView.dart';
 import '../Component/buttons/primary_button.dart';
 import '../Utils/constants.dart';
 import 'MyProfileEditPage.dart';
 
-class MyProfile extends StatefulWidget {
-  const MyProfile({Key? key}) : super(key: key);
+class MyProfilePage extends StatefulWidget {
+  const MyProfilePage({Key? key}) : super(key: key);
 
   @override
-  State<MyProfile> createState() => _MyProfileState();
+  State<MyProfilePage> createState() => _MyProfilePageState();
 }
 
-
-class _MyProfileState extends State<MyProfile> {
+class _MyProfilePageState extends State<MyProfilePage> {
   final ServiceCountBloc _serviceCountBloc = ServiceCountBloc();
 
   bool emailShowOverflow = false;
-
 
   @override
   void initState() {
@@ -46,23 +48,44 @@ class _MyProfileState extends State<MyProfile> {
                 fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
           ),
         ),
-        body: BlocProvider(
-          create: (context) => _serviceCountBloc,
-          child: BlocConsumer<ServiceCountBloc, ServiceCountState>(
-            listener: (context, state) {},
+        // body: serviceCountBlocWidget());
+        body: serviceCountBlocWidget()  /*Provider<NetworkBloc>(
+          create: (context) => NetworkBloc(),
+          child: BlocBuilder<NetworkBloc, NetworkState>(
             builder: (context, state) {
-              if (state is ProfileUpdateAndFetchingLoading) {
-                return ShimmerProfileView();
-              } else if (state is ProfileDetailsFetchingSuccessState) {
-                return buildProfileView(state.profileDetails);
+              print('checkState ${state}');
+              if (state is NetworkFailure) {
+                return noInternetConnetionView();
+              } else if (state is NetworkSuccess) {
+                return serviceCountBlocWidget();
               } else {
-                return Container(
-                  child: Center(child: Text('No Data Found')),
-                );
+                return const SizedBox.shrink();
               }
             },
           ),
-        ));
+        )*/
+
+    );
+  }
+
+  Widget serviceCountBlocWidget() {
+    return BlocProvider(
+      create: (context) => _serviceCountBloc,
+      child: BlocConsumer<ServiceCountBloc, ServiceCountState>(
+        listener: (context, state) {},
+        builder: (context, state) {
+          if (state is ProfileUpdateAndFetchingLoading) {
+            return ShimmerProfileView();
+          } else if (state is ProfileDetailsFetchingSuccessState) {
+            return buildProfileView(state.profileDetails);
+          } else {
+            return Container(
+              child:SizedBox(),
+            );
+          }
+        },
+      ),
+    );
   }
 
   Widget buildProfileView(Profile profile) {
@@ -100,8 +123,8 @@ class _MyProfileState extends State<MyProfile> {
             buildSectionTitle("Settings"),
             InkWell(
                 onTap: () {
-                  Navigator.of(context).push(
-                      GlabblePageRoute(page: UpdatePasswordPage()));
+                  Navigator.of(context)
+                      .push(GlabblePageRoute(page: UpdatePasswordPage()));
                   /*showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -119,8 +142,9 @@ class _MyProfileState extends State<MyProfile> {
               },
               child: buildOptionRow("assets/images/signout.png", "Logout"),
             ),
-
-            SizedBox(height: 20,)
+            SizedBox(
+              height: 20,
+            )
           ],
         ),
       ),
@@ -155,7 +179,8 @@ class _MyProfileState extends State<MyProfile> {
                 ),
                 child: ClipOval(
                   child: Image.network(
-                    profile.result!.profileImage ?? 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg',
+                    profile.result!.profileImage ??
+                        'https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg',
                     width: 100, // Adjust the width and height as needed
                     height: 100,
                     fit: BoxFit.cover,
@@ -196,8 +221,10 @@ class _MyProfileState extends State<MyProfile> {
                       });
                     },
                     child: Text(
-                      overflow: emailShowOverflow ? TextOverflow.visible : TextOverflow.ellipsis,
-                     '${profile.result!.email}',
+                      overflow: emailShowOverflow
+                          ? TextOverflow.visible
+                          : TextOverflow.ellipsis,
+                      '${profile.result!.email}',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w300,
@@ -395,8 +422,10 @@ class _MyProfileState extends State<MyProfile> {
                   child: InkWell(
                     onTap: () async {
                       await SharedPrefObj.clearAll();
-                      Navigator.of(context).pushReplacement(
-                          GlabblePageRoute(page: LoginScreenPage()));
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreenPage()),
+                          (Route<dynamic> route) => false);
                     },
                     child: Container(
                       decoration: BoxDecoration(
@@ -433,7 +462,4 @@ class _MyProfileState extends State<MyProfile> {
       ),
     );
   }
-
-
-
 }
