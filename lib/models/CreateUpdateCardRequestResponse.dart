@@ -12,6 +12,10 @@ class CreateUpdateCardRequest {
   String? flyerRequestUuid;
   String? vcardRequestUuid;
 
+  String? mlsId;
+  String? propertyDescription;
+  String? propertyImageData;
+
   CreateUpdateCardRequest(
       {this.printEmail,
       this.printName,
@@ -24,7 +28,10 @@ class CreateUpdateCardRequest {
       this.vcardUuid,
       this.printImageData,
       this.flyerRequestUuid,
-      this.vcardRequestUuid
+      this.vcardRequestUuid,
+      this.mlsId,
+      this.propertyDescription,
+      this.propertyImageData,
       });
 
   CreateUpdateCardRequest.fromJson(Map<String, dynamic> json) {
@@ -40,6 +47,9 @@ class CreateUpdateCardRequest {
     printImageData = json['printImageData'];
     flyerRequestUuid = json['flyerRequestUuid'];
     vcardRequestUuid = json['vcardRequestUuid'];
+    mlsId = json['mlsId'];
+    propertyDescription = json['propertyDescription'];
+    propertyImageData = json['propertyImageData'];
   }
 
   Map<String, dynamic> toJson() {
@@ -56,6 +66,9 @@ class CreateUpdateCardRequest {
     data['printImageData'] = this.printImageData;
     data['flyerRequestUuid'] = this.flyerRequestUuid;
     data['vcardRequestUuid'] = this.vcardRequestUuid;
+    data['mlsId'] = this.mlsId;
+    data['propertyDescription'] = this.propertyDescription;
+    data['propertyImageData'] = this.propertyImageData;
     return data;
   }
 }

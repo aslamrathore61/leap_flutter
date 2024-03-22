@@ -77,8 +77,10 @@ class ApiProvider {
       Response response = await _dio.get(
         '${_baseUrl}getuserservicesrequestcount',
       );
-      ServiceCountResponse serviceCountResponse = ServiceCountResponse.fromJson(response.data);
-      await SharedPrefObj.setServiceCountSharedPreValue(serviceCount, serviceCountResponse);
+      ServiceCountResponse serviceCountResponse =
+          ServiceCountResponse.fromJson(response.data);
+      await SharedPrefObj.setServiceCountSharedPreValue(
+          serviceCount, serviceCountResponse);
       return serviceCountResponse;
     } catch (error, stacktrace) {
       return ServiceCountResponse.withError(

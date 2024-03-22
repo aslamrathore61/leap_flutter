@@ -150,14 +150,14 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
     final List<Meeting> meetings = <Meeting>[];
 
     if (widget.mentors != null) {
-      widget.mentors?.availability?.forEach((element) {
-        final String? dateString = element.date;
+      widget.mentors?.availability?.forEach((_element) {
+        final String? dateString = _element.date;
         final DateTime date = DateTime.parse(dateString!);
         final DateTime dateTime = DateTime(date.year, date.month, date.day);
 
-        element.timeSlots?.forEach((element) {
-          if (element.time != null) {
-            final String? timeString = element.time;
+        _element.timeSlots?.forEach((element) {
+          if (element.startTime != null) {
+            final String? timeString = element.startTime;
             final List<String>? timeParts = timeString?.split(' ');
             final List<int> hoursMinutes =
                 timeParts![0].split(':').map((e) => int.parse(e)).toList();
@@ -166,9 +166,13 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
               hours += 12;
             }
             final int minutes = hoursMinutes[1];
-            final DateTime time =
-                dateTime.add(Duration(hours: hours, minutes: minutes));
-            final DateTime end = time.add(const Duration(minutes: 35));
+            final DateTime time = dateTime.add(Duration(hours: hours, minutes: minutes));
+
+            DateTime startTime = _parseTime(element.startTime, _element.date);
+            DateTime endTime = _parseTime(element.endTime, _element.date);
+
+            Duration duration = endTime.difference(startTime);
+            final DateTime end = time.add(duration);
 
             meetings.add(Meeting(
                 'Meeting Mode : ${element.mentorshipMode!}',
@@ -183,13 +187,13 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
         });
       });
     } else {
-      widget.training?.trainingSlots?.forEach((element) {
-        final String? dateString = element.date;
+      widget.training?.trainingSlots?.forEach((_element) {
+        final String? dateString = _element.date;
         final DateTime date = DateTime.parse(dateString!);
         final DateTime dateTime = DateTime(date.year, date.month, date.day);
 
-        element.timeSlots?.forEach((element) {
-          final String? timeString = element.time;
+        _element.timeSlots?.forEach((element) {
+          final String? timeString = element.startTime;
           final List<String>? timeParts = timeString?.split(' ');
           final List<int> hoursMinutes =
               timeParts![0].split(':').map((e) => int.parse(e)).toList();
@@ -198,9 +202,16 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
             hours += 12;
           }
           final int minutes = hoursMinutes[1];
-          final DateTime time =
-              dateTime.add(Duration(hours: hours, minutes: minutes));
-          final DateTime end = time.add(const Duration(minutes: 35));
+          final DateTime time = dateTime.add(Duration(hours: hours, minutes: minutes));
+
+
+
+          DateTime startTime = _parseTime(element.startTime, _element.date);
+          DateTime endTime = _parseTime(element.endTime, _element.date);
+
+          Duration duration = endTime.difference(startTime);
+          final DateTime end = time.add(duration);
+
           element.trainerName = widget.training?.trainerName;
           meetings.add(Meeting(
               'Training Mode : ${element.trainingMode!}',
@@ -217,6 +228,26 @@ class _CalenderEventPageState extends State<CalenderEventPage> {
 
     return meetings;
   }
+}
+
+DateTime _parseTime(String? timeString, String? dateString) {
+  final parts = timeString!.split(' ');
+  final time = parts[0];
+  final period = parts[1];
+
+  final timeParts = time.split(':');
+  int hour = int.parse(timeParts[0]);
+  int minute = int.parse(timeParts[1]);
+
+  if (period == 'PM' && hour != 12) {
+    hour += 12;
+  } else if (period == 'AM' && hour == 12) {
+    hour = 0;
+  }
+
+  List<String> dateParts = dateString!.split("-");
+
+  return DateTime(int.parse(dateParts[0]), int.parse(dateParts[1]), int.parse(dateParts[2]), hour, minute);
 }
 
 // calender model

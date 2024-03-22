@@ -65,7 +65,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
           : '')!;
 
       final timeSlot = TrainingTimeSlots(
-          time: widget.corporateTraining?.timeSlot,
+          startTime: widget.corporateTraining?.timeSlot,
           trainingMode: widget.corporateTraining?.trainingMode,
           trainingSlotUuid: widget.corporateTraining?.trainingBookingUuid,
           location: widget.corporateTraining?.location,
@@ -452,7 +452,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
       _trainingDateContorller.text =
           '${mSeletedMeeting.trainingTimeSlots?.allocatedDate}';
       _trainingTimeController.text =
-          '${mSeletedMeeting.trainingTimeSlots?.time}';
+          '${mSeletedMeeting.trainingTimeSlots?.startTime}';
     }
 
     _locationController.text = '${mSeletedMeeting.trainingTimeSlots?.location}';

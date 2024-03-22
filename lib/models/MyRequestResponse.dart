@@ -107,6 +107,9 @@ class Flyers {
     this.printEmail,
     this.printPhoneNumber,
     this.printDescription,
+    this.mlsId,
+    this.propertyDescription,
+    this.propertyImage,
   });
 
   Flyers.fromJson(dynamic json) {
@@ -126,6 +129,9 @@ class Flyers {
     printEmail = json['printEmail'];
     printPhoneNumber = json['printPhoneNumber'];
     printDescription = json['printDescription'];
+    mlsId = json['mlsId'];
+    propertyDescription = json['propertyDescription'];
+    propertyImage = json['propertyImage'];
   }
 
   String? requestBy;
@@ -144,6 +150,9 @@ class Flyers {
   String? printEmail;
   String? printPhoneNumber;
   String? printDescription;
+  String? mlsId;
+  String? propertyDescription;
+  dynamic propertyImage;
 
   Flyers copyWith({
     String? requestBy,
@@ -162,6 +171,9 @@ class Flyers {
     String? printEmail,
     String? printPhoneNumber,
     String? printDescription,
+    String? mlsId,
+    String? propertyDescription,
+    String? propertyImage,
   }) =>
       Flyers(
         requestBy: requestBy ?? this.requestBy,
@@ -180,6 +192,9 @@ class Flyers {
         printEmail: printEmail ?? this.printEmail,
         printPhoneNumber: printPhoneNumber ?? this.printPhoneNumber,
         printDescription: printDescription ?? this.printDescription,
+        mlsId: mlsId ?? this.mlsId,
+        propertyDescription: propertyDescription ?? this.propertyDescription,
+        propertyImage: propertyImage ?? this.propertyImage,
       );
 
   Map<String, dynamic> toJson() {
@@ -200,6 +215,9 @@ class Flyers {
     map['printEmail'] = printEmail;
     map['printPhoneNumber'] = printPhoneNumber;
     map['printDescription'] = printDescription;
+    map['mlsId'] = mlsId;
+    map['propertyDescription'] = propertyDescription;
+    map['propertyImage'] = propertyImage;
     return map;
   }
 }

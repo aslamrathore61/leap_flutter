@@ -94,7 +94,8 @@ class TrainingSlots {
 }
 
 class TrainingTimeSlots {
-  String? time;
+  String? startTime;
+  String? endTime;
   int? totalSeats;
   int? availableSeats;
   String? trainingMode;
@@ -106,7 +107,8 @@ class TrainingTimeSlots {
   String? trainerName;
 
   TrainingTimeSlots(
-      {this.time,
+      {this.startTime,
+      this.endTime,
       this.totalSeats,
       this.availableSeats,
       this.trainingMode,
@@ -118,7 +120,8 @@ class TrainingTimeSlots {
       this.trainerName});
 
   TrainingTimeSlots.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
+    startTime = json['startTime'];
+    endTime = json['endTime'];
     totalSeats = json['totalSeats'];
     availableSeats = json['availableSeats'];
     trainingMode = json['trainingMode'];
@@ -130,7 +133,8 @@ class TrainingTimeSlots {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
+    data['startTime'] = this.startTime;
+    data['endTime'] = this.endTime;
     data['totalSeats'] = this.totalSeats;
     data['availableSeats'] = this.availableSeats;
     data['trainingMode'] = this.trainingMode;

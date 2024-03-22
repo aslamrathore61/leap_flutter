@@ -210,6 +210,7 @@ Future<String?> cropImage(File imgFile) async {
   return null;
 }
 
+
 Future<bool?> showConfirmationDialog(
     BuildContext context, String title, String content) async {
   return await showDialog<bool>(

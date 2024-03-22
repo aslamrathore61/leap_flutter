@@ -1,4 +1,8 @@
+import 'dart:convert';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../Utils/GlabblePageRoute.dart';
 import '../models/FlyersCardTemplateResponse.dart';
@@ -40,11 +44,11 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
   TextEditingController _searchController = TextEditingController();
   FocusNode _searchFocusNode = FocusNode();
 
-  String? _userName;
-  String? _mobileNumber;
-  String? _email;
-  String? _description;
   String? _quantity;
+
+  String? _propertyDescription;
+  String? _mlsId;
+  String? _propertyImageData;
 
   String? _flyerTemplatedUuid;
 
@@ -54,6 +58,8 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
     _searchController.text =
         (widget.flyers != null ? widget.flyers!.flyerName : '')!;
     if (widget.flyers != null) _flyerTemplatedUuid = widget.flyers!.flyerUuid;
+
+    print('widgetFlyers ${widget.flyers?.mlsId}');
     cardBloc.add(GetFlyersCardListEvent());
     _searchFocusNode.addListener(_onSearchFocusChanged);
     _searchFocusNode.addListener(_onFocusChange);
@@ -154,8 +160,32 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                     fontWeight: FontWeight.w500),
               ),
 
-              /***    Display Image View  ***/
-              /*  SizedBox(height: 10.0),
+
+              /***  Name MLS ID  ***/
+              SizedBox(height: 10.0),
+              _buildTextFormField(
+                label: "MLS ID*",
+                validator: requiredValidator('MLS ID'),
+                onSaved: (value) => _mlsId = value,
+                initialValue: widget.flyers != null ? widget.flyers!.mlsId : '',
+                keyboardType: TextInputType.text,
+              ),
+
+              /***  Name Property Descriptio  ***/
+              SizedBox(height: 10.0),
+              _buildTextFormField(
+                  label: "Property Description*",
+                  validator: requiredValidator('Property Description'),
+                  onSaved: (value) => _propertyDescription = value,
+                  initialValue: widget.flyers != null ? widget.flyers!.propertyDescription : '',
+                  keyboardType: TextInputType.text),
+
+
+              SizedBox(height: 10.0),
+
+
+              /***    Property Image View  ***/
+                SizedBox(height: 10.0),
               Container(
                 child: Column(
                   children: [
@@ -164,7 +194,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                       child: Row(
                         children: [
                           Text(
-                            "Display Image",
+                            "Property Image",
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
@@ -182,56 +212,15 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                       ),
                     ),
                     SizedBox(height: 20.0),
-                    Center(
-                      child: _image == null
-                          ? Text('No Image selected')
-                          : Image.file(_image!),
-                    ),
+
+                    previewDisplayImage()
                   ],
                 ),
-              ),*/
+              ),
               SizedBox(height: 10.0),
 
-              /***  Name TextField  ***/
-              _buildTextFormField(
-                label: "Name*",
-                validator: requiredValidator('Name'),
-                onSaved: (value) => _userName = value,
-                initialValue: widget.flyers != null
-                    ? widget.flyers!.printName
-                    : '${widget.profileDetails?.result?.firstName} ${widget.profileDetails?.result?.lastName}',
-              ),
-              SizedBox(height: 10.0),
-              _buildTextFormField(
-                label: "Mobile Number*",
-                validator: phoneNumberValidator,
-                onSaved: (value) => _mobileNumber = value,
-                initialValue: widget.flyers != null
-                    ? widget.flyers!.printPhoneNumber
-                    : '${widget.profileDetails?.result?.phoneNumber}',
-                keyboardType: TextInputType.number,
-              ),
-              SizedBox(height: 10.0),
-              _buildTextFormField(
-                  label: "Email ID*",
-                  validator: emailValidator,
-                  onSaved: (value) => _email = value,
-                  initialValue: widget.flyers != null
-                      ? widget.flyers!.printEmail
-                      : '${widget.profileDetails?.result?.email}',
-                  keyboardType: TextInputType.emailAddress),
-              SizedBox(height: 10.0),
 
-              /***  Description TextField  ***/
-              _buildTextFormField(
-                label: 'Desciption*',
-                validator: requiredValidator("Description"),
-                onSaved: (value) => _description = value,
-                initialValue: widget.flyers != null
-                    ? widget.flyers!.printDescription
-                    : '',
-              ),
-              SizedBox(height: 10.0),
+
 
               /***  Quantity TextField  ***/
               _buildTextFormField(
@@ -253,10 +242,19 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                               _formKey.currentState!.save();
 
                               final cardRequest = CreateUpdateCardRequest();
-                              cardRequest.printEmail = _email;
-                              cardRequest.printName = _userName;
-                              cardRequest.printPhoneNumber = _mobileNumber;
-                              cardRequest.printDescription = _description;
+
+                              if (_image != null) {
+                                List<int> imageBytes =
+                                _image!.readAsBytesSync();
+                                String base64Image = base64Encode(imageBytes);
+                                _propertyImageData = 'data:image/png;base64,$base64Image';
+                                cardRequest.propertyImageData = _propertyImageData;
+                              }
+
+                              cardRequest.mlsId = _mlsId;
+                              cardRequest.propertyDescription = _propertyDescription;
+                              cardRequest.propertyImageData = _propertyImageData;
+
                               cardRequest.requestQuantity = _quantity;
                               cardRequest.flyerUuid = _flyerTemplatedUuid;
 
@@ -297,57 +295,119 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
     );
   }
 
+  Widget previewDisplayImage() {
+    if (_image != null) {
+      return Center(
+        child: _image == null ? Text('No Image Selected') : Image.file(_image!),
+      );
+    } else {
+      return Center(
+        child: widget.flyers?.propertyImage == null
+            ? Text('No Image Selected')
+            : Image.network(widget.flyers?.propertyImage,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) {
+                return child;
+              }
+              return CircularProgressIndicator(
+                value: progress.expectedTotalBytes != null
+                    ? progress.cumulativeBytesLoaded /
+                    progress.expectedTotalBytes!
+                    : null,
+              );
+            }),
+      );
+    }
+  }
+
   //Image Picker function to get image from gallery
   Future getImageFromGallery() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
+    await picker
+        .pickImage(source: ImageSource.gallery, imageQuality: 25)
+        .then((value) =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
     });
   }
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.camera);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      }
+    await picker
+        .pickImage(source: ImageSource.camera, imageQuality: 25)
+        .then((value) async =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
     });
   }
 
-  //Show options to get image from camera or gallery
+  cropImageCall(File imgFile) async {
+    String? croppedImagePath = await cropImage(imgFile);
+    if (croppedImagePath != null) {
+      imageCache.clear();
+      setState(() {
+        _image = File(croppedImagePath);
+      });
+    }
+  }
+
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text('Photo Gallery'),
-            onPressed: () {
-              // close the options modal
-              Navigator.of(context).pop();
-              // get image from gallery
-              getImageFromGallery();
-            },
+      builder: (context) =>
+          CupertinoActionSheet(
+            actions: [
+              CupertinoActionSheetAction(
+                child: Text('Photo Gallery'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
+
+                  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+
+                  if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.storage].request();
+                    if (galleryPermission[Permission.storage]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    }
+                  }else {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.photos].request();
+                    if (galleryPermission[Permission.photos]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.photos]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    }
+                  }
+
+
+                },
+              ),
+              CupertinoActionSheetAction(
+                child: Text('Camera'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
+
+                  Map<Permission, PermissionStatus> cameraPermission =
+                  await [Permission.camera].request();
+                  if (cameraPermission[Permission.camera]!.isGranted) {
+                    // get image from camera
+                    getImageFromCamera();
+                  } else if (cameraPermission[Permission.camera]!
+                      .isPermanentlyDenied) {
+                    showPermissionSettingsDialog(context,
+                        'Please enable storage permission in app settings to use this feature.');
+                  }
+                },
+              ),
+            ],
           ),
-          CupertinoActionSheetAction(
-            child: Text('Camera'),
-            onPressed: () {
-              // close the options modal
-              Navigator.of(context).pop();
-              // get image from camera
-              getImageFromCamera();
-            },
-          ),
-        ],
-      ),
     );
   }
-
   /***  Search field card template ***/
   Widget _CardTemplateSrchField() {
     return TextFormField(
@@ -496,7 +556,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
           ),
           cursorColor: primaryColor,
           decoration: InputDecoration(
-            hintText: "Please enter $label",
+            hintText: "Please Enter $label",
             contentPadding: kTextFieldPadding,
             border: kDefaultOutlineInputBorder.copyWith(
               borderSide: BorderSide(color: borderColor),

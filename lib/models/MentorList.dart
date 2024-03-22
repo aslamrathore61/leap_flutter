@@ -86,7 +86,8 @@ class Availability {
 }
 
 class TimeSlots {
-  String? time;
+  String? startTime;
+  String? endTime;
   String? mentorshipMode;
   String? locations;
   String? virtualLink;
@@ -94,7 +95,8 @@ class TimeSlots {
   String? mentorshipDate;
 
   TimeSlots(
-      {this.time,
+      {this.startTime,
+        this.endTime,
         this.mentorshipMode,
         this.locations,
         this.virtualLink,
@@ -103,7 +105,8 @@ class TimeSlots {
       });
 
   TimeSlots.fromJson(Map<String, dynamic> json) {
-    time = json['time'];
+    startTime = json['startTime'];
+    endTime = json['endTime'];
     mentorshipMode = json['mentorshipMode'];
     locations = json['locations'];
     virtualLink = json['virtualLink'];
@@ -113,7 +116,8 @@ class TimeSlots {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['time'] = this.time;
+    data['startTime'] = this.startTime;
+    data['endTime'] = this.endTime;
     data['mentorshipMode'] = this.mentorshipMode;
     data['locations'] = this.locations;
     data['virtualLink'] = this.virtualLink;

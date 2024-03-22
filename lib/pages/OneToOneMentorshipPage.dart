@@ -74,7 +74,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
           : '')!;
 
       final timeSlot = TimeSlots(
-          time: widget.oneToOneMentorship?.timeSlot,
+          startTime: widget.oneToOneMentorship?.timeSlot,
           mentorshipMode: widget.oneToOneMentorship?.meetingMode,
           locations: widget.oneToOneMentorship?.location,
           virtualLink: widget.oneToOneMentorship?.virtualMeetingLink,
@@ -496,7 +496,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     } else {
       _meetingDateContorller.text =
           '${mSeletedMeeting.mentorTimeSlots?.mentorshipDate}';
-      _meetingTimeController.text = '${mSeletedMeeting.mentorTimeSlots?.time}';
+      _meetingTimeController.text = '${mSeletedMeeting.mentorTimeSlots?.startTime}';
     }
 
     _locationController.text = '${mSeletedMeeting.mentorTimeSlots?.locations}';

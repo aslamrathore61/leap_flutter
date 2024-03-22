@@ -392,8 +392,6 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
 
-                                print(
-                                    'finalimageuui $itemSelectedCardTempIndext ${vcardImageInfo?[itemSelectedCardTempIndext].imageUuid}');
                                 final cardRequest = CreateUpdateCardRequest();
                                 cardRequest.printEmail = _email;
                                 cardRequest.printName = _userName;
