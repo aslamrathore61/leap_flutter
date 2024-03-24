@@ -1,22 +1,22 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:leap_flutter/Utils/GlabblePageRoute.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/models/Profile.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
 import 'package:leap_flutter/pages/UpdatePasswordPage.dart';
-import 'package:provider/provider.dart';
-import '../Bloc/networkBloc/network_bloc.dart';
-import '../Bloc/networkBloc/network_state.dart';
+import 'package:photo_view/photo_view.dart';
 import '../Bloc/serviceCountBloc/service_count_bloc.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Bloc/serviceCountBloc/service_count_state.dart';
 import '../Component/CommonComponent.dart';
 import '../Component/ShimmerProfileView.dart';
-import '../Component/buttons/primary_button.dart';
 import '../Utils/constants.dart';
+import '../controller/NetworkController.dart';
 import 'MyProfileEditPage.dart';
 
 class MyProfilePage extends StatefulWidget {
@@ -49,23 +49,16 @@ class _MyProfilePageState extends State<MyProfilePage> {
           ),
         ),
         // body: serviceCountBlocWidget());
-        body: serviceCountBlocWidget()  /*Provider<NetworkBloc>(
-          create: (context) => NetworkBloc(),
-          child: BlocBuilder<NetworkBloc, NetworkState>(
-            builder: (context, state) {
-              print('checkState ${state}');
-              if (state is NetworkFailure) {
-                return noInternetConnetionView();
-              } else if (state is NetworkSuccess) {
-                return serviceCountBlocWidget();
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          ),
-        )*/
-
-    );
+        body: GetBuilder<NetworkController>(
+          builder: (controller) {
+            print('controllerStatus ${controller.connectivityStatus}');
+            if (controller.connectivityStatus == ConnectivityResult.none) {
+              return noInternetConnetionView();
+            } else {
+              return serviceCountBlocWidget();
+            }
+          },
+        ));
   }
 
   Widget serviceCountBlocWidget() {
@@ -80,7 +73,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
             return buildProfileView(state.profileDetails);
           } else {
             return Container(
-              child:SizedBox(),
+              child: SizedBox(),
             );
           }
         },
@@ -177,7 +170,22 @@ class _MyProfilePageState extends State<MyProfilePage> {
                     width: 2, // Adjust border width as needed
                   ),
                 ),
-                child: ClipOval(
+                child: Container(
+                  width: 80, // Adjust the width and height as needed
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: Colors.black, // Adjust border color as needed
+                      width: 2, // Adjust border width as needed
+                    ),
+                  ),
+                  child: buildCircularImage(
+                    imageUrl: profile.result!.profileImage ??
+                        'https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg',
+                  ),
+                ),
+                /*ClipOval(
                   child: Image.network(
                     profile.result!.profileImage ??
                         'https://upload.wikimedia.org/wikipedia/commons/7/7e/Circle-icons-profile.svg',
@@ -196,7 +204,7 @@ class _MyProfilePageState extends State<MyProfilePage> {
                       );
                     },
                   ),
-                ),
+                ),*/
               ),
             ),
           ),
@@ -255,6 +263,67 @@ class _MyProfilePageState extends State<MyProfilePage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget buildCircularImage({String? imageUrl}) {
+    return ClipOval(
+      child:GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => Scaffold(
+              body: Stack(
+                children: [
+                  Center(
+                    child: Hero(
+                      tag: "imageHero", // Unique tag for the hero animation
+                      child: PhotoView(
+                        imageProvider: NetworkImage(
+                          imageUrl ??
+                              'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
+                        ),
+                        minScale: PhotoViewComputedScale.contained * 0.8,
+                        maxScale: PhotoViewComputedScale.covered * 2.0,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: 60,
+                    right: 10,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ));
+        },
+        child: Hero(
+          tag: "imageHero", // Same tag as above for the hero animation
+          child: Image.network(
+            imageUrl ??
+                'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
+            width: 80,
+            height: 80,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) {
+                return child;
+              }
+              return CircularProgressIndicator(
+                value: progress.expectedTotalBytes != null
+                    ? progress.cumulativeBytesLoaded /
+                    progress.expectedTotalBytes!
+                    : null,
+              );
+            },
+          ),
+        ),
       ),
     );
   }

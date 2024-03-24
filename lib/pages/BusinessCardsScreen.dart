@@ -9,6 +9,7 @@ import 'package:leap_flutter/Bloc/cardBloc/card_bloc.dart';
 import 'package:leap_flutter/Utils/constants.dart';
 import 'package:leap_flutter/models/MyRequestResponse.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:swipable_stack/swipable_stack.dart';
 import '../Bloc/cardBloc/card_event.dart';
 import '../Bloc/cardBloc/card_state.dart';
@@ -517,10 +518,47 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
 
             return Stack(
               children: vcardImageInfo!.map((url) {
-                return Card(
-                  elevation: 0.4,
-                  child: Image.network(
-                    vcardImageInfo![itemSelectedCardTempIndext].imageUrl!,
+                print('dataofurl ${url.imageUrl}');
+                return GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => Scaffold(
+                        body: Stack(
+                          children: [
+                            Center(
+                              child: Hero(
+                                tag: "imageHero", // Unique tag for the hero animation
+                                child: PhotoView(
+                                  imageProvider: NetworkImage(
+                                      vcardImageInfo![itemSelectedCardTempIndext+1].imageUrl!),
+                                  minScale: PhotoViewComputedScale.contained * 0.8,
+                                  maxScale: PhotoViewComputedScale.covered * 2.0,
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              top: 60,
+                              right: 10,
+                              child: IconButton(
+                                icon: Icon(Icons.close),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ));
+                  },
+                  child: Hero(
+                    tag: 'imageHero',
+                    child: Card(
+                      elevation: 0.4,
+                      child: Image.network(
+                        vcardImageInfo![itemSelectedCardTempIndext].imageUrl!,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),

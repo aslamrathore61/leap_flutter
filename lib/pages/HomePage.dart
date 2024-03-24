@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_bloc.dart';
 import 'package:leap_flutter/Bloc/serviceCountBloc/service_count_state.dart';
 import 'package:leap_flutter/Component/ShimmerComponent.dart';
@@ -12,14 +13,11 @@ import 'package:leap_flutter/models/ServiceCountResponse.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/MyRequestPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
-import 'package:lottie/lottie.dart';
-import 'package:provider/provider.dart';
-import '../Bloc/networkBloc/network_bloc.dart';
-import '../Bloc/networkBloc/network_state.dart';
 import '../Bloc/serviceCountBloc/service_count_event.dart';
 import '../Component/CommonComponent.dart';
 import '../Component/items/ItemHomeServiceCount.dart';
 import '../Utils/constants.dart';
+import '../controller/NetworkController.dart';
 import '../db/SharedPrefObj.dart';
 import 'BusinessCardsScreen.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -40,10 +38,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    _serviceCountBloc.add(GetProfileDataEvents());
     super.initState();
+    _serviceCountBloc.add(GetProfileDataEvents());
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -56,32 +53,20 @@ class _HomeScreenState extends State<HomeScreen> {
               fontSize: 18, fontWeight: FontWeight.w500, color: Colors.white),
         ),
       ),
-      body: _buildListTrainingRequest() /*Center(
-        child: Provider<NetworkBloc>(
-          create: (context) => NetworkBloc(),
-          child: BlocBuilder<NetworkBloc, NetworkState>(
-            builder: (context, state) {
-              print('checkState ${state}');
-              if (state is NetworkFailure) {
-                return noInternetConnetionView();
-              } else if (state is NetworkSuccess) {
-                return _buildListTrainingRequest();
-              } else {
-                return Column(
-                  children: [
-                    Center(child: const Text('inElseCondition')),
-                  ],
-                );
-              }
-            },
-          ),
+      body: Center(
+        child: GetBuilder<NetworkController>(
+          builder: (controller) {
+            print('controllerStatus ${controller.connectivityStatus}');
+            if (controller.connectivityStatus == ConnectivityResult.none) {
+              return noInternetConnetionView();
+            } else {
+              return _buildListTrainingRequest();
+            }
+          },
         ),
-
-      ),*/
+      ),
     );
   }
-
-
 
   Widget _buildListTrainingRequest() {
     return Container(
@@ -92,6 +77,7 @@ class _HomeScreenState extends State<HomeScreen> {
           create: (_) => _serviceCountBloc,
           child: BlocListener<ServiceCountBloc, ServiceCountState>(
             listener: (context, state) {
+              print('listinerStatue $state');
               if (state is ServiceCountError) {
                 ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text(state.message!)));
@@ -143,6 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
             },
             child: BlocBuilder<ServiceCountBloc, ServiceCountState>(
               builder: (context, state) {
+                print('builderStatue $state');
+
                 if (state is ServiceCountInitial) {
                   return ShimmerHomeLoading();
                 } else if (state is ServiceCountLoading) {
@@ -233,10 +221,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     onViewPress: () {
                       if (index == 0) {
                         Navigator.of(context).push(GlabblePageRoute(
-                            page: MyRequestPage(dashboardFilterType: 1)));
+                            page: MyRequestPage(
+                          dashboardFilterType: 1,
+                          comingWithFilter: true,
+                        )));
                       } else {
                         Navigator.of(context).push(GlabblePageRoute(
-                            page: MyRequestPage(dashboardFilterType: 2)));
+                            page: MyRequestPage(
+                          dashboardFilterType: 2,
+                          comingWithFilter: true,
+                        )));
                       }
                     },
                   ),
@@ -296,10 +290,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     onViewPress: () {
                       if (index == 0) {
                         Navigator.of(context).push(GlabblePageRoute(
-                            page: MyRequestPage(dashboardFilterType: 3)));
+                            page: MyRequestPage(
+                          dashboardFilterType: 3,
+                          comingWithFilter: true,
+                        )));
                       } else {
                         Navigator.of(context).push(GlabblePageRoute(
-                            page: MyRequestPage(dashboardFilterType: 4)));
+                            page: MyRequestPage(
+                          dashboardFilterType: 4,
+                          comingWithFilter: true,
+                        )));
                       }
                     },
                   ),

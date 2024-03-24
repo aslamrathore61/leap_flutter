@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:leap_flutter/Resource/ApiProvider.dart';
 import 'package:leap_flutter/pages/DashboardBottomNavigation.dart';
 import 'package:leap_flutter/pages/LoginScreen.dart';
-import 'Bloc/networkBloc/network_bloc.dart';
-import 'Bloc/networkBloc/network_event.dart';
 import 'Utils/constants.dart';
+import 'controller/DependencyInjection.dart';
 import 'db/SharedPrefObj.dart';
 
 void main() {
   runApp(MyApp());
+  DependencyInjection.init();
 }
 
 class MyApp extends StatelessWidget {
@@ -26,7 +27,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepositoryProvider(
       create: (context) => ApiProvider(),
-      child: MaterialApp(
+      child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
@@ -52,9 +53,7 @@ class MyApp extends StatelessWidget {
             create: (context) => NetworkBloc()..add(NetworkObserve()),
             child: const TestFile()),
 */
-        home: BlocProvider(
-          create: (context) => NetworkBloc()..add(NetworkObserve()),
-          child: FutureBuilder<bool>(
+        home: FutureBuilder<bool>(
             future: isLoggedIn(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -70,7 +69,6 @@ class MyApp extends StatelessWidget {
               }
             },
           ),
-        ),
       ),
     );
   }

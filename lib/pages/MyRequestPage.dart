@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:backdrop/backdrop.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:leap_flutter/Bloc/myrequestBloc/my_request_bloc.dart';
 import 'package:leap_flutter/Bloc/myrequestBloc/my_request_event.dart';
 import 'package:leap_flutter/Component/items/ItemOneToOneAndTraining.dart';
@@ -9,25 +12,24 @@ import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/pages/BusinessCardsScreen.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
-import 'package:provider/provider.dart';
 import '../Bloc/myrequestBloc/my_request_state.dart';
-import '../Bloc/networkBloc/network_bloc.dart';
-import '../Bloc/networkBloc/network_state.dart';
 import '../Component/CommonComponent.dart';
 import '../Component/items/ItemMyRequestBusinessCard.dart';
 import '../Component/ShimmerComponent.dart';
 import '../Utils/GlabblePageRoute.dart';
 import '../Utils/constants.dart';
+import '../controller/NetworkController.dart';
 import '../models/MyRequestDeleteArchivedModel.dart';
 import '../models/MyRequestResponse.dart';
 import '../models/ServiceCountResponse.dart';
 import 'FlyersCardPage.dart';
 
 class MyRequestPage extends StatefulWidget {
-  MyRequestPage({super.key, required this.dashboardFilterType});
+  MyRequestPage({super.key, required this.dashboardFilterType, required this.comingWithFilter});
 
   int dashboardFilterType;
   int? _dashboardFilterType = -1;
+  bool comingWithFilter;
 
   @override
   State<MyRequestPage> createState() => _MyRequestPageState();
@@ -64,14 +66,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   Future<void> fetchSharedPrefServiceCountData() async {
     try {
-      serviceCountResponse =
-          await SharedPrefObj.getServiceCountSharedPreValue(serviceCount);
-      print(
-          'serviceCountResponse ${serviceCountResponse!.trainingList![0].color}');
-    } catch (e) {
-      // Handle error fetching data from SharedPreferences
-      print('Error fetching data: $e');
-    }
+      serviceCountResponse = await SharedPrefObj.getServiceCountSharedPreValue(serviceCount);
+    } catch (e) {}
   }
 
   final GlobalKey<BackdropScaffoldState> _backdropKey =
@@ -83,30 +79,6 @@ class _MyRequestPageState extends State<MyRequestPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
 
-/*
-    return Provider<NetworkBloc>(
-      create: (context) => NetworkBloc(),
-      child: Scaffold(
-        body: Center(
-          child: BlocBuilder<NetworkBloc, NetworkState>(
-            builder: (context, state) {
-              print('checkState ${state}');
-              if (state is NetworkFailure) {
-                return noInternetConnetionView();
-              } else if (state is NetworkSuccess) {
-                return _myListViewWidgets();
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          ),
-        ),
-      ),
-    );
-
-  }
-*/
-
     return BackdropScaffold(
       key: _backdropKey,
       appBar: AppBar(
@@ -114,41 +86,33 @@ class _MyRequestPageState extends State<MyRequestPage> {
         title: Text("My Request"),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
         backgroundColor: primaryColor,
-        actions: <Widget>[
-          IconButton(
+         actions: <Widget>[
+         widget.comingWithFilter ? IconButton(onPressed: null,icon: Icon(Icons.filter_alt_off, color: primaryColor,),)
+          : IconButton(
             onPressed: () {
               _backdropKey.currentState!.fling();
               setState(() {
                 isBackdropOpen = !isBackdropOpen;
               });
             },
-            icon: (widget._dashboardFilterType! > 0 &&
-                    widget._dashboardFilterType != 101)
-                ? Icon(Icons.filter_alt_off)
-                : Icon(Icons.filter_alt),
+            icon: (widget._dashboardFilterType! > 0 && widget._dashboardFilterType != 101) ? Icon(Icons.filter_alt_off) : Icon(Icons.filter_alt),
           )
         ],
       ),
       headerHeight: screenHeight * 0.45,
       // 70% of the screen height,
       backLayer: backLayerContainer(screenHeight),
-      frontLayer: _myListViewWidgets(),
 
-      /* Provider<NetworkBloc>(
-          create: (context) => NetworkBloc(),
-          child: BlocBuilder<NetworkBloc, NetworkState>(
-            builder: (context, state) {
-              print('checkState ${state}');
-              if (state is NetworkFailure) {
-                return noInternetConnetionView();
-              } else if (state is NetworkSuccess) {
-                return _myListViewWidgets();
-              } else {
-                return const SizedBox.shrink();
-              }
-            },
-          ),
-        )*/
+      frontLayer: GetBuilder<NetworkController>(
+          builder: (controller) {
+            print('controllerStatus ${controller.connectivityStatus}');
+            if (controller.connectivityStatus == ConnectivityResult.none) {
+              return noInternetConnetionView();
+            } else {
+              return _myListViewWidgets();
+            }
+          },
+        ),
     );
   }
 
@@ -492,7 +456,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   Widget backLayerContainer(double screenHeight) {
     return Container(
-      height: screenHeight * 0.35, // 30% of the screen height
+      height: Platform.isAndroid ? screenHeight * 0.35 : screenHeight * 0.40,
+      // 30% of the screen height
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [

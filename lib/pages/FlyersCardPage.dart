@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_view/photo_view.dart';
 
 import '../Utils/GlabblePageRoute.dart';
 import '../models/FlyersCardTemplateResponse.dart';
@@ -498,19 +499,55 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
       return Container(); // No image selected or available, return an empty container
     }
 
-    return Center(
-      child: Image.network(
-        imageUrl,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) {
-            return child;
-          }
-          return CircularProgressIndicator(
-            value: progress.expectedTotalBytes != null
-                ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                : null,
-          );
-        },
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => Scaffold(
+            body: Stack(
+              children: [
+                Center(
+                  child: Hero(
+                    tag: "imageHero", // Unique tag for the hero animation
+                    child: PhotoView(
+                      imageProvider: NetworkImage(
+                        imageUrl ??
+                            'https://www.vectorstock.com/royalty-free-vectors/profile-male-vectors',
+                      ),
+                      minScale: PhotoViewComputedScale.contained * 0.8,
+                      maxScale: PhotoViewComputedScale.covered * 2.0,
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 60,
+                  right: 10,
+                  child: IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ));
+      },
+      child: Hero(
+        tag: "imageHero", // Same tag as above for the hero animation
+        child: Image.network(
+          imageUrl,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) {
+              return child;
+            }
+            return CircularProgressIndicator(
+              value: progress.expectedTotalBytes != null
+                  ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                  : null,
+            );
+          },
+        ),
       ),
     );
   }

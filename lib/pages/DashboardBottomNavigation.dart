@@ -24,7 +24,7 @@ class _DashboardBottomNavigationState
   TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    MyRequestPage(dashboardFilterType: 101),
+    MyRequestPage(dashboardFilterType: 101,comingWithFilter: false),
     MyProfilePage()
   ];
 
