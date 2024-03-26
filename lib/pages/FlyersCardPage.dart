@@ -351,6 +351,7 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
     }
   }
 
+  //Show options to get image from camera or gallery
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
@@ -363,27 +364,35 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
                   // close the options modal
                   Navigator.of(context).pop();
 
-                  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  AndroidDeviceInfo? deviceInfo;
 
-                  if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
+                  if (Platform.isAndroid) {
+                    deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  }
+
+                  if (Platform.isAndroid &&
+                      deviceInfo != null &&
+                      deviceInfo.version.sdkInt <= 32) {
                     Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.storage].request();
                     if (galleryPermission[Permission.storage]!.isGranted) {
                       getImageFromGallery();
-                    } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    } else if (galleryPermission[Permission.storage]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
                     }
-                  }else {
+                  } else {
                     Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.photos].request();
                     if (galleryPermission[Permission.photos]!.isGranted) {
                       getImageFromGallery();
                     } else if (galleryPermission[Permission.photos]!
                         .isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
                     }
                   }
-
 
                 },
               ),
@@ -409,6 +418,8 @@ class _FlyersCardsPageState extends State<FlyersCardPage> {
           ),
     );
   }
+
+  
   /***  Search field card template ***/
   Widget _CardTemplateSrchField() {
     return TextFormField(

@@ -49,18 +49,20 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   Future getImageFromGallery() async {
     await picker
         .pickImage(source: ImageSource.gallery, imageQuality: 25)
-        .then((value) => {
-              if (value != null) {cropImageCall(File(value.path))}
-            });
+        .then((value) =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
+    });
   }
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
     await picker
         .pickImage(source: ImageSource.camera, imageQuality: 25)
-        .then((value) async => {
-              if (value != null) {cropImageCall(File(value.path))}
-            });
+        .then((value) async =>
+    {
+      if (value != null) {cropImageCall(File(value.path))}
+    });
   }
 
   cropImageCall(File imgFile) async {
@@ -77,57 +79,67 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            child: Text('Photo Gallery'),
-            onPressed: () async {
-              // close the options modal
-              Navigator.of(context).pop();
+      builder: (context) =>
+          CupertinoActionSheet(
+            actions: [
+              CupertinoActionSheetAction(
+                child: Text('Photo Gallery'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
 
-              final deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  AndroidDeviceInfo? deviceInfo;
 
-              if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
-                Map<Permission, PermissionStatus> galleryPermission =
-                await [Permission.storage].request();
-                if (galleryPermission[Permission.storage]!.isGranted) {
-                  getImageFromGallery();
-                } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
-                  showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
-                }
-              }else {
-                Map<Permission, PermissionStatus> galleryPermission =
-                await [Permission.photos].request();
-                if (galleryPermission[Permission.photos]!.isGranted) {
-                  getImageFromGallery();
-                } else if (galleryPermission[Permission.photos]!
-                    .isPermanentlyDenied) {
-                  showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
-                }
-              }
+                  if (Platform.isAndroid) {
+                    deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  }
 
-            },
-          ),
-          CupertinoActionSheetAction(
-            child: Text('Camera'),
-            onPressed: () async {
-              // close the options modal
-              Navigator.of(context).pop();
+                  if (Platform.isAndroid &&
+                      deviceInfo != null &&
+                      deviceInfo.version.sdkInt <= 32) {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.storage].request();
+                    if (galleryPermission[Permission.storage]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.storage]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
+                    }
+                  } else {
+                    Map<Permission, PermissionStatus> galleryPermission =
+                    await [Permission.photos].request();
+                    if (galleryPermission[Permission.photos]!.isGranted) {
+                      getImageFromGallery();
+                    } else if (galleryPermission[Permission.photos]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
+                    }
+                  }
 
-              Map<Permission, PermissionStatus> cameraPermission =
+                },
+              ),
+              CupertinoActionSheetAction(
+                child: Text('Camera'),
+                onPressed: () async {
+                  // close the options modal
+                  Navigator.of(context).pop();
+
+                  Map<Permission, PermissionStatus> cameraPermission =
                   await [Permission.camera].request();
-              if (cameraPermission[Permission.camera]!.isGranted) {
-                // get image from camera
-                getImageFromCamera();
-              } else if (cameraPermission[Permission.camera]!
-                  .isPermanentlyDenied) {
-                showPermissionSettingsDialog(context,
-                    'Please enable storage permission in app settings to use this feature.');
-              }
-            },
+                  if (cameraPermission[Permission.camera]!.isGranted) {
+                    // get image from camera
+                    getImageFromCamera();
+                  } else if (cameraPermission[Permission.camera]!
+                      .isPermanentlyDenied) {
+                    showPermissionSettingsDialog(context,
+                        'Please enable storage permission in app settings to use this feature.');
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 

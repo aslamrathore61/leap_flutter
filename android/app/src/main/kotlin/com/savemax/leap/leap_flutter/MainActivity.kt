@@ -1,4 +1,4 @@
-package com.savemax.leap.leap_flutter
+package com.savemax.leap
 
 import io.flutter.embedding.android.FlutterActivity
 
