@@ -71,7 +71,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
   }
 
   final GlobalKey<BackdropScaffoldState> _backdropKey =
-      GlobalKey<BackdropScaffoldState>();
+  GlobalKey<BackdropScaffoldState>();
 
   bool isBackdropOpen = false;
 
@@ -86,9 +86,9 @@ class _MyRequestPageState extends State<MyRequestPage> {
         title: Text("My Request"),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
         backgroundColor: primaryColor,
-         actions: <Widget>[
-         widget.comingWithFilter ? IconButton(onPressed: null,icon: Icon(Icons.filter_alt_off, color: primaryColor,),)
-          : IconButton(
+        actions: <Widget>[
+          widget.comingWithFilter ? IconButton(onPressed: null,icon: Icon(Icons.filter_alt_off, color: primaryColor,),)
+              : IconButton(
             onPressed: () {
               _backdropKey.currentState!.fling();
               setState(() {
@@ -104,15 +104,15 @@ class _MyRequestPageState extends State<MyRequestPage> {
       backLayer: backLayerContainer(screenHeight),
 
       frontLayer: GetBuilder<NetworkController>(
-          builder: (controller) {
-            print('controllerStatus ${controller.connectivityStatus}');
-            if (controller.connectivityStatus == ConnectivityResult.none) {
-              return noInternetConnetionView();
-            } else {
-              return _myListViewWidgets();
-            }
-          },
-        ),
+        builder: (controller) {
+          print('controllerStatus ${controller.connectivityStatus}');
+          if (controller.connectivityStatus == ConnectivityResult.none) {
+            return noInternetConnetionView();
+          } else {
+            return _myListViewWidgets();
+          }
+        },
+      ),
     );
   }
 
@@ -151,8 +151,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
     /*|| widget.dashboardFilterType == 101;*/
 
     if ((isFilterTypeMatch(1) &&
-            (myRequestResponse.oneToOneMentorship == null ||
-                myRequestResponse.oneToOneMentorship!.isEmpty)) ||
+        (myRequestResponse.oneToOneMentorship == null ||
+            myRequestResponse.oneToOneMentorship!.isEmpty)) ||
         (isFilterTypeMatch(2) &&
             (myRequestResponse.corporateTraining == null ||
                 myRequestResponse.corporateTraining!.isEmpty)) ||
@@ -231,7 +231,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 timeSlot: oneToOneMentorship[index].timeSlot ?? '',
                 statusColor: oneToOneMentorship[index].statusColor ?? '',
                 viewBorderColor:
-                    serviceCountResponse?.trainingList![0].color ?? '#fff',
+                serviceCountResponse?.trainingList![0].color ?? '#fff',
                 isArchive: 0 /*oneToOneMentorship[index].archivedStatus ?? 0*/,
                 onEditPress: () {
                   Navigator.of(context).push(GlabblePageRoute(
@@ -248,7 +248,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
                   if (confirm == true) {
                     MyRequestDeleteModel myRequestDeleteModel =
-                        MyRequestDeleteModel();
+                    MyRequestDeleteModel();
                     myRequestDeleteModel.mentorSlotUuid =
                         oneToOneMentorship[index].mentorSlotUuid;
                     _myRequestBloc.add(DeleteMyRequestItemEvent(
@@ -295,7 +295,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 timeSlot: corporateTraining[index].timeSlot!,
                 statusColor: corporateTraining[index].statusColor!,
                 viewBorderColor:
-                    serviceCountResponse?.trainingList![1].color ?? '#fff',
+                serviceCountResponse?.trainingList![1].color ?? '#fff',
                 isArchive: 0 /*corporateTraining[index].archivedStatus ?? 0*/,
                 onEditPress: () {
                   Navigator.of(context).push(GlabblePageRoute(
@@ -312,7 +312,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
                   if (confirm == true) {
                     MyRequestDeleteModel myRequestDeleteModel =
-                        MyRequestDeleteModel();
+                    MyRequestDeleteModel();
                     myRequestDeleteModel.trainingBookingUuid =
                         corporateTraining[index].trainingBookingUuid;
                     _myRequestBloc.add(DeleteMyRequestItemEvent(
@@ -456,7 +456,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   Widget backLayerContainer(double screenHeight) {
     return Container(
-      height: Platform.isAndroid ? screenHeight * 0.35 : screenHeight * 0.40,
+      height: Platform.isAndroid ? screenHeight * 0.35 : screenHeight * 0.30,
       // 30% of the screen height
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -530,11 +530,11 @@ class _MyRequestPageState extends State<MyRequestPage> {
                           'Apply',
                           textAlign: TextAlign.center,
                           style:
-                              Theme.of(context).textTheme.bodyText1!.copyWith(
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
+                          Theme.of(context).textTheme.bodyText1!.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -574,11 +574,11 @@ class _MyRequestPageState extends State<MyRequestPage> {
                           'Reset',
                           textAlign: TextAlign.center,
                           style:
-                              Theme.of(context).textTheme.bodyText1!.copyWith(
-                                    color: Colors.white.withOpacity(0.9),
-                                    fontWeight: FontWeight.w500,
-                                    fontSize: 13,
-                                  ),
+                          Theme.of(context).textTheme.bodyText1!.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ),
@@ -646,3 +646,4 @@ class ItemFilterMyRequest extends StatelessWidget {
     );
   }
 }
+

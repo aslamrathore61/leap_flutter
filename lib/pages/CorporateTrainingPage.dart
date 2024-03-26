@@ -73,7 +73,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
           allocatedDate: widget.corporateTraining?.allocatedDate,
           trainerName: widget.corporateTraining?.trainerName);
       final meeting =
-          Meeting(null, null, null, timeSlot, null, null, null, null);
+      Meeting(null, null, null, timeSlot, null, null, null, null);
       _updateTextField(meeting, false);
     }
 
@@ -101,8 +101,8 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
     setState(() {
       _filteredData = _flyersCardListing
           .where((item) =>
-              item.trainerName!.toLowerCase().contains(keyword) ||
-              item.trainingName!.toLowerCase().contains(keyword))
+      item.trainerName!.toLowerCase().contains(keyword) ||
+          item.trainingName!.toLowerCase().contains(keyword))
           .toList();
     });
   }
@@ -146,7 +146,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                 page: SuccessPage(
                     toolbarTitle: "Corporate Training Confirmation",
                     successDescription:
-                        "Your corporate training has been scheduled successfully.")));
+                    "Your corporate training has been scheduled successfully.")));
           }
         },
         child: buildMentorshipListWidget(context),
@@ -258,7 +258,7 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                       height: 10,
                     ),
                     buildFixedRowController(
-                      controller: _locationController,
+                      controller: _virtualMeetingLink,
                       label: 'Virtual Meeting Link*',
                       hint: '',
                     ),
@@ -273,60 +273,60 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
                   return state is SubmissionTrainingLoadingState
                       ? const Center(child: CircularProgressIndicator())
                       : PrimaryButton(
-                          text: 'Submit',
-                          press: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
+                    text: 'Submit',
+                    press: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
 
-                              if (_selecteMeeting != null) {
-                                if (_trainingTimeController.text.isEmpty) {
-                                  showSnackBar(
-                                      context, 'Please select training slot');
-                                  return;
-                                }
-                                final corporateTrainingPostPut =
-                                    CorporateTrainingPostPut();
-                                corporateTrainingPostPut.trainingSlotUuid =
-                                    _selecteMeeting
-                                        ?.trainingTimeSlots?.trainingSlotUuid;
+                        if (_selecteMeeting != null) {
+                          if (_trainingTimeController.text.isEmpty) {
+                            showSnackBar(
+                                context, 'Please select training slot');
+                            return;
+                          }
+                          final corporateTrainingPostPut =
+                          CorporateTrainingPostPut();
+                          corporateTrainingPostPut.trainingSlotUuid =
+                              _selecteMeeting
+                                  ?.trainingTimeSlots?.trainingSlotUuid;
 
-                                if (widget.corporateTraining != null) {
-                                  corporateTrainingPostPut.trainingBookingUuid =
-                                      widget.corporateTraining!
-                                          .trainingBookingUuid;
-                                  trainingBloc.add(
-                                      SubmitCorporateTrainingpEvent(
-                                          corporateTrainingPostPut:
-                                              corporateTrainingPostPut,
-                                          isPost: false));
-                                } else {
-                                  trainingBloc.add(
-                                      SubmitCorporateTrainingpEvent(
-                                          corporateTrainingPostPut:
-                                              corporateTrainingPostPut,
-                                          isPost: true));
-                                }
-                              } else {
-                                showSnackBar(
-                                    context, 'Please select training program');
-                              }
-                            } else {
-                              // Find the first error in the form and scroll to it
-                              final FocusScopeNode currentFocus =
-                                  FocusScope.of(context);
-                              if (!currentFocus.hasPrimaryFocus &&
-                                  currentFocus.focusedChild != null) {
-                                currentFocus.focusedChild!.unfocus();
-                              }
+                          if (widget.corporateTraining != null) {
+                            corporateTrainingPostPut.trainingBookingUuid =
+                                widget.corporateTraining!
+                                    .trainingBookingUuid;
+                            trainingBloc.add(
+                                SubmitCorporateTrainingpEvent(
+                                    corporateTrainingPostPut:
+                                    corporateTrainingPostPut,
+                                    isPost: false));
+                          } else {
+                            trainingBloc.add(
+                                SubmitCorporateTrainingpEvent(
+                                    corporateTrainingPostPut:
+                                    corporateTrainingPostPut,
+                                    isPost: true));
+                          }
+                        } else {
+                          showSnackBar(
+                              context, 'Please select training program');
+                        }
+                      } else {
+                        // Find the first error in the form and scroll to it
+                        final FocusScopeNode currentFocus =
+                        FocusScope.of(context);
+                        if (!currentFocus.hasPrimaryFocus &&
+                            currentFocus.focusedChild != null) {
+                          currentFocus.focusedChild!.unfocus();
+                        }
 
-                              _scrollController.animateTo(
-                                0.0,
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                              );
-                            }
-                          },
+                        _scrollController.animateTo(
+                          0.0,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
                         );
+                      }
+                    },
+                  );
                 },
               )
             ],
@@ -366,19 +366,19 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
         contentPadding: kTextFieldPadding,
         border: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         focusedBorder: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         suffixIcon: Icon(
           Icons.search,
           color: borderColor.withOpacity(0.8),
         ),
         // Left icon
         prefixIconConstraints:
-            BoxConstraints(minWidth: 40), // Width of left icon
+        BoxConstraints(minWidth: 40), // Width of left icon
       ),
     );
   }
@@ -446,29 +446,37 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
           .format(toTime); // Convert to 12-hour format with AM/PM
 
       _trainingDateContorller.text =
-          '${DateFormat('yyyy-MM-dd').format(fromTime)}';
+      '${DateFormat('yyyy-MM-dd').format(fromTime)}';
       _trainingTimeController.text = '$formattedFromTime - $formattedToTime';
     } else {
       _trainingDateContorller.text =
-          '${mSeletedMeeting.trainingTimeSlots?.allocatedDate}';
+      '${mSeletedMeeting.trainingTimeSlots?.allocatedDate}';
       _trainingTimeController.text =
-          '${mSeletedMeeting.trainingTimeSlots?.startTime}';
+      '${mSeletedMeeting.trainingTimeSlots?.startTime}';
     }
 
     _locationController.text = '${mSeletedMeeting.trainingTimeSlots?.location}';
     _trainerNameController.text =
-        '${mSeletedMeeting.trainingTimeSlots?.trainerName}';
+    '${mSeletedMeeting.trainingTimeSlots?.trainerName}';
     _trainingTypeController.text =
-        '${mSeletedMeeting.trainingTimeSlots?.trainingMode}';
-    _virtualMeetingLink.text =
-        '${mSeletedMeeting.trainingTimeSlots?.virtualLink}';
-    if (mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase() ==
-        "virtual") {
+    '${mSeletedMeeting.trainingTimeSlots?.trainingMode}';
+    _virtualMeetingLink.text = '${mSeletedMeeting.trainingTimeSlots?.virtualLink}';
+    if (mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase() == "virtual") {
       setState(() {
+        print('checkkk1${mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase()}');
+
         isMeetingLinkFieldVisible = true;
         isLocationFieldVisible = false;
       });
+    }else if(mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase() ==
+        "both") {
+      print('checkkk2${mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase()}');
+      setState(() {
+        isMeetingLinkFieldVisible = true;
+        isLocationFieldVisible = true;
+      });
     } else {
+      print('checkkk3${mSeletedMeeting.trainingTimeSlots?.trainingMode?.toLowerCase()}');
       setState(() {
         isMeetingLinkFieldVisible = false;
         isLocationFieldVisible = true;
@@ -476,3 +484,4 @@ class _OneToOneMentorshipPageState extends State<CorporateTrainingPage> {
     }
   }
 }
+

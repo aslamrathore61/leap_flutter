@@ -48,7 +48,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
 
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _meetingAgendaController =
-      TextEditingController();
+  TextEditingController();
   final TextEditingController _meetingTimeController = TextEditingController();
   final TextEditingController _meetingModeController = TextEditingController();
   final TextEditingController _locationController = TextEditingController();
@@ -66,7 +66,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     if (widget.oneToOneMentorship != null) {
       if (widget.oneToOneMentorship?.meetingAgenda != null) {
         _meetingAgendaController.text =
-            widget.oneToOneMentorship!.meetingAgenda!;
+        widget.oneToOneMentorship!.meetingAgenda!;
       }
 
       _searchController.text = (widget.oneToOneMentorship != null
@@ -81,7 +81,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
           mentorSlotUuid: widget.oneToOneMentorship?.mentorSlotUuid,
           mentorshipDate: widget.oneToOneMentorship?.mentorshipDate);
       final meeting =
-          Meeting(null, null, timeSlot, null, null, null, null, null);
+      Meeting(null, null, timeSlot, null, null, null, null, null);
       _updateTextField(meeting, false);
     }
 
@@ -154,7 +154,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                 page: SuccessPage(
                     toolbarTitle: "One to One Mentorship Confirmation",
                     successDescription:
-                        "Your One to One Mentorship has been scheduled successfully.")));
+                    "Your One to One Mentorship has been scheduled successfully.")));
           }
         },
         child: buildMentorshipListWidget(context),
@@ -268,7 +268,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                       height: 10,
                     ),
                     buildFixedRowController(
-                      controller: _meetingModeController,
+                      controller: _virtualMeetingLink,
                       label: 'Virtual Meeting Link*',
                       hint: '',
                     ),
@@ -283,72 +283,72 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
                   return state is SubmissionTrainingLoadingState
                       ? const Center(child: CircularProgressIndicator())
                       : PrimaryButton(
-                          text: 'Submit',
-                          press: () {
-                            if (_formKey.currentState!.validate()) {
-                              _formKey.currentState!.save();
+                    text: 'Submit',
+                    press: () {
+                      if (_formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
 
-                              if (_selecteMeeting != null) {
-                                final oneToOneMentorship =
-                                    OneToOneMentorshipPostPut();
-                                oneToOneMentorship.meetingAgenda =
-                                    _meetingAgendaController.text;
-                                oneToOneMentorship.meetingMode = _selecteMeeting
-                                    ?.mentorTimeSlots?.mentorshipMode;
-                                if (_selecteMeeting
-                                        ?.mentorTimeSlots?.mentorshipMode
-                                        ?.toLowerCase() ==
-                                    "virtual") {
-                                  oneToOneMentorship.virtualMeetingLink =
-                                      _selecteMeeting
-                                          ?.mentorTimeSlots?.virtualLink;
-                                } else {
-                                  oneToOneMentorship.location = _selecteMeeting
-                                      ?.mentorTimeSlots?.locations;
-                                }
+                        if (_selecteMeeting != null) {
+                          final oneToOneMentorship =
+                          OneToOneMentorshipPostPut();
+                          oneToOneMentorship.meetingAgenda =
+                              _meetingAgendaController.text;
+                          oneToOneMentorship.meetingMode = _selecteMeeting
+                              ?.mentorTimeSlots?.mentorshipMode;
+                          if (_selecteMeeting
+                              ?.mentorTimeSlots?.mentorshipMode
+                              ?.toLowerCase() ==
+                              "virtual") {
+                            oneToOneMentorship.virtualMeetingLink =
+                                _selecteMeeting
+                                    ?.mentorTimeSlots?.virtualLink;
+                          } else {
+                            oneToOneMentorship.location = _selecteMeeting
+                                ?.mentorTimeSlots?.locations;
+                          }
 
-                                if (widget.oneToOneMentorship != null) {
-                                  oneToOneMentorship.mentorSlotUuidOld =
-                                      widget.oneToOneMentorship!.mentorSlotUuid;
-                                  oneToOneMentorship.mentorSlotUuidNew =
-                                      _selecteMeeting
-                                          ?.mentorTimeSlots?.mentorSlotUuid;
-                                  trainingBloc.add(
-                                      SubmitOneToOneMentorshipEvent(
-                                          oneToOneMentorshipPostGet:
-                                              oneToOneMentorship,
-                                          isPost: false));
-                                } else {
-                                  oneToOneMentorship.mentorSlotUuid =
-                                      _selecteMeeting
-                                          ?.mentorTimeSlots?.mentorSlotUuid;
-                                  trainingBloc.add(
-                                      SubmitOneToOneMentorshipEvent(
-                                          oneToOneMentorshipPostGet:
-                                              oneToOneMentorship,
-                                          isPost: true));
-                                }
-                              } else {
-                                showSnackBar(
-                                    context, 'Please select meeting date');
-                              }
-                            } else {
-                              // Find the first error in the form and scroll to it
-                              final FocusScopeNode currentFocus =
-                                  FocusScope.of(context);
-                              if (!currentFocus.hasPrimaryFocus &&
-                                  currentFocus.focusedChild != null) {
-                                currentFocus.focusedChild!.unfocus();
-                              }
+                          if (widget.oneToOneMentorship != null) {
+                            oneToOneMentorship.mentorSlotUuidOld =
+                                widget.oneToOneMentorship!.mentorSlotUuid;
+                            oneToOneMentorship.mentorSlotUuidNew =
+                                _selecteMeeting
+                                    ?.mentorTimeSlots?.mentorSlotUuid;
+                            trainingBloc.add(
+                                SubmitOneToOneMentorshipEvent(
+                                    oneToOneMentorshipPostGet:
+                                    oneToOneMentorship,
+                                    isPost: false));
+                          } else {
+                            oneToOneMentorship.mentorSlotUuid =
+                                _selecteMeeting
+                                    ?.mentorTimeSlots?.mentorSlotUuid;
+                            trainingBloc.add(
+                                SubmitOneToOneMentorshipEvent(
+                                    oneToOneMentorshipPostGet:
+                                    oneToOneMentorship,
+                                    isPost: true));
+                          }
+                        } else {
+                          showSnackBar(
+                              context, 'Please select meeting date');
+                        }
+                      } else {
+                        // Find the first error in the form and scroll to it
+                        final FocusScopeNode currentFocus =
+                        FocusScope.of(context);
+                        if (!currentFocus.hasPrimaryFocus &&
+                            currentFocus.focusedChild != null) {
+                          currentFocus.focusedChild!.unfocus();
+                        }
 
-                              _scrollController.animateTo(
-                                0.0,
-                                duration: Duration(milliseconds: 300),
-                                curve: Curves.easeOut,
-                              );
-                            }
-                          },
+                        _scrollController.animateTo(
+                          0.0,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
                         );
+                      }
+                    },
+                  );
                 },
               )
             ],
@@ -376,12 +376,12 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
         contentPadding: kTextFieldPadding,
         border: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         focusedBorder: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         // Width of left icon
         errorMaxLines: 1, // Limit the error message to a single line
       ),
@@ -417,19 +417,19 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
         contentPadding: kTextFieldPadding,
         border: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         focusedBorder: kDefaultOutlineInputBorder.copyWith(
             borderSide: BorderSide(
-          color: borderColor,
-        )),
+              color: borderColor,
+            )),
         suffixIcon: Icon(
           Icons.search,
           color: borderColor.withOpacity(0.8),
         ),
         // Left icon
         prefixIconConstraints:
-            BoxConstraints(minWidth: 40), // Width of left icon
+        BoxConstraints(minWidth: 40), // Width of left icon
       ),
     );
   }
@@ -491,25 +491,32 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
           .format(toTime); // Convert to 12-hour format with AM/PM
 
       _meetingDateContorller.text =
-          '${DateFormat('yyyy-MM-dd').format(fromTime)}';
+      '${DateFormat('yyyy-MM-dd').format(fromTime)}';
       _meetingTimeController.text = '$formattedFromTime - $formattedToTime';
     } else {
       _meetingDateContorller.text =
-          '${mSeletedMeeting.mentorTimeSlots?.mentorshipDate}';
+      '${mSeletedMeeting.mentorTimeSlots?.mentorshipDate}';
       _meetingTimeController.text = '${mSeletedMeeting.mentorTimeSlots?.startTime}';
     }
 
     _locationController.text = '${mSeletedMeeting.mentorTimeSlots?.locations}';
     _meetingModeController.text =
-        '${mSeletedMeeting.mentorTimeSlots?.mentorshipMode}';
+    '${mSeletedMeeting.mentorTimeSlots?.mentorshipMode}';
     _virtualMeetingLink.text =
-        '${mSeletedMeeting.mentorTimeSlots?.virtualLink}';
+    '${mSeletedMeeting.mentorTimeSlots?.virtualLink}';
     if (mSeletedMeeting.mentorTimeSlots?.mentorshipMode?.toLowerCase() ==
         "virtual") {
       setState(() {
         isMeetingLinkFieldVisible = true;
         isLocationFieldVisible = false;
       });
+    }else if(mSeletedMeeting.mentorTimeSlots?.mentorshipMode?.toLowerCase() ==
+        "Both") {
+      setState(() {
+        isMeetingLinkFieldVisible = true;
+        isLocationFieldVisible = true;
+      });
+
     } else {
       setState(() {
         isMeetingLinkFieldVisible = false;
@@ -518,3 +525,4 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
     }
   }
 }
+

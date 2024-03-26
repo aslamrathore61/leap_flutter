@@ -54,79 +54,82 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
               color: Colors.white, fontWeight: FontWeight.w500, fontSize: 16),
         ),
       ),
-      body: BlocProvider(
-        create: (context) => _serviceCountBloc,
-        child: BlocListener<ServiceCountBloc, ServiceCountState>(
-          listener: (context, state) {
-            if (state is ProfileUpdateAndFetchingErrorState) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(state.error.toString())));
-            } else if (state is ProfileUpdateSuccessState) {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      content: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LottieBuilder.asset(
-                            'assets/lottie/success_file.json',
-                            height: 100,
-                            repeat: false,
-                          ),
-                          SizedBox(height: 8),
-                          Text(
-                            "Profile Update Successful!",
-                            style: TextStyle(
-                              color: Colors.black45,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500,
+      body: Container(
+        color: primaryColor,
+        child: BlocProvider(
+          create: (context) => _serviceCountBloc,
+          child: BlocListener<ServiceCountBloc, ServiceCountState>(
+            listener: (context, state) {
+              if (state is ProfileUpdateAndFetchingErrorState) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(state.error.toString())));
+              } else if (state is ProfileUpdateSuccessState) {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            LottieBuilder.asset(
+                              'assets/lottie/success_file.json',
+                              height: 100,
+                              repeat: false,
                             ),
-                          ),
-                          SizedBox(height: 8),
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                              Navigator.pop(context, "1");
-                            },
-                            child: Text(
-                              "OK",
+                            SizedBox(height: 8),
+                            Text(
+                              "Profile Update Successful!",
                               style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14,
+                                color: Colors.black45,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  });
-            }
-          },
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Container(
-              color: primaryColor,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(top: 12),
-                    width: double.infinity,
-                    height: 1,
-                    color: Colors.white,
-                  ),
-                  SizedBox(
-                    height: 50,
-                  ),
-                  _buildProfileImage(),
-                  SizedBox(
-                    height: 50,
-                  ),
-                  _buildTopCornerReduceContainer(),
-                ],
+                            SizedBox(height: 8),
+                            ElevatedButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                                Navigator.pop(context, "1");
+                              },
+                              child: Text(
+                                "OK",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    });
+              }
+            },
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Container(
+                color: primaryColor,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: EdgeInsets.only(top: 12),
+                      width: double.infinity,
+                      height: 1,
+                      color: Colors.white,
+                    ),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    _buildProfileImage(),
+                    SizedBox(
+                      height: 50,
+                    ),
+                    _buildTopCornerReduceContainer(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -505,27 +508,35 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                   // close the options modal
                   Navigator.of(context).pop();
 
-                  final deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  AndroidDeviceInfo? deviceInfo;
 
-                  if(Platform.isAndroid && deviceInfo.version.sdkInt <=32) {
+                  if (Platform.isAndroid) {
+                    deviceInfo = await DeviceInfoPlugin().androidInfo;
+                  }
+
+                  if (Platform.isAndroid &&
+                      deviceInfo != null &&
+                      deviceInfo.version.sdkInt <= 32) {
                     Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.storage].request();
                     if (galleryPermission[Permission.storage]!.isGranted) {
                       getImageFromGallery();
-                    } else if (galleryPermission[Permission.storage]!.isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                    } else if (galleryPermission[Permission.storage]!
+                        .isPermanentlyDenied) {
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
                     }
-                  }else {
+                  } else {
                     Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.photos].request();
                     if (galleryPermission[Permission.photos]!.isGranted) {
                       getImageFromGallery();
                     } else if (galleryPermission[Permission.photos]!
                         .isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context, 'Please enable storage permission in app settings to use this feature.');
+                      showPermissionSettingsDialog(context,
+                          'Please enable storage permission in app settings to use this feature.');
                     }
                   }
-
 
                 },
               ),
@@ -552,3 +563,4 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
     );
   }
 }
+
