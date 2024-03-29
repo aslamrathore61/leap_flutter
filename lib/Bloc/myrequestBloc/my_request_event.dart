@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../../models/CreateUpdateCardRequestResponse.dart';
 import '../../models/MyRequestDeleteArchivedModel.dart';
+import '../../models/ProofReadRequest.dart';
 
 @immutable
 abstract class MyRequestEvent {}
@@ -19,4 +20,9 @@ class ArchivedMyRequestItemEvent extends MyRequestEvent {
   final MyRequestArchivedModel myRequestArchivedModel;
   final String endPoint;
   ArchivedMyRequestItemEvent({required this.myRequestArchivedModel,required this.endPoint});
+}
+
+class ProofReadRequestEvent extends MyRequestEvent {
+  final ProofReadRequest proofReadRequest;
+  ProofReadRequestEvent({required this.proofReadRequest});
 }

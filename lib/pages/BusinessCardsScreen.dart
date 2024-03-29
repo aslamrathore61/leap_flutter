@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'package:card_swiper/card_swiper.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +12,6 @@ import 'package:leap_flutter/Utils/constants.dart';
 import 'package:leap_flutter/models/MyRequestResponse.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
-import 'package:swipable_stack/swipable_stack.dart';
 import '../Bloc/cardBloc/card_event.dart';
 import '../Bloc/cardBloc/card_state.dart';
 import '../Utils/GlabblePageRoute.dart';
@@ -40,8 +41,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   File? _image;
   String printImageData = "";
 
-  int itemSelectedCardTempIndext = 0;
-  int updateIndextCardTemplateImage = 0;
+  int initialIndex = 0;
   List<VcardImageInfo>? vcardImageInfo;
   final picker = ImagePicker();
 
@@ -49,20 +49,18 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   Future getImageFromGallery() async {
     await picker
         .pickImage(source: ImageSource.gallery, imageQuality: 25)
-        .then((value) =>
-    {
-      if (value != null) {cropImageCall(File(value.path))}
-    });
+        .then((value) => {
+              if (value != null) {cropImageCall(File(value.path))}
+            });
   }
 
   //Image Picker function to get image from camera
   Future getImageFromCamera() async {
     await picker
         .pickImage(source: ImageSource.camera, imageQuality: 25)
-        .then((value) async =>
-    {
-      if (value != null) {cropImageCall(File(value.path))}
-    });
+        .then((value) async => {
+              if (value != null) {cropImageCall(File(value.path))}
+            });
   }
 
   cropImageCall(File imgFile) async {
@@ -79,67 +77,59 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
   Future showOptions() async {
     showCupertinoModalPopup(
       context: context,
-      builder: (context) =>
-          CupertinoActionSheet(
-            actions: [
-              CupertinoActionSheetAction(
-                child: Text('Photo Gallery'),
-                onPressed: () async {
-                  // close the options modal
-                  Navigator.of(context).pop();
+      builder: (context) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            child: Text('Photo Gallery'),
+            onPressed: () async {
+              // close the options modal
+              Navigator.of(context).pop();
 
-                  AndroidDeviceInfo? deviceInfo;
+              final deviceInfo = await DeviceInfoPlugin().androidInfo;
 
-                  if (Platform.isAndroid) {
-                    deviceInfo = await DeviceInfoPlugin().androidInfo;
-                  }
-
-                  if (Platform.isAndroid &&
-                      deviceInfo != null &&
-                      deviceInfo.version.sdkInt <= 32) {
-                    Map<Permission, PermissionStatus> galleryPermission =
+              if (Platform.isAndroid && deviceInfo.version.sdkInt <= 32) {
+                Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.storage].request();
-                    if (galleryPermission[Permission.storage]!.isGranted) {
-                      getImageFromGallery();
-                    } else if (galleryPermission[Permission.storage]!
-                        .isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context,
-                          'Please enable storage permission in app settings to use this feature.');
-                    }
-                  } else {
-                    Map<Permission, PermissionStatus> galleryPermission =
+                if (galleryPermission[Permission.storage]!.isGranted) {
+                  getImageFromGallery();
+                } else if (galleryPermission[Permission.storage]!
+                    .isPermanentlyDenied) {
+                  showPermissionSettingsDialog(context,
+                      'Please enable storage permission in app settings to use this feature.');
+                }
+              } else {
+                Map<Permission, PermissionStatus> galleryPermission =
                     await [Permission.photos].request();
-                    if (galleryPermission[Permission.photos]!.isGranted) {
-                      getImageFromGallery();
-                    } else if (galleryPermission[Permission.photos]!
-                        .isPermanentlyDenied) {
-                      showPermissionSettingsDialog(context,
-                          'Please enable storage permission in app settings to use this feature.');
-                    }
-                  }
-
-                },
-              ),
-              CupertinoActionSheetAction(
-                child: Text('Camera'),
-                onPressed: () async {
-                  // close the options modal
-                  Navigator.of(context).pop();
-
-                  Map<Permission, PermissionStatus> cameraPermission =
-                  await [Permission.camera].request();
-                  if (cameraPermission[Permission.camera]!.isGranted) {
-                    // get image from camera
-                    getImageFromCamera();
-                  } else if (cameraPermission[Permission.camera]!
-                      .isPermanentlyDenied) {
-                    showPermissionSettingsDialog(context,
-                        'Please enable storage permission in app settings to use this feature.');
-                  }
-                },
-              ),
-            ],
+                if (galleryPermission[Permission.photos]!.isGranted) {
+                  getImageFromGallery();
+                } else if (galleryPermission[Permission.photos]!
+                    .isPermanentlyDenied) {
+                  showPermissionSettingsDialog(context,
+                      'Please enable storage permission in app settings to use this feature.');
+                }
+              }
+            },
           ),
+          CupertinoActionSheetAction(
+            child: Text('Camera'),
+            onPressed: () async {
+              // close the options modal
+              Navigator.of(context).pop();
+
+              Map<Permission, PermissionStatus> cameraPermission =
+                  await [Permission.camera].request();
+              if (cameraPermission[Permission.camera]!.isGranted) {
+                // get image from camera
+                getImageFromCamera();
+              } else if (cameraPermission[Permission.camera]!
+                  .isPermanentlyDenied) {
+                showPermissionSettingsDialog(context,
+                    'Please enable storage permission in app settings to use this feature.');
+              }
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -226,11 +216,9 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
         child: BlocListener<CardBloc, CardState>(
             listener: (context, state) {
               if (state is CardTemplateErrorState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.error.toString())));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error.toString())));
               } else if (state is SubmissionCardReqErrorState) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.error.toString())));
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.error.toString())));
               } else if (state is BusinessCardTemplateFetchingSuccessState) {
                 if (!_visitingCardListing.isNotEmpty) {
                   _visitingCardListing.addAll(
@@ -255,7 +243,7 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                           print(
                               '22 ${element.imageUuid} ${widget.businessCards?.vcardImageUuid}');
 
-                          itemSelectedCardTempIndext = idx;
+                          initialIndex = idx;
                           setState(() {
                             _cardTemplateSelected = true;
                           });
@@ -299,7 +287,6 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
               _buildSearchField(),
               if (_isSearchFocused)
                 _buildTemplateListWidget(context, _filteredData),
-              SizedBox(height: 10.0),
               if (_cardTemplateSelected) _buildSwapCardTemplate(),
               SizedBox(height: 10.0),
               Text(
@@ -404,16 +391,14 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
-
                                 final cardRequest = CreateUpdateCardRequest();
                                 cardRequest.printEmail = _email;
                                 cardRequest.printName = _userName;
                                 cardRequest.printPhoneNumber = _mobileNumber;
                                 cardRequest.printAddress = _address;
                                 cardRequest.requestQuantity = _quantity;
-                                cardRequest.designImageUuid = vcardImageInfo?[
-                                        updateIndextCardTemplateImage + 1]
-                                    .imageUuid;
+                                cardRequest.designImageUuid =
+                                    vcardImageInfo?[initialIndex].imageUuid;
                                 cardRequest.vcardUuid = _businessTemplatedUuid;
 
                                 if (_image != null) {
@@ -485,104 +470,89 @@ class _BusinessCardsPageState extends State<BusinessCardsPage> {
     );
   }
 
-  /***  ImageSetNetwork  ***/
-/*  Widget _buildTemplateCardImage() {
-    final imageUrl = widget.businessCards != null
-        ? widget.businessCards!.vcardImageUrl
-        : _selectedImageIndex >= 0 && _filteredData.length > _selectedImageIndex
-            ? _filteredData[_selectedImageIndex].vcardImageInfo![0].imageUrl
-            : null;
-
-    if (imageUrl == null) {
-      return Container(); // No image selected or available, return an empty container
-    }
-    return Center(
-      child: Image.network(
-        imageUrl,
-        loadingBuilder: (context, child, progress) {
-          if (progress == null) {
-            return child;
-          }
-          return CircularProgressIndicator(
-            value: progress.expectedTotalBytes != null
-                ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                : null,
-          );
-        },
-      ),
-    );
-  }*/
-
   Widget _buildSwapCardTemplate() {
     return Container(
-      width: double.infinity,
-      height: 220, // Set the desired height here
-      child: Center(
-        child: SwipableStack(
-          allowVerticalSwipe: false,
-          builder: (context, properties) {
-            if (needToUpdateIndext) {
-              itemSelectedCardTempIndext =
-                  properties.index % vcardImageInfo!.length;
-            } else {
-              needToUpdateIndext = true;
-            }
-
-            return Stack(
-              children: vcardImageInfo!.map((url) {
-                print('dataofurl ${url.imageUrl}');
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => Scaffold(
-                        body: Stack(
-                          children: [
-                            Center(
-                              child: Hero(
-                                tag: "imageHero", // Unique tag for the hero animation
-                                child: PhotoView(
-                                  imageProvider: NetworkImage(
-                                      vcardImageInfo![itemSelectedCardTempIndext+1].imageUrl!),
-                                  minScale: PhotoViewComputedScale.contained * 0.8,
-                                  maxScale: PhotoViewComputedScale.covered * 2.0,
-                                ),
-                              ),
-                            ),
-                            Positioned(
-                              top: 60,
-                              right: 10,
-                              child: IconButton(
-                                icon: Icon(Icons.close),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ));
-                  },
-                  child: Hero(
-                    tag: 'imageHero',
-                    child: Card(
-                      elevation: 0.4,
-                      child: Image.network(
-                        vcardImageInfo![itemSelectedCardTempIndext].imageUrl!,
-                      ),
+      height: 400,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => Scaffold(
+              body: Stack(
+                children: [
+                  Center(
+                    child: PhotoView(
+                      imageProvider:
+                          NetworkImage(vcardImageInfo![initialIndex].imageUrl!),
+                      minScale: PhotoViewComputedScale.contained * 0.8,
+                      maxScale: PhotoViewComputedScale.covered * 2.0,
                     ),
                   ),
-                );
-              }).toList(),
-            );
+                  Positioned(
+                    top: 60,
+                    right: 10,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ));
+        },
+        child: Swiper(
+          index: initialIndex,
+          itemBuilder: (BuildContext context, int index) {
+            return _buildSwiperList(vcardImageInfo![index], index);
           },
-          onSwipeCompleted: (index, direction) {
-            updateIndextCardTemplateImage = index % vcardImageInfo!.length;
-
-            print('indexCheck ${updateIndextCardTemplateImage}');
-            print('desginImageUUId $updateIndextCardTemplateImage');
+          itemWidth: MediaQuery.of(context).size.width,
+          itemHeight: 350,
+          itemCount: vcardImageInfo!.length,
+          layout: SwiperLayout.TINDER,
+          pagination: const SwiperPagination(
+              builder: DotSwiperPaginationBuilder(
+                color: Colors.grey, // Set your desired dot color here
+                activeColor:
+                    primaryColor, // Set your desired active dot color here
+              ),
+              margin: EdgeInsets.only(top: 40)),
+          // control:SwiperControl(),
+          onIndexChanged: (int indext) {
+            setState(() {
+              initialIndex = indext;
+            });
           },
         ),
+      ),
+    );
+  }
+
+
+  Future<Size> getImageDimensions(String imageUrl) async {
+    final Image image = Image.network(imageUrl);
+    final Completer<Size> completer = Completer<Size>();
+    image.image.resolve(const ImageConfiguration()).addListener(
+      ImageStreamListener((ImageInfo info, bool _) {
+        completer.complete(Size(
+          info.image.width.toDouble(),
+          info.image.height.toDouble(),
+        ));
+      }),
+    );
+    return completer.future;
+  }
+
+
+
+
+  Widget _buildSwiperList(VcardImageInfo items, int index) {
+    return ClipRRect(
+      borderRadius: BorderRadius.all(Radius.circular(4)),
+      child: Image.network(
+        vcardImageInfo![index].imageUrl!,
+        fit: BoxFit.cover,
       ),
     );
   }

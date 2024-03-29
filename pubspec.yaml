@@ -50,15 +50,15 @@ dependencies:
   swipable_stack: ^2.0.0
   timer_count_down: ^2.2.2
   device_info_plus: ^9.1.2
-
   # images
   image_picker: ^1.0.7
+  image_painter: ^0.7.0
   image_cropper: ^5.0.1
   photo_view: ^0.14.0
   permission_handler: ^11.3.0
   package_info_plus: ^5.0.1
   flutter_placeholder_textlines: ^1.2.0
-
+  card_swiper: ^3.0.1
 
   shared_preferences: ^2.2.2
 

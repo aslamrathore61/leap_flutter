@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:leap_flutter/models/MentorList.dart';
 import 'package:leap_flutter/models/Profile.dart';
+import 'package:leap_flutter/models/ProofReadRequest.dart';
 import 'package:leap_flutter/models/ServiceCountResponse.dart';
 import '../Utils/constants.dart';
 import '../db/SharedPrefObj.dart';
@@ -153,6 +154,23 @@ class ApiProvider {
           data: requestBody,
         );
       }
+      return CommonSimilarResponse.fromJson(response.data);
+    } catch (error, stacktrace) {
+      return CommonSimilarResponse.withError(
+          'Data not found / connection issue');
+    }
+  }
+
+  /*** BusinessCard Submit Vis API  ***/
+
+  Future<CommonSimilarResponse> submitProofReadDetails(
+      ProofReadRequest proofReadRequest) async {
+    try {
+      String? token = await SharedPrefObj.getSharedPrefValue(bearerToken);
+      _dio.options.headers["Authorization"] = "Bearer ${token}";
+      String requestBody = json.encode(proofReadRequest.toJson());
+      Response response =
+          await _dio.put('${_baseUrl}vcardproofreadsubmit', data: requestBody);
       return CommonSimilarResponse.fromJson(response.data);
     } catch (error, stacktrace) {
       return CommonSimilarResponse.withError(

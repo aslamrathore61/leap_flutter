@@ -202,7 +202,7 @@ class _OneToOneMentorshipPageState extends State<OneToOneMentorshipPage> {
               if (_isSearchFocused)
                 _buildMentorListWidget(context, _filteredData),
               SizedBox(
-                height: 10,
+                height: 12,
               ),
               InkWell(
                 onTap: () {

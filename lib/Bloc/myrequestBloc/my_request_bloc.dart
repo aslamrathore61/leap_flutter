@@ -11,6 +11,7 @@ class MyRequestBloc extends Bloc<MyRequestEvent, MyRequestState> {
     on<GetMyRequestListEvent>(getMyRequestList);
     on<DeleteMyRequestItemEvent>(deleteMyRequestItem);
     on<ArchivedMyRequestItemEvent>(archivedMyRequestItem);
+    on<ProofReadRequestEvent>(setProofReadRequest);
   }
 
   FutureOr<void> getMyRequestList(
@@ -59,6 +60,27 @@ class MyRequestBloc extends Bloc<MyRequestEvent, MyRequestState> {
       }
     } catch (error) {
       print('Failed to Archived $error');
+    }
+  }
+
+  /*** Proof Read Update Status   ***/
+  FutureOr<void> setProofReadRequest(
+      ProofReadRequestEvent event, Emitter<MyRequestState> emit) async {
+    emit(MyRequestLoading());
+
+    try {
+      final businessCardSubmitResponse =
+          await _apiRepo.submitProofReadDetails(event.proofReadRequest!);
+
+      final statusCode = businessCardSubmitResponse.code;
+      if (statusCode == 200) {
+        emit(ProofReadSubmitSuccessState(businessCardSubmitResponse));
+      } else {
+        emit(MyRequestFetchingError(businessCardSubmitResponse.message ??
+            "Something went wrong, please try again later."));
+      }
+    } catch (error) {
+      emit(MyRequestFetchingError(error.toString()));
     }
   }
 }

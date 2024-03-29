@@ -12,6 +12,7 @@ import 'package:leap_flutter/db/SharedPrefObj.dart';
 import 'package:leap_flutter/pages/BusinessCardsScreen.dart';
 import 'package:leap_flutter/pages/CorporateTrainingPage.dart';
 import 'package:leap_flutter/pages/OneToOneMentorshipPage.dart';
+import 'package:leap_flutter/pages/ProofReadPage.dart';
 import '../Bloc/myrequestBloc/my_request_state.dart';
 import '../Component/CommonComponent.dart';
 import '../Component/items/ItemMyRequestBusinessCard.dart';
@@ -25,7 +26,10 @@ import '../models/ServiceCountResponse.dart';
 import 'FlyersCardPage.dart';
 
 class MyRequestPage extends StatefulWidget {
-  MyRequestPage({super.key, required this.dashboardFilterType, required this.comingWithFilter});
+  MyRequestPage(
+      {super.key,
+      required this.dashboardFilterType,
+      required this.comingWithFilter});
 
   int dashboardFilterType;
   int? _dashboardFilterType = -1;
@@ -66,12 +70,13 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
   Future<void> fetchSharedPrefServiceCountData() async {
     try {
-      serviceCountResponse = await SharedPrefObj.getServiceCountSharedPreValue(serviceCount);
+      serviceCountResponse =
+          await SharedPrefObj.getServiceCountSharedPreValue(serviceCount);
     } catch (e) {}
   }
 
   final GlobalKey<BackdropScaffoldState> _backdropKey =
-  GlobalKey<BackdropScaffoldState>();
+      GlobalKey<BackdropScaffoldState>();
 
   bool isBackdropOpen = false;
 
@@ -87,16 +92,26 @@ class _MyRequestPageState extends State<MyRequestPage> {
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 20),
         backgroundColor: primaryColor,
         actions: <Widget>[
-          widget.comingWithFilter ? IconButton(onPressed: null,icon: Icon(Icons.filter_alt_off, color: primaryColor,),)
+          widget.comingWithFilter
+              ? IconButton(
+                  onPressed: null,
+                  icon: Icon(
+                    Icons.filter_alt_off,
+                    color: primaryColor,
+                  ),
+                )
               : IconButton(
-            onPressed: () {
-              _backdropKey.currentState!.fling();
-              setState(() {
-                isBackdropOpen = !isBackdropOpen;
-              });
-            },
-            icon: (widget._dashboardFilterType! > 0 && widget._dashboardFilterType != 101) ? Icon(Icons.filter_alt_off) : Icon(Icons.filter_alt),
-          )
+                  onPressed: () {
+                    _backdropKey.currentState!.fling();
+                    setState(() {
+                      isBackdropOpen = !isBackdropOpen;
+                    });
+                  },
+                  icon: (widget._dashboardFilterType! > 0 &&
+                          widget._dashboardFilterType != 101)
+                      ? Icon(Icons.filter_alt_off)
+                      : Icon(Icons.filter_alt),
+                )
         ],
       ),
       headerHeight: screenHeight * 0.45,
@@ -151,8 +166,8 @@ class _MyRequestPageState extends State<MyRequestPage> {
     /*|| widget.dashboardFilterType == 101;*/
 
     if ((isFilterTypeMatch(1) &&
-        (myRequestResponse.oneToOneMentorship == null ||
-            myRequestResponse.oneToOneMentorship!.isEmpty)) ||
+            (myRequestResponse.oneToOneMentorship == null ||
+                myRequestResponse.oneToOneMentorship!.isEmpty)) ||
         (isFilterTypeMatch(2) &&
             (myRequestResponse.corporateTraining == null ||
                 myRequestResponse.corporateTraining!.isEmpty)) ||
@@ -231,7 +246,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 timeSlot: oneToOneMentorship[index].timeSlot ?? '',
                 statusColor: oneToOneMentorship[index].statusColor ?? '',
                 viewBorderColor:
-                serviceCountResponse?.trainingList![0].color ?? '#fff',
+                    serviceCountResponse?.trainingList![0].color ?? '#fff',
                 isArchive: 0 /*oneToOneMentorship[index].archivedStatus ?? 0*/,
                 onEditPress: () {
                   Navigator.of(context).push(GlabblePageRoute(
@@ -248,7 +263,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
                   if (confirm == true) {
                     MyRequestDeleteModel myRequestDeleteModel =
-                    MyRequestDeleteModel();
+                        MyRequestDeleteModel();
                     myRequestDeleteModel.mentorSlotUuid =
                         oneToOneMentorship[index].mentorSlotUuid;
                     _myRequestBloc.add(DeleteMyRequestItemEvent(
@@ -295,7 +310,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 timeSlot: corporateTraining[index].timeSlot!,
                 statusColor: corporateTraining[index].statusColor!,
                 viewBorderColor:
-                serviceCountResponse?.trainingList![1].color ?? '#fff',
+                    serviceCountResponse?.trainingList![1].color ?? '#fff',
                 isArchive: 0 /*corporateTraining[index].archivedStatus ?? 0*/,
                 onEditPress: () {
                   Navigator.of(context).push(GlabblePageRoute(
@@ -312,7 +327,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
 
                   if (confirm == true) {
                     MyRequestDeleteModel myRequestDeleteModel =
-                    MyRequestDeleteModel();
+                        MyRequestDeleteModel();
                     myRequestDeleteModel.trainingBookingUuid =
                         corporateTraining[index].trainingBookingUuid;
                     _myRequestBloc.add(DeleteMyRequestItemEvent(
@@ -336,7 +351,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
         _buildTitleOfList("Business Card - Design and Print"),
         SizedBox(height: 15),
 
-        /*** Monthly color flyers - Personalize Now List ***/
+        /*** Business Carddd List Row ***/
         ListView.builder(
           physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
@@ -345,6 +360,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
             return Padding(
               padding: EdgeInsets.only(bottom: 10.0),
               child: ItemMyRequestBusinessCard(
+                isStatusProofRead: businessCards[index].isStatusProofRead!,
                 key: ValueKey(businessCards[index]),
                 // Assign a key
                 cardName: businessCards[index].vcardType!,
@@ -354,9 +370,16 @@ class _MyRequestPageState extends State<MyRequestPage> {
                 statusColor: businessCards[index].statusColor!,
                 isArchive: 0 /*businessCards[index].archivedStatus!*/,
                 onEditPress: () {
-                  Navigator.of(context).push(GlabblePageRoute(
-                      page: BusinessCardsPage(
-                          businessCards: businessCards[index])));
+                  if(businessCards[index].isStatusProofRead!) {
+                    Navigator.of(context).push(GlabblePageRoute(
+                        page: ProofReadPage(
+                            businessCards: businessCards[index])));
+                  }else {
+                    Navigator.of(context).push(GlabblePageRoute(
+                        page: BusinessCardsPage(
+                            businessCards: businessCards[index])));
+                  }
+
                 },
 
                 onDeletePress: () async {
@@ -401,6 +424,7 @@ class _MyRequestPageState extends State<MyRequestPage> {
             return Padding(
               padding: EdgeInsets.only(bottom: 10.0),
               child: ItemMyRequestBusinessCard(
+                isStatusProofRead: false,
                 key: ValueKey(flyers[index]),
                 // Assign a key
                 cardName: flyers[index].flyerType!,
@@ -530,11 +554,11 @@ class _MyRequestPageState extends State<MyRequestPage> {
                           'Apply',
                           textAlign: TextAlign.center,
                           style:
-                          Theme.of(context).textTheme.bodyText1!.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13,
-                          ),
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
                         ),
                       ),
                     ),
@@ -574,11 +598,11 @@ class _MyRequestPageState extends State<MyRequestPage> {
                           'Reset',
                           textAlign: TextAlign.center,
                           style:
-                          Theme.of(context).textTheme.bodyText1!.copyWith(
-                            color: Colors.white.withOpacity(0.9),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 13,
-                          ),
+                              Theme.of(context).textTheme.bodyText1!.copyWith(
+                                    color: Colors.white.withOpacity(0.9),
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 13,
+                                  ),
                         ),
                       ),
                     ),
@@ -646,4 +670,3 @@ class ItemFilterMyRequest extends StatelessWidget {
     );
   }
 }
-

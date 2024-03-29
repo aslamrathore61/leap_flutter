@@ -291,11 +291,9 @@ class _MyProfileEditPageState extends State<MyProfileEditPage> {
                           profileUpdate.userLastName = _lastName;
 
                           if (_image != null) {
-                            List<int> imageBytes =
-                            _image!.readAsBytesSync();
+                            List<int> imageBytes = _image!.readAsBytesSync();
                             String base64Image = base64Encode(imageBytes);
-                            _mProfileImagePath =
-                            'data:image/png;base64,$base64Image';
+                            _mProfileImagePath = 'data:image/png;base64,$base64Image';
                             profileUpdate.imageData = _mProfileImagePath;
                           }
 

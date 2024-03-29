@@ -271,7 +271,9 @@ class BusinessCards {
     printEmail = json['printEmail'];
     printPhoneNumber = json['printPhoneNumber'];
     printAddress = json['printAddress'];
-    proofRead = json['proofRead'];
+    proofRead = json['proofRead'] != null
+        ? new ProofRead.fromJson(json['proofRead'])
+        : null;
   }
 
   String? requestBy;
@@ -293,7 +295,7 @@ class BusinessCards {
   String? printEmail;
   String? printPhoneNumber;
   String? printAddress;
-  dynamic proofRead;
+  ProofRead? proofRead;
 
   BusinessCards copyWith({
     String? requestBy,
@@ -315,7 +317,7 @@ class BusinessCards {
     String? printEmail,
     String? printPhoneNumber,
     String? printAddress,
-    dynamic proofRead,
+    ProofRead? proofRead,
   }) =>
       BusinessCards(
         requestBy: requestBy ?? this.requestBy,
@@ -361,8 +363,40 @@ class BusinessCards {
     map['printEmail'] = printEmail;
     map['printPhoneNumber'] = printPhoneNumber;
     map['printAddress'] = printAddress;
-    map['proofRead'] = proofRead;
+    if (this.proofRead != null) {
+      map['proofRead'] = this.proofRead!.toJson();
+    }
     return map;
+  }
+}
+
+
+class ProofRead {
+  String? proofReadUuid;
+  String? proofReadImageUrl;
+  String? proofReadUploadDate;
+  List<String>? proofReadStatus;
+
+  ProofRead(
+      {this.proofReadUuid,
+        this.proofReadImageUrl,
+        this.proofReadUploadDate,
+        this.proofReadStatus});
+
+  ProofRead.fromJson(Map<String, dynamic> json) {
+    proofReadUuid = json['proofReadUuid'];
+    proofReadImageUrl = json['proofReadImageUrl'];
+    proofReadUploadDate = json['proofReadUploadDate'];
+    proofReadStatus = json['proofReadStatus'].cast<String>();
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['proofReadUuid'] = this.proofReadUuid;
+    data['proofReadImageUrl'] = this.proofReadImageUrl;
+    data['proofReadUploadDate'] = this.proofReadUploadDate;
+    data['proofReadStatus'] = this.proofReadStatus;
+    return data;
   }
 }
 

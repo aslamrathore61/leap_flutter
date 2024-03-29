@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../Utils/constants.dart';
 
 class ItemMyRequestBusinessCard extends StatelessWidget {
+  final bool isStatusProofRead;
   final String cardName;
   final String date;
   final String statusName;
@@ -15,6 +16,7 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
 
   const ItemMyRequestBusinessCard({
     Key? key,
+    required this.isStatusProofRead,
     required this.cardName,
     required this.date,
     required this.statusName,
@@ -184,11 +186,7 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
-                              child: Icon(
-                                Icons.edit,
-                                color: primaryColor,
-                                size: 20,
-                              ),
+                              child: Icon(isStatusProofRead ? Icons.preview : Icons.edit, color: primaryColor, size: 20,),
                             ),
                           ),
                         )
