@@ -197,7 +197,7 @@ class ItemOneToOneAndTraining extends StatelessWidget {
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
                                 Icons.delete_forever_outlined,
-                                color: Colors.grey.shade600,
+                                color: Colors.red.shade300,
                                 size: 20,
                               ),
                             ),

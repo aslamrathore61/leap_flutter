@@ -14,7 +14,7 @@
 
 
     <application
-        android:label="LEAP Flutter"
+        android:label="Save Max Leap"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

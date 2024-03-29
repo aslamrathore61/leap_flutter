@@ -159,7 +159,7 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                           onTap: onDeletePress,
                           child: Container(
                             decoration: BoxDecoration(
-                              color: Colors.grey.withOpacity(0.1),
+                              color: Colors.red.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(2.0),
                             ),
                             child: Padding(
@@ -167,7 +167,7 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
                               child: Icon(
                                 Icons.delete_forever_outlined,
-                                color: Colors.grey.shade600,
+                                color: Colors.red.shade300,
                                 size: 20,
                               ),
                             ),
@@ -186,7 +186,7 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
-                              child: Icon(isStatusProofRead ? Icons.preview : Icons.edit, color: primaryColor, size: 20,),
+                              child: Icon(isStatusProofRead ? Icons.preview : Icons.edit, color: primaryColor.withOpacity(0.8), size: 20,),
                             ),
                           ),
                         )

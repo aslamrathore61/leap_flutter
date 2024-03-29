@@ -155,12 +155,9 @@ class _ProofReadPageState extends State<ProofReadPage> {
                 ),
             
                 SizedBox(height: 10,),
-                if (selectedRadioValue == RadioTwo)
                   Padding(
                     padding: const EdgeInsets.only(right: 12.0, left: 12.0),
-                    child: Flexible(
-                      flex: 1,
-                      child: TextFormField(
+                   child: TextFormField(
                         controller: _commentController,
                         maxLines: null,
                         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -182,7 +179,6 @@ class _ProofReadPageState extends State<ProofReadPage> {
                           ),
                         ),
                       ),
-                    ),
                   ),
                 SizedBox(
                   height: 20,
