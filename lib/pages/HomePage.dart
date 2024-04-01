@@ -177,13 +177,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
                     isTraining: true,
-                    title: serviceCountResponse
-                            .trainingList?[index].trainingName ??
-                        '',
+                    title: serviceCountResponse.trainingList?[index].trainingName ?? '',
                     unPaidTitle: " Remaining Training",
-                    unPaidMaxLimit: serviceCountResponse
-                            .trainingList?[index].remaining_training_count ??
-                        0,
+                    unPaidMaxLimit: serviceCountResponse.trainingList?[index].remaining_training_count ?? 0,
+                    remainingQuantity: serviceCountResponse.requestList?[index].remainingQuantity ?? 0,
                     completedInLimit: 0,
                     count: serviceCountResponse
                             .trainingList?[index].trainingRisedCount ??
@@ -250,18 +247,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   // Add bottom padding for the gap
                   child: ItemHomeServiceCount(
                     isTraining: false,
-                    title:
-                        serviceCountResponse.requestList![index].requestName!,
+                    title: serviceCountResponse.requestList![index].requestName!,
                     unPaidTitle: "Available Free Limit",
-                    unPaidMaxLimit: serviceCountResponse
-                            .requestList?[index].unpaid_max_limit ??
-                        0,
-                    completedInLimit: serviceCountResponse
-                            .requestList?[index].requested_quantity ??
-                        0,
-                    count: serviceCountResponse
-                            .requestList![index].requestRisedCount ??
-                        0,
+                    unPaidMaxLimit: serviceCountResponse.requestList?[index].unpaid_max_limit ?? 0,
+                    remainingQuantity: serviceCountResponse.requestList?[index].remainingQuantity ?? 0,
+                    completedInLimit: serviceCountResponse.requestList?[index].requested_quantity ?? 0,
+                    count: serviceCountResponse.requestList![index].requestRisedCount ?? 0,
                     colorCode: serviceCountResponse.requestList![index].color!,
                     icon: SvgPicture.asset(
                       'assets/icons/businesscard.svg',

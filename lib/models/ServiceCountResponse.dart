@@ -75,6 +75,7 @@ class RequestList {
   int? requestUuid;
   String? requestName;
   int? unpaid_max_limit;
+  int? remainingQuantity;
   int? requested_quantity;
   String? color;
   int? requestRisedCount;
@@ -90,7 +91,8 @@ class RequestList {
   RequestList.fromJson(Map<String, dynamic> json) {
     requestUuid = json['requestUuid'];
     requestName = json['requestName'];
-    unpaid_max_limit = json['unpaid_max_limit'];
+    unpaid_max_limit = json['unpaidMaxLimit'];
+    remainingQuantity = json['remainingQuantity'];
     requested_quantity = json['requested_quantity'];
     color = json['color'];
     requestRisedCount = json['requestRisedCount'];
@@ -100,7 +102,8 @@ class RequestList {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['requestUuid'] = this.requestUuid;
     data['requestName'] = this.requestName;
-    data['unpaid_max_limit'] = this.unpaid_max_limit;
+    data['unpaidMaxLimit'] = this.unpaid_max_limit;
+    data['remainingQuantity'] = this.remainingQuantity;
     data['requested_quantity'] = this.requested_quantity;
     data['color'] = this.color;
     data['requestRisedCount'] = this.requestRisedCount;

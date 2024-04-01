@@ -56,16 +56,18 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                       children: <TextSpan>[
                         TextSpan(
                           text: '$cardName',
-                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              color: titleColor,
-                              fontWeight: FontWeight.w500,
-                              fontSize: 14),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(
+                                  color: titleColor,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14),
                         ),
                       ],
                     ),
                   ),
                 ),
-
                 if (isArchive == 1)
                   Expanded(
                     flex: 1,
@@ -186,7 +188,11 @@ class ItemMyRequestBusinessCard extends StatelessWidget {
                             child: Padding(
                               padding: const EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 6.0, right: 6.0),
-                              child: Icon(isStatusProofRead ? Icons.preview : Icons.edit, color: primaryColor.withOpacity(0.8), size: 20,),
+                              child: Icon(
+                                isStatusProofRead ? Icons.preview : Icons.edit,
+                                color: primaryColor.withOpacity(0.8),
+                                size: 20,
+                              ),
                             ),
                           ),
                         )

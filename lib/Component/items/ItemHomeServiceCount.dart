@@ -8,6 +8,7 @@ class ItemHomeServiceCount extends StatelessWidget {
   final String title;
   final String unPaidTitle;
   final int unPaidMaxLimit;
+  final int remainingQuantity;
   final int completedInLimit;
   final int count;
   final String colorCode;
@@ -21,6 +22,7 @@ class ItemHomeServiceCount extends StatelessWidget {
     required this.title,
     required this.unPaidTitle,
     required this.unPaidMaxLimit,
+    required this.remainingQuantity,
     required this.completedInLimit,
     required this.count,
     required this.colorCode,
@@ -80,7 +82,9 @@ class ItemHomeServiceCount extends StatelessWidget {
                                     fontWeight: FontWeight.w500,
                                     fontSize: 18),
                           ),
-                          SizedBox(height: 4,),
+                          SizedBox(
+                            height: 4,
+                          ),
                           Text.rich(
                             TextSpan(
                               style: Theme.of(context)
@@ -90,7 +94,9 @@ class ItemHomeServiceCount extends StatelessWidget {
                                       color: titleColor.withOpacity(0.9),
                                       fontWeight: FontWeight.w500,
                                       fontSize: 15),
-                              text: isTraining ? '$unPaidMaxLimit' :  '$unPaidMaxLimit/${unPaidMaxLimit-completedInLimit}',
+                              text: isTraining
+                                  ? '$unPaidMaxLimit'
+                                  : '$unPaidMaxLimit/${remainingQuantity}',
                               children: <TextSpan>[
                                 TextSpan(
                                   text: ' $unPaidTitle',
@@ -107,15 +113,16 @@ class ItemHomeServiceCount extends StatelessWidget {
                           ),
                         ],
                       ),
-                    Text(
-                      isTraining ? '$count Training Schedule' : '$count Request Raised',
-                      style: TextStyle(
-                        color: titleColor.withOpacity(0.6),
-                        fontWeight: FontWeight.w500,
-                        fontSize: 14,
+                      Text(
+                        isTraining
+                            ? '$count Training Schedule'
+                            : '$count Request Raised',
+                        style: TextStyle(
+                          color: titleColor.withOpacity(0.6),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                        ),
                       ),
-
-                ),
                     ],
                   ),
                 ),
@@ -129,7 +136,9 @@ class ItemHomeServiceCount extends StatelessWidget {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                          color: Color(int.parse(colorCode.replaceAll('#', '0xFF'))).withOpacity(0.1),
+                          color: Color(
+                                  int.parse(colorCode.replaceAll('#', '0xFF')))
+                              .withOpacity(0.1),
                           borderRadius: BorderRadius.circular(3.0),
                         ),
                         child: Padding(
@@ -141,17 +150,22 @@ class ItemHomeServiceCount extends StatelessWidget {
                       InkWell(
                         onTap: onAddPress,
                         child: Row(
-                            children: [
-                              Icon(Icons.add, color: primaryColor,),
-                              Text('Add', style: Theme.of(context)
+                          children: [
+                            Icon(
+                              Icons.add,
+                              color: primaryColor,
+                            ),
+                            Text(
+                              'Add',
+                              style: Theme.of(context)
                                   .textTheme
                                   .bodySmall!
                                   .copyWith(
-                                  color: primaryColor,
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 16),)
-
-                            ],
+                                      color: primaryColor,
+                                      fontWeight: FontWeight.w500,
+                                      fontSize: 16),
+                            )
+                          ],
                         ),
                       ),
                     ],

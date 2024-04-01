@@ -6,7 +6,6 @@ import 'HomePage.dart';
 import 'MyProfilePage.dart';
 import 'MyRequestPage.dart';
 
-
 import 'package:flutter/material.dart';
 
 class DashboardBottomNavigation extends StatefulWidget {
@@ -17,14 +16,13 @@ class DashboardBottomNavigation extends StatefulWidget {
       _DashboardBottomNavigationState();
 }
 
-class _DashboardBottomNavigationState
-    extends State<DashboardBottomNavigation> {
+class _DashboardBottomNavigationState extends State<DashboardBottomNavigation> {
   int _selectedIndex = 0;
   static const TextStyle optionStyle =
-  TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
+      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   static List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
-    MyRequestPage(dashboardFilterType: 101,comingWithFilter: false),
+    MyRequestPage(dashboardFilterType: 101, comingWithFilter: false),
     MyProfilePage()
   ];
 
@@ -80,13 +78,17 @@ class _DashboardBottomNavigationState
       if (currentBackPressTime == null ||
           now.difference(currentBackPressTime!) > Duration(seconds: 2)) {
         currentBackPressTime = now;
-        showToast('Tap again to close', Colors.green,
-            const Icon(Icons.check, color: Colors.white,));
+        showToast(
+            'Tap again to close',
+            Colors.green,
+            const Icon(
+              Icons.check,
+              color: Colors.white,
+            ));
         return Future.value(false);
-      }else {
+      } else {
         return Future.value(true);
       }
-
     }
   }
 }
